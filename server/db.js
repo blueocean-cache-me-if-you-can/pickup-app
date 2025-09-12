@@ -1,0 +1,1 @@
+//Whether we use MongoDB or another database, this file will handle the connection logic.

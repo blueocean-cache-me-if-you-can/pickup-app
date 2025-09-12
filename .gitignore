@@ -7,3 +7,5 @@
 !/client/dist/styles.css
 # ignore .env file
 .env
+# ignore package-lock.json
+package-lock.json
