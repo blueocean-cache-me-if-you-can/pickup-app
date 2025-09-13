@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 // import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import {
-  Routes, Route, Link, Navigate, useNavigate, useLocation, BrowserRouter as Router,
+  Routes, Route, Link, Navigate, useNavigate, useLocation,
 } from 'react-router-dom';
+import Login from './Login';
 
 function App() {
   // for development, this sessionId uses localStorage and crypto
@@ -43,16 +44,14 @@ function App() {
 
   // sessionId, setSessionId, activities, skillLevels, intensities should be passed as props
   return (
-    <Router>
-      <Routes>
-        <Route path='/' element={<div>Hello World</div>} />
-        <Route path='/login' element={<div>Login</div>} />
-        <Route path='/signup' element={<div>Signup</div>} />
-        <Route path='/profile' element={<div>Profile</div>} />
-        <Route path='/events' element={<div>Events</div>} />
-        <Route path='*' element={<Navigate to={sessionId ? '/events' : '/login'} />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path='/' element={<div>Hello World</div>} />
+      <Route path='/login' element={<Login setSessionId={setSessionId} />} />
+      <Route path='/signup' element={<div>Signup</div>} />
+      <Route path='/profile' element={<div>Profile</div>} />
+      <Route path='/events' element={<div>Events</div>} />
+      <Route path='*' element={<Navigate to={sessionId ? '/events' : '/login'} />} />
+    </Routes>
   );
 }
 
