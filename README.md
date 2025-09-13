@@ -26,3 +26,25 @@ Follow these steps to get the project running locally:
    ```
    http://localhost:3000/
    ```
+
+## Codebase Overview
+
+### Tech Stack
+- **Frontend**: React 19, Mantine UI, Phosphor Icons
+- **Backend**: Express.js, Node.js
+- **Build Tools**: Webpack, Babel
+- **Development**: ESLint (Airbnb config), Nodemon
+
+### Project Structure
+- `client/` - React frontend application
+- `server/` - Express.js backend API
+
+### Routing
+- **Client Routes**: All frontend routes are served from `/` (root)
+- **Server Routes**: All API endpoints are prefixed with `/api/`
+
+### Best Practices
+For development guidelines, coding standards, and Git workflows, check the `guidelines/` folder.
+
+### Environment
+Copy `sample.env` to `.env` and configure your environment variables as needed.
