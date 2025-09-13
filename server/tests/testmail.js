@@ -1,25 +1,46 @@
 const nodemailer = require("nodemailer");
+require('dotenv').config();
+const axios = require("axios");
 
-// Create a test account or replace with real credentials.
-const transporter = nodemailer.createTransport({
-  host: "smtp.ethereal.email",
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: "maddison53@ethereal.email",
-    pass: "jn7jnAPss4f63QBp6D",
-  },
-});
-
-// Wrap in an async IIFE so we can use await.
-(async () => {
-  const info = await transporter.sendMail({
-    from: '"Maddison Foo Koch" <maddison53@ethereal.email>',
-    to: "bar@example.com, baz@example.com",
-    subject: "Hello ✔",
-    text: "Hello world?", // plain‑text body
-    html: "<b>Hello world?</b>", // HTML body
+async function getAccessToken() {
+  const res = await axios.post("https://oauth2.googleapis.com/token", null, {
+    params: {
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+      refresh_token: process.env.REFRESH_TOKEN,
+      grant_type: "refresh_token"
+    },
   });
+  return res.data.access_token;
+}
 
-  console.log("Message sent:", info.messageId);
-})();
+async function sendMail() {
+  try {
+    //const accessToken = await getAccessToken();
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        type: "OAuth2",
+        user: process.env.USER_EMAIL,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN
+      },
+    });
+
+    const mailOptions = {
+      from: `Pick Up App <${process.env.USER_EMAIL}>`,
+      to: "tworedfrog2@gmail.com",
+      subject: "Pick Up App Test Email",
+      text: "Your pick up game is scheduled for today at 6 PM. See you there!",
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log("Email sent:", result.response);
+  } catch (err) {
+    console.error("Error sending email:", err);
+  }
+}
+
+sendMail();
