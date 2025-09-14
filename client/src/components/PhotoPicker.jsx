@@ -1,0 +1,88 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ActionIcon, Avatar, Box, FileButton, Stack, Text, rem } from '@mantine/core';
+import { Plus, User } from '@phosphor-icons/react';
+
+export const PhotoPicker = ({
+	size = 160,
+	label = 'Upload a photo for your profile',
+	accept = 'image/*',
+	onChange,
+}) => {
+	const [file, setFile] = useState(null);
+	const [previewUrl, setPreviewUrl] = useState(null);
+
+	const resetRef = useRef(null);
+
+	const handleFileChange = (f) => {
+		setFile(f);
+		onChange?.(f ?? null);
+		resetRef.current?.();
+	};
+
+	useEffect(() => {
+		if (!file) {
+			setPreviewUrl(null);
+			return;
+		}
+		const url = URL.createObjectURL(file);
+		setPreviewUrl(url);
+		return () => URL.revokeObjectURL(url);
+	}, [file]);
+
+	const dimension = useMemo(() => rem(size), [size]);
+	const badgeSize = useMemo(() => Math.max(32, Math.min(48, Math.floor(size * 0.3))), [size]);
+
+	return (
+		<Stack align="center" gap="sm">
+			<FileButton onChange={handleFileChange} resetRef={resetRef} accept={accept}>
+				{(props) => (
+					<Box
+						{...props}
+						role="button"
+						aria-label="Upload profile photo"
+						tabIndex={0}
+						style={{
+							position: 'relative',
+							width: dimension,
+							height: dimension,
+							cursor: 'pointer',
+							outline: 'none',
+						}}
+					>
+						<Avatar
+							src={previewUrl || undefined}
+							radius="50%"
+							styles={{ root: { width: '100%', height: '100%' } }}
+							color="gray"
+							variant={previewUrl ? 'filled' : 'light'}
+						>
+							{!previewUrl && <User size={Math.max(48, Math.floor(size * 0.35))} />}
+						</Avatar>
+
+						<ActionIcon
+							variant="filled"
+							color="dark"
+							radius="50%"
+							style={{
+								position: 'absolute',
+								right: 4,
+								bottom: 4,
+								width: rem(badgeSize),
+								height: rem(badgeSize),
+								boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+							}}
+						>
+							<Plus size={Math.floor(badgeSize * 0.6)} />
+						</ActionIcon>
+					</Box>
+				)}
+			</FileButton>
+
+			<Text size="sm" c="dimmed" ta="center">
+				{label}
+			</Text>
+		</Stack>
+	);
+};
+
+export default PhotoPicker;
