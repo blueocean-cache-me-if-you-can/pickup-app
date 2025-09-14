@@ -45,14 +45,16 @@ function App() {
 
   // sessionId, setSessionId, activities, skillLevels, intensities should be passed as props
   return (
-    <Routes>
-      <Route path='/' element={<div>Hello World</div>} />
-      <Route path='/login' element={<Login setSessionId={setSessionId} />} />
-      <Route path='/signup' element={<Signup setSessionId={setSessionId} />} />
-      <Route path='/profile' element={<div>Profile</div>} />
-      <Route path='/events' element={<div>Events</div>} />
-      <Route path='*' element={<Navigate to={sessionId ? '/events' : '/login'} />} />
-    </Routes>
+    <Router>
+      <Routes>
+        <Route path='/' element={<div>Hello World</div>} />
+        <Route path='/login' element={<div>Login</div>} />
+        <Route path='/signup' element={<div>Signup</div>} />
+        <Route path='/profile' element={<div>Profile</div>} />
+        <Route path='/events' element={<div>Events</div>} />
+        <Route path='*' element={<Navigate to={sessionId ? '/events' : '/login'} />} />
+      </Routes>
+    </Router>
   );
 }
 
