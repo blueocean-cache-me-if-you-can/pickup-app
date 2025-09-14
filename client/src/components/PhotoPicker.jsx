@@ -16,7 +16,6 @@ export const PhotoPicker = ({
 	const handleFileChange = (f) => {
 		setFile(f);
 		onChange?.(f ?? null);
-		// allow selecting the same file again
 		resetRef.current?.();
 	};
 
