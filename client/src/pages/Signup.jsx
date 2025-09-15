@@ -1,18 +1,32 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Box } from '@mantine/core';
+import {
+  Box, PasswordInput, Stack, Group, TextInput, Button, Checkbox, Text,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { useForm } from '@mantine/form';
+import Logo from '../components/Logo';
 
 function Signup({ setSessionId }) {
-  const [name, setName] = useState([]);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const form = useForm({
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+    validate: {
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+      confirmPassword: (value, values) => (value === values.password ? null : 'Passwords must match'),
+    },
+  });
+  const [visible, { toggle }] = useDisclosure(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
+  const handleSubmit = async (formValues) => {
+    console.log('Submitting signup with', formValues.firstName, formValues.lastName, formValues.email, formValues.password);
+    if (formValues.password !== formValues.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
@@ -21,7 +35,12 @@ function Signup({ setSessionId }) {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: `${name[0]} ${name[1]}`, email, password }),
+        body: JSON.stringify({
+          firstName: formValues.firstName,
+          lastName: formValues.lastName,
+          email: formValues.email,
+          password: formValues.password,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -31,28 +50,90 @@ function Signup({ setSessionId }) {
       }
     } catch (err) {
       // setError('Network error');
+      console.error('This error is expected in development without a backend', err);
       setSessionId('1234567890'); // temporary for testing without backend
       // redirect to onboarding page after signup
-      navigate('/profile/?onboarding=true', { replace: true });
+      navigate('/profile', { replace: true });
     }
   };
   return (
-    <Box>
-      <form onSubmit={handleSubmit}>
-        <h2>LOGO COMPONENT HERE</h2>
-        <input type='text' placeholder='First Name' value={name} onChange={(e) => setName([e.target.value, name[1]])} required />
-        <input type='text' placeholder='Last Name' value={name} onChange={(e) => setName([name[0], e.target.value])} required />
-        <input type='email' placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
-        <input type='password' placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-        <p>CHECKBOX TO CONFIRM OVER 18 HERE</p>
-        <button type='submit'>Sign Up</button>
-        {error && <div style={{ color: 'red' }}>{error}</div>}
-        <div>
-          <Link to='/login'>Already have an account? Log in</Link>
-        </div>
-      </form>
-    </Box>
+    <div style={{
+      display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',
+    }}
+    >
+      <Box>
+        <form
+          onSubmit={form.onSubmit((values) => handleSubmit(values))}
+          style={{
+            maxWidth: 350, margin: 'auto',
+          }}
+        >
+          <Stack>
+            <Logo />
+            <Group>
+              <TextInput
+                withAsterisk
+                label='First name'
+                placeholder='John'
+                key={form.key('firstName')}
+                {...form.getInputProps('firstName')}
+                flex={1}
+                required
+              />
+              <TextInput
+                withAsterisk
+                label='Last name'
+                placeholder='Doe'
+                key={form.key('lastName')}
+                {...form.getInputProps('lastName')}
+                flex={1}
+                required
+              />
+            </Group>
+            <TextInput
+              withAsterisk
+              label='Email'
+              placeholder='your@email.com'
+              key={form.key('email')}
+              {...form.getInputProps('email')}
+              required
+            />
+            <PasswordInput
+              label='Password'
+              visible={visible}
+              onVisibilityChange={toggle}
+              placeholder='Password'
+              withAsterisk
+              key={form.key('password')}
+              {...form.getInputProps('password')}
+              required
+            />
+            <PasswordInput
+              label='Confirm Password'
+              visible={visible}
+              onVisibilityChange={toggle}
+              placeholder='Confirm Password'
+              withAsterisk
+              key={form.key('confirmPassword')}
+              {...form.getInputProps('confirmPassword')}
+              withErrorStyles={false}
+              required
+            />
+            <Checkbox label='I confirm I am at least 18 years old' required />
+            <Button variant='filled' fullWidth type='submit'>Sign Up</Button>
+            {error && <div style={{ color: 'red' }}>{error}</div>}
+            <Text size='sm' ta='center'>
+              Already have an account?
+              {' '}
+              <Link to='/login' style={{ textDecoration: 'underline' }}>Log in</Link>
+            </Text>
+          </Stack>
+        </form>
+        <Text size='xs' ta='center' mt='md'>
+          By signing up, you agree to our Terms of Service and Privacy Policy.
+        </Text>
+      </Box>
+    </div>
   );
 }
 export default Signup;
