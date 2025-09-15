@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, Text, Group, AspectRatio } from '@mantine/core';
 import { NavLink } from 'react-router-dom';
-import logo from '../../assets/logo.png';
+import logo from '../assets/logo.png';
 
 const LogoBase = ({showText}) => (
     <Group align="center" gap="xs">
