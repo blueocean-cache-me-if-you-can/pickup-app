@@ -23,7 +23,7 @@ function Login({ setSessionId }) {
   const handleSubmit = async (formValues) => {
     console.log('Submitting login with', formValues.email, formValues.password);
     try {
-      const res = await fetch('/api/login', {
+      const res = await fetch('/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formValues.email, password: formValues.password }),

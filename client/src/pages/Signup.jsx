@@ -32,7 +32,7 @@ function Signup({ setSessionId }) {
     }
     setError('');
     try {
-      const res = await fetch('/api/signup', {
+      const res = await fetch('/api/users/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

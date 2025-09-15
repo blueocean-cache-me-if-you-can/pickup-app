@@ -17,7 +17,7 @@ function App() {
   useEffect(() => {
     if (sessionId) {
       localStorage.setItem('sessionId', sessionId);
-      if (location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/') {
+      if (location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/') {
         navigate('/events', { replace: true });
       }
     } else {
