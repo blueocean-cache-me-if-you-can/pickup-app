@@ -69,7 +69,7 @@ function Signup({ setSessionId }) {
           }}
         >
           <Stack>
-            <Logo />
+            <Logo showText />
             <Group>
               <TextInput
                 withAsterisk

@@ -52,7 +52,7 @@ function Login({ setSessionId }) {
           }}
         >
           <Stack>
-            <Logo />
+            <Logo showText />
             <TextInput
               withAsterisk
               label='Email'
