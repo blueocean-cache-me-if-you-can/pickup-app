@@ -21,6 +21,7 @@
   "homepage": "https://github.com/blueocean-cache-me-if-you-can/pickup-app#readme",
   "dependencies": {
     "@mantine/core": "^8.3.1",
+    "@mantine/form": "^8.3.1",
     "@mantine/hooks": "^8.3.1",
     "@phosphor-icons/react": "^2.1.10",
     "axios": "^1.12.1",
@@ -31,6 +32,8 @@
     "mongoose": "^8.18.1",
     "nodemailer": "^7.0.6",
     "open": "^10.2.0",
+    "install": "^0.13.0",
+    "npm": "^11.6.0",
     "path": "^0.12.7",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
