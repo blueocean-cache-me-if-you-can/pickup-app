@@ -4,10 +4,11 @@ import {
 } from 'react-router-dom';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
+import Profile from '../pages/Profile';
 
 function App() {
   // for development, this sessionId uses localStorage and crypto
-  // in production, this should be handled by something like JWT and/or cookies
+  // in production, this should `be handled by something like JWT and/or cookies
   const [sessionId, setSessionId] = useState(localStorage.getItem('sessionId'));
   const location = useLocation();
   const navigate = useNavigate();
@@ -17,6 +18,9 @@ function App() {
   useEffect(() => {
     if (sessionId) {
       localStorage.setItem('sessionId', sessionId);
+      if (!localStorage.getItem('firstLogin')) {
+        localStorage.setItem('firstLogin', 'true');
+      }
       if (location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/') {
         navigate('/events', { replace: true });
       }
@@ -51,7 +55,7 @@ function App() {
       <Route path='/' element={<div>Hello World</div>} />
       <Route path='/login' element={<Login setSessionId={setSessionId} />} />
       <Route path='/signup' element={<Signup setSessionId={setSessionId} />} />
-      <Route path='/profile' element={<div>Profile</div>} />
+      <Route path='/profile' element={<Profile activities={activities} skillLevels={skillLevels} />} />
       <Route path='/events' element={<div>Events</div>} />
       <Route path='*' element={<Navigate to={sessionId ? '/events' : '/login'} />} />
     </Routes>
