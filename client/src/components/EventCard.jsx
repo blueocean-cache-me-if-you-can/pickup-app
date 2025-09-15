@@ -46,13 +46,13 @@ function EventCard({ event }) {
   };
 
   return (
-    <Box w={300} h={400}>
+    <Box w={300} h={300}>
       <Box pos='relative' w='100%' h='100%'>
-        <AspectRatio ratio={3 / 4}>
+        <AspectRatio ratio={1}>
           <Image
             src={event.photo}
             alt={event.title}
-            radius='md'
+            radius='lg'
             w='100%'
             h='100%'
           />
@@ -61,7 +61,7 @@ function EventCard({ event }) {
           <Image
             src={event.sport.image}
             alt={event.sport.name}
-            radius='md'
+            style={{ borderRadius: '16px 0 16px 0', border: '2px solid #fff' }}
             w='30%'
             h='30%'
             opacity={0.8}
