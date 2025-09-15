@@ -4,6 +4,7 @@ import {
 } from 'react-router-dom';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
+import AddressPicker from './AddressPicker';
 
 function App() {
   // for development, this sessionId uses localStorage and crypto
@@ -52,7 +53,7 @@ function App() {
       <Route path='/login' element={<Login setSessionId={setSessionId} />} />
       <Route path='/signup' element={<Signup setSessionId={setSessionId} />} />
       <Route path='/profile' element={<div>Profile</div>} />
-      <Route path='/events' element={<div>Events</div>} />
+      <Route path='/events' element={<AddressPicker />} />
       <Route path='*' element={<Navigate to={sessionId ? '/events' : '/login'} />} />
     </Routes>
   );
