@@ -20,17 +20,27 @@ import { useForm } from '@mantine/form';
 import PhotoPicker from '../components/PhotoPicker';
 import AddressPicker from '../components/AddressPicker';
 
-const sportsList = [
-  { key: 'pickleball', label: 'Pickleball' },
-  { key: 'ultimateFrisbee', label: 'Ultimate Frisbee' },
-  { key: 'volleyball', label: 'Volleyball' },
-  { key: 'basketball', label: 'Basketball' },
-  { key: 'kickball', label: 'Kickball' },
-];
-
-export default function Profile({ activities, skillLevels }) {
+export default function Profile({ activities = [], skillLevels = [] }) {
   const [selectedSports, setSelectedSports] = useState({});
   const [showFirstLoginMsg, setShowFirstLoginMsg] = useState(false);
+
+  // TODO: Remove placeholder data when backend is ready
+  const placeholderActivities = [
+    { id: '301', name: 'Pickleball' },
+    { id: '302', name: 'Volleyball' },
+    { id: '303', name: 'Basketball' },
+    { id: '304', name: 'Ultimate Frisbee' },
+    { id: '305', name: 'Kickball' },
+  ];
+
+  const placeholderSkillLevels = [
+    { id: '501', name: 'Beginner', displayOrder: 1 },
+    { id: '502', name: 'Intermediate', displayOrder: 2 },
+    { id: '503', name: 'Expert', displayOrder: 3 },
+  ];
+
+  const activitiesToUse = activities.length > 0 ? activities : placeholderActivities;
+  const skillLevelsToUse = skillLevels.length > 0 ? skillLevels : placeholderSkillLevels;
 
   useEffect(() => {
     if (localStorage.getItem('firstLogin') === 'true') {
@@ -150,15 +160,15 @@ export default function Profile({ activities, skillLevels }) {
         {/* Activity Info */}
         <Title order={2} mb='sm' size='h4'>Activity Info</Title>
         <Stack>
-          {sportsList.map((sport) => (
-            <Box key={sport.key}>
+          {activitiesToUse.map((activity) => (
+            <Box key={activity.id}>
               <Checkbox
-                label={sport.label}
-                checked={!!selectedSports[sport.key]}
-                onChange={() => toggleSport(sport.key)}
+                label={activity.name}
+                checked={!!selectedSports[activity.id]}
+                onChange={() => toggleSport(activity.id)}
                 size='xs'
               />
-              {selectedSports[sport.key] && (
+              {selectedSports[activity.id] && (
                 <Box mt='lg' mb='lg'>
                   <Slider
                     color='teal'
@@ -166,13 +176,11 @@ export default function Profile({ activities, skillLevels }) {
                     min={1}
                     max={3}
                     step={1}
-                    value={selectedSports[sport.key]}
-                    onChange={(val) => handleSkillChange(sport.key, val)}
-                    marks={[
-                      { value: 1, label: 'Beginner' },
-                      { value: 2, label: 'Intermediate' },
-                      { value: 3, label: 'Advanced' },
-                    ]}
+                    value={selectedSports[activity.key]}
+                    onChange={(val) => handleSkillChange(activity.id, val)}
+                    marks={skillLevelsToUse.map((level) => ({
+                      value: parseInt(level.displayOrder, 10), label: level.name,
+                    }))}
                   />
                 </Box>
               )}
