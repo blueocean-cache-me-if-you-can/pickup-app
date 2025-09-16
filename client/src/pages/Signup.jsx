@@ -27,38 +27,41 @@ function Signup({ setSessionId }) {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const handleSubmit = async (formValues) => {
-    console.log('Submitting signup with:\n', 'first name:', formValues.firstName, 'last name:', formValues.lastName, 'address:', formValues.address, 'email:', formValues.email, 'password:', formValues.password);
+    console.log('Will signup with:\nfirst name:', formValues.firstName, 'last name:', formValues.lastName, 'address:', formValues.address, 'email:', formValues.email, 'password:', formValues.password);
     if (formValues.password !== formValues.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
     setError('');
-    try {
-      const res = await fetch('/api/users/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: formValues.firstName,
-          lastName: formValues.lastName,
-          email: formValues.email,
-          password: formValues.password,
-          address: formValues.address,
-          atLeastEighteen: true,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSessionId(data.sessionId);
-      } else {
-        setError(data.error || 'Signup failed');
-      }
-    } catch (err) {
-      // setError('Network error');
-      console.error('This error is expected in development without a backend', err);
-      setSessionId('1234567890'); // temporary for testing without backend
-      // redirect to onboarding page after signup
-      navigate('/profile', { replace: true });
-    }
+    setSessionId('1234567890'); // temporary for testing without backend
+    // redirect to onboarding page after signup
+    navigate('/profile', { replace: true });
+    // try {
+    //   const res = await fetch('/api/users/signup', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({
+    //       firstName: formValues.firstName,
+    //       lastName: formValues.lastName,
+    //       email: formValues.email,
+    //       password: formValues.password,
+    //       address: formValues.address,
+    //       atLeastEighteen: true,
+    //     }),
+    //   });
+    //   const data = await res.json();
+    //   if (res.ok) {
+    //     setSessionId(data.sessionId);
+    //   } else {
+    //     setError(data.error || 'Signup failed');
+    //   }
+    // } catch (err) {
+    //   // setError('Network error');
+    //   console.error('This error is expected in development without a backend', err);
+    //   setSessionId('1234567890'); // temporary for testing without backend
+    //   // redirect to onboarding page after signup
+    //   navigate('/profile', { replace: true });
+    // }
   };
   return (
     <div style={{
