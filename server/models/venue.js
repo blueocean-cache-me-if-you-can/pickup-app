@@ -2,10 +2,8 @@ const mongoose = require('mongoose');
 
 // Venue Schema
 const venueSchema = new mongoose.Schema({
-  name: { type: String, required: true },
   address: { type: String, required: true },
-  latitude: { type: Number, required: true },
-  longitude: { type: Number, required: true },
+  verified: { type: Boolean, required: true, default: false }
 });
 
 const Venue = mongoose.model('Venue', venueSchema);

@@ -1,4 +1,6 @@
 const path = require("path");
+const webpack = require("webpack");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 module.exports = {
   mode: "development",
@@ -38,4 +40,9 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      "process.env.GOOGLE_API": JSON.stringify(process.env.GOOGLE_API || ""),
+    }),
+  ],
 };
