@@ -19,7 +19,7 @@ function EventCard({ event, currentUserId = 1 }) {
   };
 
   return (
-    <Box w={300} h={300}>
+    <Box maw={300} mah={300}>
       <Box pos='relative' w='100%' h='100%'>
         <AspectRatio ratio={1}>
           <Image
