@@ -51,7 +51,7 @@ function Login({ setSessionId }) {
             maxWidth: 350, marginTop: '50px', margin: 'auto',
           }}
         >
-          <Stack>
+          <Stack gap='xs'>
             <Logo showText />
             <TextInput
               withAsterisk
