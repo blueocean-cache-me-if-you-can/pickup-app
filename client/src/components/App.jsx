@@ -55,6 +55,45 @@ function App() {
       .catch((error) => console.error('This error is expected in development without a backend:', error));
   }, [sessionId, location.pathname, navigate]);
 
+  // create a test call to the upload API
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
+  const testUpload = async () => {
+    if (!selectedFile) {
+      alert('Please select a file first.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result.split(',')[1];
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: base64String,
+          filename: "user-pfp/" + new Date().toISOString() + "-" + selectedFile.name,
+        }),
+      });
+      const data = await response.json();
+      console.log('Upload test response:', data);
+    };
+    reader.readAsDataURL(selectedFile);
+  };
+
+  // test for the upload API
+  return (
+    <div>
+      <input type='file' onChange={handleFileChange} />
+      <button type='button' onClick={testUpload}>Test Upload API</button>
+    </div>
+  );
+
   // sessionId, setSessionId, activities, skillLevels, intensities should be passed as props
   return (
     <AppShell
