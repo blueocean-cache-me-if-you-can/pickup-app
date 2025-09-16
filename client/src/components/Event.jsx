@@ -5,8 +5,12 @@ import IconInfo from './IconInfo';
 import AttendeesRatio from './AttendeesRatio';
 
 function Event({ event }) {
+  const expandEvent = () => {
+    // TODO: trigger event details modal
+    console.log(`Event ${event.title} expanded`);
+  };
   return (
-    <Grid m='md'>
+    <Grid m='md' onClick={expandEvent}>
       <Grid.Col span={3}>
         <EventCard event={event} />
       </Grid.Col>
