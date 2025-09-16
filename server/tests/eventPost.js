@@ -1,28 +1,5 @@
 const axios = require('axios');
 
-const newEvent = {
-  title: "Pick Up Pickleball Game @ Mile Hi Pickleball",
-  owner: {
-    userId: null,
-    displayName: "John Doe"
-  },
-  photo: "https://as2.ftcdn.net/v2/jpg/04/20/26/01/1000_F_420260100_aOyfSD6bs6l1yezMPNyEd6gYREDMPF2q.jpg",
-  activityId: null,
-  skillId: null,
-  intensityId: null,
-  brief_description: "A pick up game, 2 on 2, at the courts behind the school",
-  description: "We will meet up at the courts, the games shouldn't last longer than 2 hours so don't forget to bring water and a snack. If you want to play again or some other time please message me @(303) 704-9999",
-  additional_info: "Go through the gate on the East side of the parking lot, it should be open",
-  time: null,
-  location: {
-    type: "Point",
-    coordinates: [-104.8667063, 39.7700105] // [longitude, latitude]
-  },
-  address: "3700 Havana St STE 305, Denver, CO 80239",
-  minPlayers: 4,
-  maxPlayers: 8
-}
-
 const unformatedEvent = {
   title: "Pick Up Pickleball Game @ Mile Hi Pickleball",
   user_id: null,
