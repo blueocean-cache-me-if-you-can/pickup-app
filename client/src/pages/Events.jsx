@@ -45,6 +45,7 @@ function Events({ currentUserId = 1 }) {
     selectedSort,
     currentUserId,
     view,
+    orderByDesc,
   ]);
 
   return (
