@@ -49,6 +49,24 @@ function App() {
       .catch((error) => console.error('This error is expected in development without a backend:', error));
   }, [sessionId, location.pathname, navigate]);
 
+  // Dummy event data
+  /*
+  const [event, setEvent] = useState(
+    {
+      id: 1,
+      title: 'Sample Event',
+      owner: { user_id: 4, name: 'Steve Knobs' },
+      sport: { id: 1, name: 'pickleball', image: 'https://img.freepik.com/premium-vector/pickleball-vector-vector-traditional-symbol-icon-playing-pickleball_769314-451.jpg?w=826' },
+      players: [
+        { user_id: 2, name: 'Alice Wonder' },
+        { user_id: 3, name: 'Bob Builder', photo: 'https://randomuser.me/api/portraits/men/75.jpg' },
+        { user_id: 4, name: 'Steve Knobs' },
+      ],
+      maxPlayers: 8,
+      photo: 'https://thepickleballprofessionals.com/wp-content/uploads/2024/02/image-4-11.jpg',
+    },
+  );
+  */
   // sessionId, setSessionId, activities, skillLevels, intensities should be passed as props
   return (
     <Routes>
