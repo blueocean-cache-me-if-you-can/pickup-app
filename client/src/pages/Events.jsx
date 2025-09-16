@@ -13,7 +13,7 @@ function Events() {
         </Tabs.List>
 
         <Tabs.Panel value='eventsNearMe' pt='xs'>
-          <ScrollArea style={{ height: 500 }}>
+          <ScrollArea>
             <Stack>
               <div>Events Near Me Component</div>
             </Stack>
@@ -21,7 +21,7 @@ function Events() {
         </Tabs.Panel>
 
         <Tabs.Panel value='myEvents' pt='xs'>
-          <ScrollArea style={{ height: 500 }}>
+          <ScrollArea>
             <Stack>
               <div>My Events Component</div>
             </Stack>
