@@ -24,36 +24,7 @@ const storage = new Storage({
 const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
 
 // Upload endpoint
-app.post("/api/upload", (req, res) => {
-  if (!req.body.image || !req.body.filename) {
-    return res.status(400).json({ error: "Image and filename are required" });
-  }
-
-  const buffer = Buffer.from(req.body.image, "base64");
-  const file = bucket.file(req.body.filename);
-  const stream = file.createWriteStream({
-    metadata: {
-      contentType: "image/jpeg",
-    },
-  });
-
-  stream.on("error", (err) => {
-    console.error("Error uploading to GCS:", err);
-    res.status(500).json({ error: "Failed to upload image" });
-  });
-
-  stream.on("finish", async () => {
-    try {
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
-      res.status(200).json({ url: publicUrl });
-    } catch (err) {
-      console.error("Error making file public:", err);
-      res.status(500).json({ error: "Failed to make image public" });
-    }
-  });
-
-  stream.end(buffer);
-});
+app.post('/api/upload', uploadRoutes);
 
 // Client routes
 app.get("/*", (_, res) => {
@@ -61,3 +32,44 @@ app.get("/*", (_, res) => {
 });
 
 app.listen(4000, () => console.log("Server running on port 4000"));
+
+//this is the test code for the react stuff:
+
+  // create a test call to the upload API
+  // const [selectedFile, setSelectedFile] = useState(null);
+
+  // const handleFileChange = (e) => {
+  //   setSelectedFile(e.target.files[0]);
+  // };
+
+  // const testUpload = async () => {
+  //   if (!selectedFile) {
+  //     alert('Please select a file first.');
+  //     return;
+  //   }
+  //   const reader = new FileReader();
+  //   reader.onloadend = async () => {
+  //     const base64String = reader.result.split(',')[1];
+  //     const response = await fetch('/api/upload', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         image: base64String,
+  //         filename: "user-pfp/" + new Date().toISOString() + "-" + selectedFile.name,
+  //       }),
+  //     });
+  //     const data = await response.json();
+  //     console.log('Upload test response:', data);
+  //   };
+  //   reader.readAsDataURL(selectedFile);
+  // };
+
+  // // test for the upload API
+  // return (
+  //   <div>
+  //     <input type='file' onChange={handleFileChange} />
+  //     <button type='button' onClick={testUpload}>Test Upload API</button>
+  //   </div>
+  // );
