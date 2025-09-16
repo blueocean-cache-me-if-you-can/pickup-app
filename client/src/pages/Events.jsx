@@ -5,7 +5,7 @@ function Events() {
   const [activeTab, setActiveTab] = useState('eventsNearMe');
 
   return (
-    <Center>
+    <Center mt='md'>
       <Tabs value={activeTab} onChange={setActiveTab} variant='pills' color='lime' defaultValue='eventsNearMe'>
         <Tabs.List>
           <Tabs.Tab value='eventsNearMe'>Events Near Me</Tabs.Tab>
