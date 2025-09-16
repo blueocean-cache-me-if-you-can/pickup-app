@@ -6,12 +6,14 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import Logo from '../components/Logo';
+import AddressPicker from '../components/AddressPicker';
 
 function Signup({ setSessionId }) {
   const form = useForm({
     initialValues: {
       firstName: '',
       lastName: '',
+      address: 'GET FROM AddressPicker',
       email: '',
       password: '',
       confirmPassword: '',
@@ -25,7 +27,7 @@ function Signup({ setSessionId }) {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const handleSubmit = async (formValues) => {
-    console.log('Submitting signup with', formValues.firstName, formValues.lastName, formValues.email, formValues.password);
+    console.log('Submitting signup with:\n', 'first name:', formValues.firstName, 'last name:', formValues.lastName, 'address:', formValues.address, 'email:', formValues.email, 'password:', formValues.password);
     if (formValues.password !== formValues.confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -40,6 +42,8 @@ function Signup({ setSessionId }) {
           lastName: formValues.lastName,
           email: formValues.email,
           password: formValues.password,
+          address: formValues.address,
+          atLeastEighteen: true,
         }),
       });
       const data = await res.json();
@@ -68,7 +72,7 @@ function Signup({ setSessionId }) {
             maxWidth: 350, margin: 'auto',
           }}
         >
-          <Stack>
+          <Stack gap='xs'>
             <Logo showText />
             <Group>
               <TextInput
@@ -90,6 +94,7 @@ function Signup({ setSessionId }) {
                 required
               />
             </Group>
+            <AddressPicker />
             <TextInput
               withAsterisk
               label='Email'
