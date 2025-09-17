@@ -9,3 +9,4 @@
 .env
 # ignore package-lock.json
 package-lock.json
+gcs.json
