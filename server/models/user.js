@@ -22,3 +22,39 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
+
+
+
+// // Read user by ID
+// async function getUserById(userId) {
+//   return await User.findById(userId).exec();
+// }
+
+// // Create new user
+// async function createUser(userData) {
+//   const user = new User(userData);
+//   return await user.save();
+// }
+
+// // Update user by ID, including embedded activities
+// async function updateUser(userId, updateData) {
+//   // If activities is present in updateData, replace the entire array
+//   if (updateData.activities) {
+//     return await User.findByIdAndUpdate(
+//       userId,
+//       {
+//         $set: {
+//           ...updateData,
+//           activities: updateData.activities
+//         }
+//       },
+//       { new: true }
+//     ).exec();
+//   } else {
+//     return await User.findByIdAndUpdate(userId, updateData, { new: true }).exec();
+//   }
+// }
+
+// module.exports.getUserById = getUserById;
+// module.exports.createUser = createUser;
+// module.exports.updateUser = updateUser;
