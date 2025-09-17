@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
 import { useForm } from '@mantine/form';
 
-const useCreateEventForm = ({ onCreate, sportOptions = [] }) => {
+const useCreateEventForm = () => {
   const form = useForm({
+    mode: 'uncontrolled',
     initialValues: {
       imageFile: null,
-      sport: sportOptions[0]?.value ?? '',
+      sport: '',
       minPlayers: 2,
       maxPlayers: 30,
       date: null,
@@ -17,6 +17,8 @@ const useCreateEventForm = ({ onCreate, sportOptions = [] }) => {
       description: '',
       instructions: '',
       address: '',
+      lat: null,
+      lng: null,
     },
     validate: {
       sport: (v) => (v ? null : 'Select a sport'),
@@ -31,21 +33,10 @@ const useCreateEventForm = ({ onCreate, sportOptions = [] }) => {
       skillLevel: (v) => (v ? null : 'Select skill level'),
       title: (v) => (v.trim().length >= 2 ? null : 'Enter a title (min 2 chars)'),
       address: (v) => (v.trim() ? null : 'Address is required'),
-    },
-    transformValues: (values) => {
-      const datePart = values.date ? values.date.toISOString().slice(0, 10) : '';
-      return {
-        ...values,
-        datetime: datePart && values.time ? `${datePart}T${values.time}:00` : null,
-      };
+      lat: (v) => (v == null ? 'Select an address from the list or use current location' : null),
+      lng: (v) => (v == null ? 'Select an address from the list or use current location' : null),
     },
   });
-
-  useEffect(() => {
-    if (!form.values.sport && sportOptions[0]?.value) {
-      form.setFieldValue('sport', sportOptions[0].value);
-    }
-  }, [sportOptions, form]);
 
   return form;
 };

@@ -38,6 +38,13 @@ function EventFormInfo({ form }) {
         label='Preferred address'
         value={form.values.address}
         onChange={(v) => form.setFieldValue('address', v)}
+        onResolved={({ address, lat, lng }) => {
+          if (address && address !== form.values.address) {
+            form.setFieldValue('address', address);
+          }
+          form.setFieldValue('lat', lat);
+          form.setFieldValue('lng', lng);
+        }}
       />
     </Stack>
   );

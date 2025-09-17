@@ -18,7 +18,6 @@ export function CreateEvent({
   activities = [],
   skillLevels = [],
   intensities = [],
-  onCreate,
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -28,14 +27,15 @@ export function CreateEvent({
     intensities,
   });
 
-  const form = useCreateEventForm({ onCreate, sportOptions });
+  const form = useCreateEventForm();
 
-  const handleSubmit = () => {
-    const payload = form.getTransformedValues();
-    onCreate?.(payload);
-    setIsOpen(false);
-    form.reset();
-  };
+  // const handleSubmit = () => {
+  //   const payload = form.getTransformedValues();
+  //   console.log('CreateEvent payload:', payload);
+  //   onCreate?.(payload);
+  //   setIsOpen(false);
+  //   form.reset();
+  // };
 
   return (
     <>
@@ -56,30 +56,32 @@ export function CreateEvent({
         title={<Text fw={600}>Create New Event</Text>}
         overlayProps={{ backgroundOpacity: 0.4, blur: 2 }}
       >
-        <Stack align='flex-start' w='100%' mah='100%'>
-          <ScrollArea flex={1} w='100%'>
-            <Group align='flex-start' gap='xl' wrap='nowrap' w='100%'>
-              <PhotoPicker
-                size={160}
-                label='Add an event photo'
-                onChange={(f) => form.setFieldValue('imageFile', f)}
-                style={{ flex: '0 0 160px' }}
-              />
-              <EventFormDetails
-                form={form}
-                sportOptions={sportOptions}
-                skillOptions={skillOptions}
-                intensityOptions={intensityOptions}
-              />
-              <EventFormInfo form={form} />
-            </Group>
-          </ScrollArea>
+        <form onSubmit={form.onSubmit((values) => console.log('CreateEvent values:', values))}>
+          <Stack align='flex-start' w='100%' mah='100%'>
+            <ScrollArea flex={1} w='100%'>
+              <Group align='flex-start' gap='xl' wrap='nowrap' w='100%'>
+                <PhotoPicker
+                  size={160}
+                  label='Add an event photo'
+                  onChange={(f) => form.setFieldValue('imageFile', f)}
+                  style={{ flex: '0 0 160px' }}
+                />
+                <EventFormDetails
+                  form={form}
+                  sportOptions={sportOptions}
+                  skillOptions={skillOptions}
+                  intensityOptions={intensityOptions}
+                />
+                <EventFormInfo form={form} />
+              </Group>
+            </ScrollArea>
 
-          <Group w='100%' justify='flex-end'>
-            <Button variant='default' onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button color='dark' onClick={form.onSubmit(handleSubmit)}>Create Event</Button>
-          </Group>
-        </Stack>
+            <Group w='100%' justify='flex-end'>
+              <Button variant='default' onClick={() => setIsOpen(false)}>Cancel</Button>
+              <Button color='dark' type='submit'>Create Event</Button>
+            </Group>
+          </Stack>
+        </form>
       </Modal>
     </>
   );
