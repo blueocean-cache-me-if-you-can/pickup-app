@@ -6,6 +6,6 @@ const activitySchema = new mongoose.Schema({
   image: { type: String },
 });
 
-const Activity = mongoose.model('Activity', activitySchema);
+const Activity = mongoose.model('Activity', activitySchema, 'activities');
 
 module.exports = Activity;

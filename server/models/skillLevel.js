@@ -6,6 +6,6 @@ const skillLevelSchema = new mongoose.Schema({
   displayOrder: { type: Number, min: 0, max: 9, required: true },
 });
 
-const SkillLevel = mongoose.model('SkillLevel', skillLevelSchema);
+const SkillLevel = mongoose.model('SkillLevel', skillLevelSchema, 'skillLevel');
 
 module.exports = SkillLevel;
