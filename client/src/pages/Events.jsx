@@ -49,7 +49,7 @@ function Events({ currentUserId = 1 }) {
   ]);
 
   return (
-    <Container>
+    <Container size='lg'>
       <Space h='md' />
 
       {/* View toggle & filter */}
@@ -66,79 +66,22 @@ function Events({ currentUserId = 1 }) {
         />
       </Flex>
 
-      {/* Primary filters using Mantine MultiSelect -- comment this out to see difference */}
-
-      <Flex justify='center' mt='md' mb='xl' gap='lg'>
-        <MultiSelect
-          size='xs'
-          label='Activity'
-          data={[
-            'Pickleball',
-            'Volleyball',
-            'Basketball',
-            'Ultimate Frisbee',
-            'Kickball',
-          ]}
-          placeholder='Select activities'
-          value={selectedActivities}
-          onChange={setSelectedActivities}
-          searchable
-          clearable
-        />
-
-        <MultiSelect
-          size='xs'
-          label='Skill Level'
-          data={['Beginner', 'Intermediate', 'Advanced']}
-          placeholder='Select skill level(s)'
-          value={selectedSkillLevels}
-          onChange={setSelectedSkillLevels}
-          clearable
-        />
-
-        <MultiSelect
-          size='xs'
-          label='Intensity'
-          data={['Casual', 'Spirited', 'Competitive']}
-          placeholder='Select intensity'
-          value={selectedIntensity}
-          onChange={setSelectedIntensity}
-          clearable
-        />
-
-        <Select
-          label='Distance'
-          data={[
-            { value: '1', label: '1 mile' },
-            { value: '5', label: '5 miles' },
-            { value: '10', label: '10 miles' },
-            { value: '15', label: '15 miles' },
-            { value: '20', label: '20 miles' },
-          ]}
-          placeholder='Select distance'
-          value={selectedDistance.toString()}
-          onChange={(value) => setSelectedDistance(Number(value))}
-          clearable
-        />
-      </Flex>
-
-      {/* Primary filter component -- uncomment this out to see difference */}
-
-      {/* <Flex justify='center' mt='md' mb='xl' gap='lg'>
+      <Flex align='center' justify='center' mt='md' mb='xl' gap='lg'>
+        <Title size='h4'>Filter by: </Title>
         <PrimaryFilter
-          label='Activity'
+          label='Activities'
           values={['Pickleball', 'Volleyball', 'Basketball', 'Ultimate Frisbee', 'Kickball']}
           onChange={setSelectedActivities}
         />
 
         <PrimaryFilter
-          label='Skill Level'
+          label='Skill Levels'
           values={['Beginner', 'Intermediate', 'Advanced']}
           onChange={setSelectedSkillLevels}
         />
 
         <PrimaryFilter
-          label='Intensity'
+          label='Intensities'
           values={['Casual', 'Spirited', 'Competitive']}
           onChange={setSelectedIntensity}
         />
@@ -149,7 +92,7 @@ function Events({ currentUserId = 1 }) {
           values={[1, 5, 10, 15, 20]}
           onChange={setSelectedDistance}
         />
-      </Flex> */}
+      </Flex>
 
       {view === 'events-near-me' && (
         <Group justify='space-between' mb='xl' gap='lg'>

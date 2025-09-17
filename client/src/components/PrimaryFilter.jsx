@@ -15,12 +15,10 @@ function PrimaryFilter({
 }) {
   const [menuOpened, setMenuOpened] = useState(false);
 
-  // Initial committed value
-  const initialSelected = type === 'checkbox' ? values : Math.max(...values);
+  const initialSelected = type === 'checkbox' ? [] : Math.max(...values);
   const [committed, setCommitted] = useState(initialSelected);
   const [selected, setSelected] = useState(initialSelected);
 
-  // Whenever committed changes, bubble it up to parent
   useEffect(() => {
     onChange(committed);
   }, [committed]);
@@ -33,15 +31,29 @@ function PrimaryFilter({
     setSelected(newSelected);
   };
 
-  const handleReset = () => {
-    const resetValue = type === 'checkbox' ? values : Math.max(...values);
-    setSelected(resetValue);
+  const handleClear = () => {
+    const clearedValue = type === 'checkbox' ? [] : Math.max(...values);
+    setSelected(clearedValue);
   };
 
   const handleViewResults = () => {
     setCommitted(selected);
     setMenuOpened(false);
   };
+
+  let buttonLabel = label;
+
+  if (type === 'checkbox') {
+    if (committed.length > 0) {
+      buttonLabel = `${label} (${committed.length})`;
+    }
+  } else if (type === 'slider') {
+    buttonLabel = `Within ${committed} mile${committed !== 1 ? 's' : ''}`;
+  }
+
+  const clearDisabled = type === 'checkbox'
+    ? selected.length === 0
+    : selected === Math.max(...values);
 
   return (
     <Menu
@@ -56,8 +68,11 @@ function PrimaryFilter({
       }}
     >
       <Menu.Target>
-        <Button variant='outline' color='dark'>
-          {label}
+        <Button
+          variant={(type === 'checkbox' ? committed.length > 0 : committed !== Math.max(...values)) ? 'filled' : 'outline'}
+          color={(type === 'checkbox' ? committed.length > 0 : committed !== Math.max(...values)) ? 'teal' : 'dark'}
+        >
+          {buttonLabel}
           <IconChevronDown size={24} />
         </Button>
       </Menu.Target>
@@ -80,7 +95,7 @@ function PrimaryFilter({
         {type === 'slider' && (
           <Flex direction='column' px='sm' mt='lg' mb='lg'>
             <Text size='xs' mb='md'>
-              Within
+              Search within
               {selected}
               miles of my location
             </Text>
@@ -103,14 +118,10 @@ function PrimaryFilter({
           <Button
             color='teal'
             variant='transparent'
-            onClick={handleReset}
-            disabled={
-              type === 'checkbox'
-                ? selected.length === values.length
-                : selected === Math.max(...values)
-            }
+            onClick={handleClear}
+            disabled={clearDisabled}
           >
-            Reset
+            {type === 'checkbox' ? 'Clear' : 'Reset'}
           </Button>
           <Button color='teal' onClick={handleViewResults}>
             View Results
