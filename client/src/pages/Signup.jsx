@@ -8,7 +8,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import Logo from '../components/Logo';
 import AddressPicker from '../components/AddressPicker';
-import { signUp } from '../api'; // <-- import API call
+import { signUp } from '../api';
 
 function Signup({ setSessionId }) {
   const form = useForm({
@@ -37,7 +37,6 @@ function Signup({ setSessionId }) {
     }
 
     try {
-      // Call backend signup API
       const newUser = await signUp({
         firstName: formValues.firstName,
         lastName: formValues.lastName,
@@ -47,10 +46,8 @@ function Signup({ setSessionId }) {
         atLeastEighteen: true,
       });
 
-      // Simulate session with returned user ID
-      setSessionId(newUser._id || 'temporary-session-id');
+      setSessionId(newUser._id || 'mock-session-id');
 
-      // Redirect to profile page
       navigate('/profile', { replace: true });
     } catch (err) {
       console.error('Signup failed:', err);
