@@ -6,6 +6,7 @@ import { AppShell } from '@mantine/core';
 import axios from 'axios';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
+import Events from '../pages/Events';
 import Profile from '../pages/Profile';
 import Navbar from './Navbar';
 
@@ -56,6 +57,24 @@ function App() {
       .catch((error) => console.error('Error fetching intensities:', error));
   }, [sessionId, location.pathname, navigate]);
 
+  // Dummy event data
+  /*
+  const [event, setEvent] = useState(
+    {
+      id: 1,
+      title: 'Sample Event',
+      owner: { user_id: 4, name: 'Steve Knobs' },
+      activity: { id: 1, name: 'pickleball', image: 'https://img.freepik.com/premium-vector/pickleball-vector-vector-traditional-symbol-icon-playing-pickleball_769314-451.jpg?w=826' },
+      players: [
+        { user_id: 2, name: 'Alice Wonder' },
+        { user_id: 3, name: 'Bob Builder', photo: 'https://randomuser.me/api/portraits/men/75.jpg' },
+        { user_id: 4, name: 'Steve Knobs' },
+      ],
+      maxPlayers: 8,
+      photo: 'https://thepickleballprofessionals.com/wp-content/uploads/2024/02/image-4-11.jpg',
+    },
+  );
+  */
   // sessionId, setSessionId, activities, skillLevels, intensities should be passed as props
   return (
     <AppShell
@@ -78,7 +97,7 @@ function App() {
           <Route path='/login' element={<Login setSessionId={setSessionId} />} />
           <Route path='/signup' element={<Signup setSessionId={setSessionId} />} />
           <Route path='/profile' element={<Profile activities={activities} skillLevels={skillLevels} />} />
-          <Route path='/events' element={<div>Events</div>} />
+          <Route path='/events' element={<Events />} />
           <Route path='*' element={<Navigate to={sessionId ? '/events' : '/login'} />} />
         </Routes>
       </AppShell.Main>

@@ -21,23 +21,24 @@ function Login({ setSessionId }) {
   const [error, setError] = useState('');
 
   const handleSubmit = async (formValues) => {
-    console.log('Submitting login with', formValues.email, formValues.password);
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formValues.email, password: formValues.password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSessionId(data.sessionId);
-      } else {
-        setError(data.error || 'Login failed');
-      }
-    } catch (err) {
-      console.error('This error is expected in development without a backend', err);
-      setSessionId('1234567890'); // temporary for testing without backend
-    }
+    console.log('Will login with', formValues.email, formValues.password);
+    setSessionId('1234567890'); // temporary for testing without backend
+    // try {
+    //   const res = await fetch('/api/users/login', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ email: formValues.email, password: formValues.password }),
+    //   });
+    //   const data = await res.json();
+    //   if (res.ok) {
+    //     setSessionId(data.sessionId);
+    //   } else {
+    //     setError(data.error || 'Login failed');
+    //   }
+    // } catch (err) {
+    //   console.error('This error is expected in development without a backend', err);
+    //   setSessionId('1234567890'); // temporary for testing without backend
+    // }
   };
   return (
     <div style={{
