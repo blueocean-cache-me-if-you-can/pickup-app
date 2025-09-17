@@ -6,6 +6,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import Logo from '../components/Logo';
+import { login } from '../api'; // <-- import our new API helper
 
 function Login({ setSessionId }) {
   const form = useForm({
@@ -21,35 +22,41 @@ function Login({ setSessionId }) {
   const [error, setError] = useState('');
 
   const handleSubmit = async (formValues) => {
-    console.log('Will login with', formValues.email, formValues.password);
-    setSessionId('1234567890'); // temporary for testing without backend
-    // try {
-    //   const res = await fetch('/api/users/login', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ email: formValues.email, password: formValues.password }),
-    //   });
-    //   const data = await res.json();
-    //   if (res.ok) {
-    //     setSessionId(data.sessionId);
-    //   } else {
-    //     setError(data.error || 'Login failed');
-    //   }
-    // } catch (err) {
-    //   console.error('This error is expected in development without a backend', err);
-    //   setSessionId('1234567890'); // temporary for testing without backend
-    // }
+    console.log(formValues);
+    setError(''); // reset errors
+    try {
+      const res = await login({
+        emailPrimary: formValues.email,
+        password: formValues.password,
+      });
+
+      console.log('Login response:', res);
+
+      setSessionId(res.user?._id || 'mock-session-id');
+    } catch (err) {
+      console.error('Login failed:', err);
+      const msg = err.response?.data?.error
+      || err.message || 'Login failed. Please try again.';
+      setError(msg);
+    }
   };
+
   return (
-    <div style={{
-      display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',
-    }}
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+      }}
     >
       <Box>
         <form
-          onSubmit={form.onSubmit((values) => handleSubmit(values))}
+          onSubmit={form.onSubmit(handleSubmit)}
           style={{
-            maxWidth: 350, marginTop: '50px', margin: 'auto',
+            maxWidth: 350,
+            marginTop: '50px',
+            margin: 'auto',
           }}
         >
           <Stack gap='xs'>
@@ -72,12 +79,16 @@ function Login({ setSessionId }) {
               {...form.getInputProps('password')}
               required
             />
-            <Button variant='filled' fullWidth type='submit'>Log In</Button>
+            <Button variant='filled' fullWidth type='submit'>
+              Log In
+            </Button>
             {error && <div style={{ color: 'red' }}>{error}</div>}
             <Text size='sm' ta='center'>
-              Don't have an account yet?
+              Don&apos;t have an account yet?
               {' '}
-              <Link to='/signup' style={{ textDecoration: 'underline' }}>Sign up</Link>
+              <Link to='/signup' style={{ textDecoration: 'underline' }}>
+                Sign up
+              </Link>
             </Text>
           </Stack>
         </form>
