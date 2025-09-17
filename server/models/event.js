@@ -9,8 +9,18 @@ const eventSchema = new mongoose.Schema({
   additional_info: { type: String },
   photo: { type: String },
   time: { type: Date, required: true },
-  locationName: { type: String, required: true },
-  location: { type: String, required: true },
+  address: { type: String, required: true },
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      required: true
+    }
+  },
   activityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Activity', required: true },
   intensityId: { type: mongoose.Schema.Types.ObjectId, ref: 'IntensityLevel', required: true },
   skillId: { type: mongoose.Schema.Types.ObjectId, ref: 'SkillLevel', required: true },
@@ -18,6 +28,8 @@ const eventSchema = new mongoose.Schema({
   maxPlayers: { type: Number, required: true },
   players: [{ userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, displayName: String }],
 });
+
+eventSchema.index({ location: "2dsphere" });
 
 const Event = mongoose.model('Event', eventSchema);
 

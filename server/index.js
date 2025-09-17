@@ -1,11 +1,12 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
 const express = require('express');
-const path = require('path');
 const logger = require('./middleware/logger');
+const path = require('path');
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const venueRoutes = require("./routes/venueRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
+const { Storage } = require('@google-cloud/storage');
+const mongoose = require('mongoose');
 
 require('dotenv').config();
 
@@ -23,7 +24,15 @@ mongoose.connect(process.env.MONGO_URI, {
   dbName: 'pickup'
 });
 
+// Connecting to google cloud storage to upload images, creating a storage instance
+const storage = new Storage({
+  projectId: process.env.GCS_PROJECT_ID,
+  keyFilename: path.join(__dirname, process.env.PATH_TO_GCS_KEY),
+});
+const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
+
 // Server Routes
+app.use('/api/upload', uploadRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/venues", venueRoutes);
