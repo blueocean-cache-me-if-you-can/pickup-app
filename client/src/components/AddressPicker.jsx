@@ -9,7 +9,7 @@ import {
   Stack,
   Text,
 } from '@mantine/core';
-import { MagnifyingGlassIcon, NavigationArrowIcon } from '@phosphor-icons/react';
+import { IconLocation, IconSearch } from '@tabler/icons-react';
 import useDebounce from '../hooks/useDebounce';
 import useGooglePlaces from '../hooks/useGooglePlaces';
 import usePlaceAutocomplete from '../hooks/usePlaceAutocomplete';
@@ -68,7 +68,7 @@ function AddressPicker({
         }}
         placeholder={placeholder}
         rightSection={isLoading ? <Loader size='xs' /> : null}
-        leftSection={<MagnifyingGlassIcon size={16} />}
+        leftSection={<IconSearch size={16} />}
         limit={10}
         filter={optionsFilter}
         label={label}
@@ -76,7 +76,7 @@ function AddressPicker({
         disabled={!isReady && !address}
       />
       <Group align='center' justify='center' gap='xs'>
-        <NavigationArrowIcon size={16} style={{ transform: 'rotate(90deg)' }} />
+        <IconLocation size={16} />
         <Anchor c='black' underline='always' onClick={handleUseMyLocation}>
           <Text size='xs'>
             Use my current location

@@ -4,7 +4,7 @@ import React, {
 import {
   ActionIcon, Avatar, Box, FileButton, Stack, Text, rem,
 } from '@mantine/core';
-import { Plus, User } from '@phosphor-icons/react';
+import { IconPlus, IconUser } from '@tabler/icons-react';
 
 function PhotoPicker({
   size = 160,
@@ -69,7 +69,7 @@ function PhotoPicker({
               color='gray'
               variant={previewUrl ? 'filled' : 'light'}
             >
-              {!previewUrl && <User size={Math.max(48, Math.floor(size * 0.35))} />}
+              {!previewUrl && <IconUser size={Math.max(48, Math.floor(size * 0.35))} />}
             </Avatar>
 
             <ActionIcon
@@ -85,7 +85,7 @@ function PhotoPicker({
                 boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
               }}
             >
-              <Plus size={Math.floor(badgeSize * 0.6)} />
+              <IconPlus size={Math.floor(badgeSize * 0.6)} />
             </ActionIcon>
           </Box>
         )}
