@@ -6,7 +6,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import Logo from '../components/Logo';
-import { login } from '../api'; // <-- import our new API helper
+import { login } from '../api';
 
 function Login({ setSessionId }) {
   const form = useForm({
