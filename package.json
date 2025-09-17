@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/blueocean-cache-me-if-you-can/pickup-app#readme",
   "dependencies": {
+    "@google-cloud/storage": "^7.17.1",
     "@mantine/core": "^8.3.1",
     "@mantine/form": "^8.3.1",
     "@mantine/hooks": "^8.3.1",
@@ -33,7 +34,6 @@
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
     "nodemailer": "^7.0.6",
-    "npm": "^11.6.0",
     "open": "^10.2.0",
     "path": "^0.12.7",
     "react": "^19.1.1",

@@ -1,7 +1,6 @@
+
 require('dotenv').config();
-//const mongoose = require('mongoose');
 const express = require('express');
-const path = require('path');
 const logger = require('./middleware/logger');
 const sbdb = require('./db');
 const userRoutes = require("./routes/userRoutes");
@@ -10,6 +9,10 @@ const venueRoutes = require("./routes/venueRoutes");
 const skillLevelRoutes = require("./routes/skillLevelRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const intensityLevelRoutes = require("./routes/intensityLevelRoutes");
+const path = require('path');
+const uploadRoutes = require("./routes/uploadRoutes");
+const { Storage } = require('@google-cloud/storage');
+
 
 require('dotenv').config();
 
@@ -27,7 +30,15 @@ app.use(logger);
 //   dbName: 'pickup'
 // });
 
+// Connecting to google cloud storage to upload images, creating a storage instance
+const storage = new Storage({
+  projectId: process.env.GCS_PROJECT_ID,
+  keyFilename: path.join(__dirname, process.env.PATH_TO_GCS_KEY),
+});
+const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
+
 // Server Routes
+app.use('/api/upload', uploadRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/venues", venueRoutes);
