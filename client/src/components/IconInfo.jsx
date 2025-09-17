@@ -1,8 +1,12 @@
 import React from 'react';
-import { IconClockHour4Filled, IconLocationFilled, IconUserFilled, IconFileUnknownFilled } from '@tabler/icons-react';
+import {
+  IconClockHour4Filled, IconLocationFilled, IconUserFilled, IconFileUnknownFilled,
+} from '@tabler/icons-react';
 import { Group, Text, AspectRatio } from '@mantine/core';
 
-function IconInfo({ iconType, infoText, size = 'sm' }) {
+function IconInfo({
+  iconType, infoText, size = 'sm', grayscale = false,
+}) {
   let IconComponent;
   switch (iconType) {
     case 'time':
@@ -20,9 +24,9 @@ function IconInfo({ iconType, infoText, size = 'sm' }) {
   return (
     <Group h={size} style={{ minWidth: 0, flexGrow: 1 }}>
       <AspectRatio ratio={1} w={size} style={{ minWidth: 0 }}>
-        <IconComponent style={{ width: '100%', height: '100%', minWidth: '16px' }} />
+        <IconComponent style={{ width: '100%', height: '100%', minWidth: '16px', fill: grayscale ? '#888' : undefined }} />
       </AspectRatio>
-      <Text size={size} tt='uppercase' style={{ minWidth: 0, flexGrow: 1 }}>{infoText}</Text>
+      <Text size={size} tt='uppercase' style={{ minWidth: 0, flexGrow: 1, color: grayscale ? '#888' : undefined }}>{infoText}</Text>
     </Group>
   );
 }
