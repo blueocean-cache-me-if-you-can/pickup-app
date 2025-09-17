@@ -1,5 +1,6 @@
 const user = require('../models/user');
 const bcrypt = require('bcrypt');
+const mail = require('./sendMail');
 
 // Controller to get all users
 exports.getUsers = async (req, res) => {
@@ -25,6 +26,14 @@ exports.signUp = async (req, res) => {
     const userObj = savedUser.toObject();
     delete userObj.password;
     delete userObj.__v;
+
+    mail.sendMailWithHtmlFile({
+      recipients: [{ email: userObj.emailPrimary }],
+      subject: 'Welcome to Blue Ocean Pickup!',
+      text: `Hello ${userObj.firstName},\n\nThank you for signing up for Blue Ocean Pickup! We're excited to have you on board.\n\nBest regards,\nBlue Ocean Pickup Team`,
+      htmlFile: 'createAccount.html'
+    });
+
     res.status(201).json(userObj);
   } catch (err) {
     res.status(400).json({ error: 'Failed to create user', details: err.message });
