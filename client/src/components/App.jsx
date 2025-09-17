@@ -11,7 +11,6 @@ import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import Events from '../pages/Events';
 import Profile from '../pages/Profile';
-import Events from '../pages/Events';
 
 function App() {
   // for development, this sessionId uses localStorage and crypto
