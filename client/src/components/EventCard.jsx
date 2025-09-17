@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   AspectRatio, Box, Button, Image, Center,
 } from '@mantine/core';
+import { IconCrown } from '@tabler/icons-react';
 
 function EventCard({ event, currentUserId = 1 }) {
   // HARDCODING DEFAULT current user_id = 1
@@ -19,7 +20,7 @@ function EventCard({ event, currentUserId = 1 }) {
   };
 
   return (
-    <Box w={300} h={300}>
+    <Box maw={300} mah={300}>
       <Box pos='relative' w='100%' h='100%'>
         <AspectRatio ratio={1}>
           <Image
@@ -40,6 +41,11 @@ function EventCard({ event, currentUserId = 1 }) {
             opacity={0.8}
           />
         </Box>
+        {created && (
+          <Box pos='absolute' top={0} right={0} zIndex={2} bg='lime' px='xs' py='xs' style={{ borderRadius: '0 16px 0 16px' }}>
+            <IconCrown />
+          </Box>
+        )}
         <Center pos='absolute' bottom={0} right={0} zIndex={2} w='100%'>
           {created ? <Button m='xs' variant='filled' fullWidth onClick={editEvent}>Edit</Button> : <Button m='xs' variant='filled' fullWidth onClick={toggleJoin}>{joined ? 'Leave' : 'Join'}</Button>}
         </Center>
