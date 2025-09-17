@@ -31,7 +31,7 @@ function EventCard({ event, currentUserId = 1 }) {
             h='100%'
           />
         </AspectRatio>
-        <Box pos='absolute' top={0} left={0} zIndex={2}>
+        <Box pos='absolute' top={0} left={0}>
           <Image
             src={event.activity.image}
             alt={event.activity.name}
@@ -42,11 +42,11 @@ function EventCard({ event, currentUserId = 1 }) {
           />
         </Box>
         {created && (
-          <Box pos='absolute' top={0} right={0} zIndex={2} bg='lime' px='xs' py='xs' style={{ borderRadius: '0 16px 0 16px' }}>
+          <Box pos='absolute' top={0} right={0} bg='lime' px='xs' py='xs' style={{ borderRadius: '0 16px 0 16px' }}>
             <IconCrown />
           </Box>
         )}
-        <Center pos='absolute' bottom={0} right={0} zIndex={2} w='100%'>
+        <Center pos='absolute' bottom={0} right={0} w='100%'>
           {created ? <Button m='xs' variant='filled' fullWidth onClick={editEvent}>Edit</Button> : <Button m='xs' variant='filled' fullWidth onClick={toggleJoin}>{joined ? 'Leave' : 'Join'}</Button>}
         </Center>
       </Box>
