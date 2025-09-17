@@ -33,7 +33,7 @@ function Login({ setSessionId }) {
     try {
       const res = await login({
         emailPrimary: formValues.email,
-        password: formValues.password,
+        pwd: formValues.password,
       });
 
       console.log('Login response:', res);

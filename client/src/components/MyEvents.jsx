@@ -3,6 +3,7 @@ import {
   Box, Stack, Select, Title, Flex, Text,
 } from '@mantine/core';
 import Event from './Event';
+import { upcomingMyEvents, pastMyEvents } from '../data';
 
 function MyEvents({
   currentUserId = 1,
@@ -10,10 +11,13 @@ function MyEvents({
   setSelectedUpcomingSort,
   selectedPastSort,
   setSelectedPastSort,
+  activities = [],
+  intensities = [],
+  skillLevels = [],
 }) {
   // TODO: set these states with API calls
-  const [upcomingMyEvents, setUpcomingMyEvents] = useState([]);
-  const [pastMyEvents, setPastMyEvents] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([...upcomingMyEvents]);
+  const [pastEvents, setPastEvents] = useState([...pastMyEvents]);
 
   return (
     <Stack>
@@ -30,9 +34,9 @@ function MyEvents({
             onChange={setSelectedUpcomingSort}
           />
         </Flex>
-        {upcomingMyEvents.length === 0 ? <Text>No upcoming events.</Text> : upcomingMyEvents.map(
+        {upcomingEvents.length === 0 ? <Text>No upcoming events.</Text> : upcomingEvents.map(
           (event) => (
-            <Event key={event.id} event={event} />
+            <Event key={event.id} event={event} activities={activities} intensities={intensities} skillLevels={skillLevels} />
           ),
         )}
         <Flex justify='space-between' mb='xl' gap='lg'>
@@ -47,9 +51,9 @@ function MyEvents({
             onChange={setSelectedPastSort}
           />
         </Flex>
-        {pastMyEvents.length === 0 ? <Text>No past events.</Text> : pastMyEvents.map(
+        {pastEvents.length === 0 ? <Text>No past events.</Text> : pastEvents.map(
           (event) => (
-            <Event key={event.id} event={event} isPast />
+            <Event key={event.id} event={event} isPast activities={activities} intensities={intensities} skillLevels={skillLevels} />
           ),
         )}
       </Box>

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container, SegmentedControl, Flex, Space, Select, Title, Box, Group, MultiSelect,
+  Container, SegmentedControl, Flex, Space, Select, Title, Box, Group,
 } from '@mantine/core';
 import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
+import Event from '../components/Event';
+import { events } from '../data';
 
-function Events({ currentUserId = 1 }) {
+function Events({ currentUserId = 1, activities = [], intensities = [], skillLevels = [] }) {
   const [view, setView] = useState('events-near-me');
 
   const [selectedActivities, setSelectedActivities] = useState([]);
@@ -174,6 +176,17 @@ function Events({ currentUserId = 1 }) {
               onChange={setSelectedSort}
             />
           </Group>
+          <Box>
+            {events.map((event) => (
+              <Event
+                event={event}
+                key={event.id}
+                activities={activities}
+                intensities={intensities}
+                skillLevels={skillLevels}
+              />
+            ))}
+          </Box>
         </Box>
       )}
 
@@ -184,6 +197,9 @@ function Events({ currentUserId = 1 }) {
           setSelectedUpcomingSort={setSelectedUpcomingSort}
           selectedPastSort={selectedPastSort}
           setSelectedPastSort={setSelectedPastSort}
+          activities={activities}
+          intensities={intensities}
+          skillLevels={skillLevels}
         />
       )}
 

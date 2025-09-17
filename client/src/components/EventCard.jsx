@@ -4,7 +4,7 @@ import {
 } from '@mantine/core';
 import { IconCrown } from '@tabler/icons-react';
 
-function EventCard({ event, currentUserId = 1 }) {
+function EventCard({ event, currentUserId = 1, activities = [], intensities = [], skillLevels = [] }) {
   // HARDCODING DEFAULT current user_id = 1
   const [joined, setJoined] = useState(event.players.some((player) => player.user_id === currentUserId));
   const [created, setCreated] = useState(event.owner.user_id === currentUserId);
@@ -18,9 +18,9 @@ function EventCard({ event, currentUserId = 1 }) {
     // TODO: Call API to edit event
     console.log('Edit event clicked');
   };
-
+  const activity = activities.find((act) => act._id === event.activityId) || {};
   return (
-    <Box maw={300} mah={300}>
+    <Box>
       <Box pos='relative' w='100%' h='100%'>
         <AspectRatio ratio={1}>
           <Image
@@ -33,8 +33,8 @@ function EventCard({ event, currentUserId = 1 }) {
         </AspectRatio>
         <Box pos='absolute' top={0} left={0}>
           <Image
-            src={event.activity.image}
-            alt={event.activity.name}
+            src={activity.image}
+            alt={activity.name}
             style={{ borderRadius: '16px 0 16px 0', border: '2px solid #fff' }}
             w='30%'
             h='30%'
