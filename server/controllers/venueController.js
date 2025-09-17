@@ -1,5 +1,4 @@
 const venue = require('../models/venue');
-const bcrypt = require('bcrypt');
 
 exports.getVenues = async (req, res) => {
   try {
