@@ -23,6 +23,7 @@ function Event({ event }) {
             <IconInfo iconType='owner' infoText={event.owner.name} size='sm' />
           </Group>
           <div style={{ borderTop: '1px solid #e0e0e0', margin: '12px 0' }} />
+          <Text fw={700} size='lg'>{event.title}</Text>
           <Text size='sm'>{event.description}</Text>
         </Stack>
       </Grid.Col>
