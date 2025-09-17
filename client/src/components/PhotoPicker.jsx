@@ -6,7 +6,7 @@ import {
 } from '@mantine/core';
 import { Plus, User } from '@phosphor-icons/react';
 
-export function PhotoPicker({
+function PhotoPicker({
   size = 160,
   label = 'Upload a photo for your profile',
   accept = 'image/*',
