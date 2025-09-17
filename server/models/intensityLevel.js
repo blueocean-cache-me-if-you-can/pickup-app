@@ -6,6 +6,6 @@ const intensityLevelSchema = new mongoose.Schema({
   displayOrder: { type: Number, min: 0, max: 9, required: true },
 });
 
-const IntensityLevel = mongoose.model('IntensityLevel', intensityLevelSchema);
+const IntensityLevel = mongoose.model('IntensityLevel', intensityLevelSchema, 'intensityLevel');
 
 module.exports = IntensityLevel;
