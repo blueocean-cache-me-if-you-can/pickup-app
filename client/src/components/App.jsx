@@ -9,6 +9,7 @@ import { IconChevronDown, IconPlus } from '@tabler/icons-react';
 import Logo from './Logo';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
+import Events from '../pages/Events';
 import Profile from '../pages/Profile';
 
 function App() {
@@ -70,7 +71,7 @@ function App() {
               <Button variant='filled' color='teal'>
                 <IconPlus size={16} />
                 &nbsp;
-                Create Activity
+                Create Event
               </Button>
               <Divider orientation='vertical' />
               <Menu shadow='md' width={200}>
@@ -107,7 +108,7 @@ function App() {
           <Route path='/login' element={<Login setSessionId={setSessionId} />} />
           <Route path='/signup' element={<Signup setSessionId={setSessionId} />} />
           <Route path='/profile' element={<Profile activities={activities} skillLevels={skillLevels} />} />
-          <Route path='/events' element={<div>Events</div>} />
+          <Route path='/events' element={<Events />} />
           <Route path='*' element={<Navigate to={sessionId ? '/events' : '/login'} />} />
         </Routes>
       </AppShell.Main>
