@@ -26,6 +26,7 @@ exports.signUp = async (req, res) => {
     const userObj = savedUser.toObject();
     delete userObj.password;
     delete userObj.__v;
+
     mail.sendMailWithHtmlFile({
       recipients: [{ email: userObj.emailPrimary }],
       subject: 'Welcome to Blue Ocean Pickup!',
@@ -33,11 +34,6 @@ exports.signUp = async (req, res) => {
       htmlFile: 'createAccount.html'
     });
 
-    // .then(info => {
-    //   console.log('Welcome email sent successfully:', info.response);
-    // }).catch(error => {
-    //   console.error('Error sending welcome email:', error);
-    // });
     res.status(201).json(userObj);
   } catch (err) {
     res.status(400).json({ error: 'Failed to create user', details: err.message });
