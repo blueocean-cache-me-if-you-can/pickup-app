@@ -16,6 +16,12 @@ function Login({ setSessionId }) {
     },
     validate: {
       email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+      password: (value) => {
+        if (value.length < 6) {
+          return 'Password must be at least 6 characters';
+        }
+        return null;
+      },
     },
   });
   const [visible, { toggle }] = useDisclosure(false);
@@ -23,7 +29,7 @@ function Login({ setSessionId }) {
 
   const handleSubmit = async (formValues) => {
     console.log(formValues);
-    setError(''); // reset errors
+    setError('');
     try {
       const res = await login({
         emailPrimary: formValues.email,
@@ -44,19 +50,14 @@ function Login({ setSessionId }) {
   return (
     <div
       style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
+        display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',
       }}
     >
       <Box>
         <form
           onSubmit={form.onSubmit(handleSubmit)}
           style={{
-            maxWidth: 350,
-            marginTop: '50px',
-            margin: 'auto',
+            maxWidth: 350, marginTop: '50px', margin: 'auto',
           }}
         >
           <Stack gap='xs'>
@@ -67,7 +68,6 @@ function Login({ setSessionId }) {
               placeholder='your@email.com'
               key={form.key('email')}
               {...form.getInputProps('email')}
-              required
             />
             <PasswordInput
               label='Password'
@@ -77,14 +77,11 @@ function Login({ setSessionId }) {
               withAsterisk
               key={form.key('password')}
               {...form.getInputProps('password')}
-              required
             />
-            <Button variant='filled' fullWidth type='submit'>
-              Log In
-            </Button>
+            <Button variant='filled' fullWidth type='submit'>Log In</Button>
             {error && <div style={{ color: 'red' }}>{error}</div>}
             <Text size='sm' ta='center'>
-              Don&apos;t have an account yet?
+              Don't have an account yet?
               {' '}
               <Link to='/signup' style={{ textDecoration: 'underline' }}>
                 Sign up

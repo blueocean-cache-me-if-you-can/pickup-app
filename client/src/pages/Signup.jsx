@@ -19,10 +19,25 @@ function Signup({ setSessionId }) {
       email: '',
       password: '',
       confirmPassword: '',
+      atLeastEighteen: false,
     },
     validate: {
+      firstName: (value) => (value.trim().length > 0 ? null : 'Required'),
+      lastName: (value) => (value.trim().length > 0 ? null : 'Required'),
       email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-      confirmPassword: (value, values) => (value === values.password ? null : 'Passwords must match'),
+      password: (value) => {
+        if (!value) return 'Password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
+        return null;
+      },
+
+      confirmPassword: (value, values) => {
+        if (!value) return 'Confirm password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
+        if (value !== values.password) return 'Passwords must match';
+        return null;
+      },
+      atLeastEighteen: (value) => (value ? null : 'You must confirm you are at least 18'),
     },
   });
 
@@ -110,9 +125,11 @@ function Signup({ setSessionId }) {
               withAsterisk
               key={form.key('confirmPassword')}
               {...form.getInputProps('confirmPassword')}
-              withErrorStyles={false}
             />
-            <Checkbox label='I confirm I am at least 18 years old' required />
+            <Checkbox
+              label='I confirm I am at least 18 years old'
+              {...form.getInputProps('atLeastEighteen', { type: 'checkbox' })}
+            />
             <Button variant='filled' fullWidth type='submit'>Sign Up</Button>
             {error && <div style={{ color: 'red' }}>{error}</div>}
             <Text size='sm' ta='center'>
