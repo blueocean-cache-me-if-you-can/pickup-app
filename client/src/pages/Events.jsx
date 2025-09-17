@@ -1,69 +1,150 @@
-import React, { useState } from 'react';
-import { Tabs, ScrollArea, Stack } from '@mantine/core';
-import Event from '../components/Event';
+import React, { useState, useEffect } from 'react';
+import {
+  Container, SegmentedControl, Flex, Space, Select, Title, Box, Group, MultiSelect,
+} from '@mantine/core';
+import AddressPicker from '../components/AddressPicker';
+import PrimaryFilter from '../components/PrimaryFilter';
 
-function Events() {
-  const [activeTab, setActiveTab] = useState('eventsNearMe');
-  // dummy data for testing
-  /*
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      title: 'Sample Event',
-      owner: { user_id: 4, name: 'Steve Knobs' },
-      activity: { id: 1, name: 'pickleball', image: 'https://img.freepik.com/premium-vector/pickleball-vector-vector-traditional-symbol-icon-playing-pickleball_769314-451.jpg?w=826' },
-      description: 'Come join us for a fun game of pickleball!',
-      date: '2024-04-09T09:00:00',
-      location: '123 Sports Ct, Springfield, USA',
-      players: [
-        { user_id: 2, name: 'Alice Wonder' },
-        { user_id: 3, name: 'Bob Builder', photo: 'https://randomuser.me/api/portraits/men/75.jpg' },
-        { user_id: 4, name: 'Steve Knobs' },
+function Events({ currentUserId = 1 }) {
+  const [view, setView] = useState('events-near-me');
+
+  const [selectedActivities, setSelectedActivities] = useState([]);
+  const [selectedSkillLevels, setSelectedSkillLevels] = useState([]);
+  const [selectedIntensity, setSelectedIntensity] = useState([]);
+  const [selectedDistance, setSelectedDistance] = useState(0);
+  const [selectedSort, setSelectedSort] = useState('distance');
+  const sortDirections = {
+    distance: false,
+    date: true,
+  };
+  const orderByDesc = sortDirections[selectedSort] ?? false;
+  // Debugging state to view filter params being sent to backend
+  const [debugParams, setDebugParams] = useState({});
+
+  useEffect(() => {
+    const filterParams = {
+      user_id: view === 'my-events' ? currentUserId : null,
+      finished: view === 'my-events',
+      sort: selectedSort,
+      orderByDesc,
+      filter: [
+        { activities: selectedActivities },
+        { skillLevels: selectedSkillLevels },
+        { intensity: selectedIntensity },
+        { distance: selectedDistance },
       ],
-      maxPlayers: 8,
-      photo: 'https://thepickleballprofessionals.com/wp-content/uploads/2024/02/image-4-11.jpg',
-    },
-    {
-      id: 2,
-      title: 'Sample Event 2',
-      owner: { user_id: 1, name: 'John Sno' },
-      activity: { id: 2, name: 'basketball', image: 'https://static.vecteezy.com/system/resources/previews/000/627/315/original/basketball-icon-symbol-sign-vector.jpg' },
-      description: 'This is a sample event description for event 2.',
-      date: '2024-04-10T15:00:00',
-      location: '456 Court St, Springfield, USA',
-      players: [
-        { user_id: 2, name: 'Alice Wonder' },
-        { user_id: 3, name: 'Bob Builder', photo: 'https://randomuser.me/api/portraits/men/75.jpg' },
-        { user_id: 4, name: 'Steve Knobs' },
-      ],
-      maxPlayers: 4,
-      photo: 'https://st2.depositphotos.com/1018611/8860/i/950/depositphotos_88608500-stock-photo-teenagers-playing-basketball-game-together.jpg',
-    },
+    };
+
+    console.log('Filter params:', filterParams);
+    setDebugParams(filterParams); // Remove later
+  }, [
+    selectedActivities,
+    selectedSkillLevels,
+    selectedIntensity,
+    selectedDistance,
+    selectedSort,
+    currentUserId,
+    view,
+    orderByDesc,
   ]);
-  */
+
   return (
-    <Tabs mt='md' value={activeTab} onChange={setActiveTab} variant='pills' color='lime' defaultValue='eventsNearMe'>
-      <Tabs.List justify='center'>
-        <Tabs.Tab value='eventsNearMe'>Events Near Me</Tabs.Tab>
-        <Tabs.Tab value='myEvents'>My Events</Tabs.Tab>
-      </Tabs.List>
+    <Container size='lg'>
+      <Space h='md' />
 
-      <Tabs.Panel value='eventsNearMe' pt='xs'>
-        <ScrollArea>
-          <Stack>
-            <h4>Events Near Me Component</h4>
-          </Stack>
-        </ScrollArea>
-      </Tabs.Panel>
+      {/* View toggle & filter */}
+      <Flex justify='center' mt='md' mb='xl'>
+        <SegmentedControl
+          fullWidth
+          size='md'
+          value={view}
+          onChange={setView}
+          data={[
+            { label: 'Events Near Me', value: 'events-near-me' },
+            { label: 'My Events', value: 'my-events' },
+          ]}
+        />
+      </Flex>
 
-      <Tabs.Panel value='myEvents' pt='xs'>
-        <ScrollArea>
-          <Stack>
-            <h4>My Events Component</h4>
-          </Stack>
-        </ScrollArea>
-      </Tabs.Panel>
-    </Tabs>
+      <Flex align='center' justify='center' mt='md' mb='xl' gap='lg'>
+        <Title size='h4'>Filter by: </Title>
+        <PrimaryFilter
+          label='Activities'
+          values={['Pickleball', 'Volleyball', 'Basketball', 'Ultimate Frisbee', 'Kickball']}
+          onChange={setSelectedActivities}
+        />
+
+        <PrimaryFilter
+          label='Skill Levels'
+          values={['Beginner', 'Intermediate', 'Advanced']}
+          onChange={setSelectedSkillLevels}
+        />
+
+        <PrimaryFilter
+          label='Intensities'
+          values={['Casual', 'Spirited', 'Competitive']}
+          onChange={setSelectedIntensity}
+        />
+
+        <PrimaryFilter
+          label='Distance'
+          type='slider'
+          values={[1, 5, 10, 15, 20]}
+          onChange={setSelectedDistance}
+        />
+      </Flex>
+
+      {view === 'events-near-me' && (
+        <Group justify='space-between' mb='xl' gap='lg'>
+          <AddressPicker />
+          <Select
+            label='Sort by'
+            data={[
+              { value: 'distance', label: 'Distance' },
+              { value: 'date', label: 'Date' },
+            ]}
+            defaultValue='distance'
+            onChange={setSelectedSort}
+          />
+        </Group>
+      )}
+
+      {view === 'my-events' && (
+        <Box>
+          <Title order={2} size='h4'>My Events</Title>
+          <Flex justify='flex-end' mb='xl' gap='lg'>
+            <Select
+              label='Sort by'
+              data={[
+                { value: 'distance', label: 'Distance' },
+                { value: 'date', label: 'Date' },
+              ]}
+              defaultValue='distance'
+              onChange={setSelectedSort}
+            />
+          </Flex>
+          <Title order={2} size='h4'>Past Events</Title>
+          <Flex justify='flex-end' mb='xl' gap='lg'>
+            <Select
+              label='Sort by'
+              data={[
+                { value: 'distance', label: 'Distance' },
+                { value: 'date', label: 'Date' },
+              ]}
+              defaultValue='distance'
+              onChange={setSelectedSort}
+            />
+          </Flex>
+        </Box>
+      )}
+
+      {/* debug my filter params here:  */}
+
+      <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
+        {JSON.stringify(debugParams, null, 2)}
+      </pre>
+      <Space h='xl' />
+    </Container>
   );
 }
 

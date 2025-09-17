@@ -9,6 +9,7 @@ import { IconChevronDown, IconPlus } from '@tabler/icons-react';
 import Logo from './Logo';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
+import Events from '../pages/Events';
 import Profile from '../pages/Profile';
 import Events from '../pages/Events';
 
@@ -71,7 +72,7 @@ function App() {
               <Button variant='filled' color='teal'>
                 <IconPlus size={16} />
                 &nbsp;
-                Create Activity
+                Create Event
               </Button>
               <Divider orientation='vertical' />
               <Menu shadow='md' width={200}>
