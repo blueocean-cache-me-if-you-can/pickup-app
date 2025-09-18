@@ -1,11 +1,11 @@
 import React from 'react';
 import { Group, Avatar, Text } from '@mantine/core';
 
-function ProfileHeadline({ pfp, displayName }) {
+function ProfileHeadline({ pfp, name }) {
   return (
     <Group>
-      <Avatar src={pfp} alt={`${displayName}'s profile picture`} radius='xl' key={displayName} name={displayName} color='initials' />
-      <Text>{displayName}</Text>
+      <Avatar src={pfp} alt={`${name}'s profile picture`} radius='xl' key={name} name={name} color='initials' />
+      <Text>{name}</Text>
     </Group>
   );
 }
