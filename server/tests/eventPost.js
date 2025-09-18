@@ -17,6 +17,7 @@ const unformatedEvent = {
   maxPlayers: 8
 }
 
+<<<<<<< HEAD
 // create a NEW mock event object to send to the server, based in denver, but not the one from above
 const newEvent = {
   title: "Pickleball Game at Bear Valley Park",
@@ -37,6 +38,8 @@ const newEvent = {
 
 // Function to post the event to the server
 
+=======
+>>>>>>> origin/main
 function postEvent() {
   axios.post('http://localhost:3000/api/events', unformatedEvent)
     .then(response => {
@@ -54,17 +57,29 @@ axios.get('http://localhost:3000/api/activities')
     return axios.get('http://localhost:3000/api/skillLevels');
   })
   .then(response => {
+<<<<<<< HEAD
     newEvent.skillId = response.data[2]._id; // Assuming the first skill level is Beginner
+=======
+    newEvent.skillId = response.data[0]._id; // Assuming the first skill level is Beginner
+>>>>>>> origin/main
     unformatedEvent.skillId = response.data[0]._id;
     return axios.get('http://localhost:3000/api/intensityLevels');
   })
   .then(response => {
+<<<<<<< HEAD
     newEvent.intensityId = response.data[1]._id; // Assuming the first intensity level is Casual
+=======
+    newEvent.intensityId = response.data[0]._id; // Assuming the first intensity level is Casual
+>>>>>>> origin/main
     unformatedEvent.intensityId = response.data[0]._id;
     return axios.get('http://localhost:3000/api/users');
   })
   .then(response => {
+<<<<<<< HEAD
     newEvent.user_id = response.data[2]._id; // Assuming the first user is John Doe
+=======
+    newEvent.owner.userId = response.data[0]._id; // Assuming the first user is John Doe
+>>>>>>> origin/main
     unformatedEvent.user_id = response.data[0]._id;
     newEvent.time = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Set event time to one week from now
     unformatedEvent.time = newEvent.time;
@@ -73,8 +88,12 @@ axios.get('http://localhost:3000/api/activities')
     console.error('Error fetching IDs:', error.response ? error.response.data : error.message);
   })
   .finally(() => {
+<<<<<<< HEAD
     console.log('Prepared Event:', newEvent);
     if (newEvent.activityId && newEvent.skillId && newEvent.intensityId && newEvent.time) {
+=======
+    if (newEvent.activityId && newEvent.skillId && newEvent.intensityId && newEvent.location && newEvent.time) {
+>>>>>>> origin/main
       postEvent();
     } else {
       console.error('Failed to set all required IDs for the event.');
