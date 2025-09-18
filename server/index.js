@@ -11,7 +11,7 @@ const activityRoutes = require("./routes/activityRoutes");
 const intensityLevelRoutes = require("./routes/intensityLevelRoutes");
 const path = require('path');
 const uploadRoutes = require("./routes/uploadRoutes");
-const { Storage } = require('@google-cloud/storage');
+// const { Storage } = require('@google-cloud/storage');
 
 
 require('dotenv').config();
@@ -25,11 +25,11 @@ app.use(logger);
 
 
 // Connecting to google cloud storage to upload images, creating a storage instance
-const storage = new Storage({
-  projectId: process.env.GCS_PROJECT_ID,
-  keyFilename: path.join(__dirname, process.env.PATH_TO_GCS_KEY),
-});
-const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
+// const storage = new Storage({
+//   projectId: process.env.GCS_PROJECT_ID,
+//   keyFilename: path.join(__dirname, process.env.PATH_TO_GCS_KEY),
+// });
+// const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
 
 // Server Routes
 app.use('/api/upload', uploadRoutes);

@@ -1,4 +1,15 @@
+const { Storage } = require('@google-cloud/storage');
+const path = require('path');
+
 exports.upload = (req, res) => {
+
+  const storage = new Storage({
+    projectId: process.env.GCS_PROJECT_ID,
+    keyFilename: path.join(__dirname, process.env.PATH_TO_GCS_KEY),
+  });
+
+  const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
+
   if (!req.body.image || !req.body.filename) {
     return res.status(400).json({ error: "Image and filename are required" });
   }
