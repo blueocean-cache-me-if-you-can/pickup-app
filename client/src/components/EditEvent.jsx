@@ -7,7 +7,7 @@ import {
   Text,
   ScrollArea,
 } from '@mantine/core';
-import { IconPlus } from '@tabler/icons-react';
+import { useDisclosure } from '@mantine/hooks';
 import PhotoPicker from './PhotoPicker';
 import EventFormInfo from './EventFormInfo';
 import EventFormDetails from './EventFormDetails';
@@ -22,7 +22,7 @@ function EditEvent({
   skillLevels,
   intensities,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, { open, close }] = useDisclosure(false);
 
   const { sportOptions, skillOptions, intensityOptions } = useEventSelectOptions({
     activities,
@@ -66,7 +66,7 @@ function EditEvent({
     // const payload = form.values;
     // console.log('CreateEvent payload:', payload);
     // onCreate?.(payload);
-    setIsOpen(false);
+    close();
     form.reset();
   };
 
@@ -75,10 +75,11 @@ function EditEvent({
       <Button 
         m='xs'
         variant='filled' 
-        fullWidth 
+        fullWidth
+        data-no-expand
         onClick={(e) => {
             e.stopPropagation();
-            setIsOpen(true);
+            open();
         }}
       >
         Edit
@@ -86,13 +87,15 @@ function EditEvent({
 
       <Modal
         opened={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => close()}
         size='80rem'
         radius='md'
         padding='lg'
         centered
         title={<Text fw={600}>Edit Event</Text>}
         overlayProps={{ backgroundOpacity: 0.4, blur: 2 }}
+        // onClickCapture={(e) => e.stopPropagation() }
+        // closeOnClickOutside={false}
       >
         <form onSubmit={form.onSubmit(handleSubmit, (errors) => console.log('form errors', errors))}>
           <Stack align='flex-start' w='100%' mah='100%'>
@@ -118,8 +121,24 @@ function EditEvent({
             </ScrollArea>
 
             <Group w='100%' justify='flex-end'>
-              <Button variant='default' onClick={() => setIsOpen(false)}>Cancel</Button>
-              <Button color='dark' type='submit'>Create Event</Button>
+                <Button 
+                    variant='default' 
+                    data-no-expand 
+                    onClick={(e) => { 
+                        e.stopPropagation(); 
+                        close(); 
+                    }}
+                >
+                    Cancel
+                </Button>
+                <Button 
+                    color='dark' 
+                    type='submit' 
+                    data-no-expand 
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    Create Event
+                </Button>
             </Group>
           </Stack>
         </form>

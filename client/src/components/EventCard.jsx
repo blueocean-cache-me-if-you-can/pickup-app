@@ -50,7 +50,25 @@ function EventCard({
           </Box>
         )}
         <Center pos='absolute' bottom={0} right={0} w='100%'>
-          {created ? <EditEvent event={event} activities={activities} intensities={intensities} skillLevels={skillLevels} /> : <Button m='xs' variant='filled' fullWidth onClick={toggleJoin}>{joined ? 'Leave' : 'Join'}</Button>}
+          {created ? 
+            <EditEvent 
+              event={event} 
+              activities={activities} 
+              intensities={intensities} 
+              skillLevels={skillLevels} 
+              onEdit={editEvent}
+            /> 
+            : 
+            <Button 
+              m='xs' 
+              data-no-expand
+              variant='filled' 
+              fullWidth 
+              onClick={toggleJoin}
+            >
+              {joined ? 'Leave' : 'Join'}
+            </Button>
+          }
         </Center>
       </Box>
     </Box>

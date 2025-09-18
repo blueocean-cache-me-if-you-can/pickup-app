@@ -15,6 +15,7 @@ import useEventSelectOptions from '../hooks/useEventSelectOptions';
 import useCreateEventForm from '../hooks/useCreateEventForm';
 import useImageUpload from '../hooks/useImageUpload';
 import useDateTimeFormatter from '../hooks/useDateTimeFormatter';
+import { createEvent } from '../api';
 
 function CreateEvent({
   user,
@@ -41,7 +42,7 @@ function CreateEvent({
 
     const dateTimeString = formatEventDateTime(values.date, values.time);
 
-    // const location = [values.longitude, values.latitude];
+    const location = [values.lng, values.lat];
 
     const payload = {
       title: values.title,
@@ -53,19 +54,15 @@ function CreateEvent({
       description: values.description,
       additional_info: values.instructions,
       time: dateTimeString,
-      imageUrl,
-      location: values.address,
+      photo: imageUrl,
+      address: values.address,
       minPlayers: values.minPlayers,
       maxPlayers: values.maxPlayers,
-      latitude: values.lat,
-      longitude: values.lng,
+      coordinates: location,
     };
     console.log('payload', payload);
 
-    // e.preventDefault();
-    // const payload = form.values;
-    // console.log('CreateEvent payload:', payload);
-    // onCreate?.(payload);
+    await createEvent(payload);
     setIsOpen(false);
     form.reset();
   };

@@ -14,7 +14,17 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
 
   return (
     <>
-      <Box onClick={() => setIsOpen(true)} style={{ cursor: 'pointer' }}>
+      <Box 
+        onClick={(e) => {
+          const el = e.currentTarget;
+          const t = e.target;
+          if (!(el instanceof Element) || !(t instanceof Element)) return;
+          if (!el.contains(t)) return;
+          if (t.closest('[data-no-expand]')) return;
+          setIsOpen(true);
+        }} 
+        style={{ cursor: 'pointer' }}
+      >
         <Event 
             event={event} 
             activities={activities} 
