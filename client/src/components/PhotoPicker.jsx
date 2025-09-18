@@ -4,13 +4,14 @@ import React, {
 import {
   ActionIcon, Avatar, Box, FileButton, Stack, Text, rem,
 } from '@mantine/core';
-import { IconPlus, IconUser } from '@tabler/icons-react';
+import { IconPlus, IconUser, IconPhoto } from '@tabler/icons-react';
 
 function PhotoPicker({
   size = 160,
   label = 'Upload a photo for your profile',
   accept = 'image/*',
   onChange,
+  mode = 'profile',
 }) {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -69,7 +70,8 @@ function PhotoPicker({
               color='gray'
               variant={previewUrl ? 'filled' : 'light'}
             >
-              {!previewUrl && <IconUser size={Math.max(48, Math.floor(size * 0.35))} />}
+              {(!previewUrl && mode === 'profile') && <IconUser size={Math.max(48, Math.floor(size * 0.35))} />}
+              {(!previewUrl && mode === 'event') && <IconPhoto size={Math.max(48, Math.floor(size * 0.35))} />}
             </Avatar>
 
             <ActionIcon

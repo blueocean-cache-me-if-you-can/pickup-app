@@ -14,6 +14,7 @@ import useDebounce from '../hooks/useDebounce';
 import useGooglePlaces from '../hooks/useGooglePlaces';
 import usePlaceAutocomplete from '../hooks/usePlaceAutocomplete';
 import useCurrentLocation from '../hooks/useCurrentLocation';
+import useGeocodeAddress from '../hooks/useGeocodeAddress';
 
 function AddressPicker({
   value,
@@ -21,6 +22,7 @@ function AddressPicker({
   label = 'Preferred address',
   placeholder = 'Preferred address',
   required = false,
+  onResolved,
 }) {
   const [address, setAddress] = useState(value ?? '');
 
@@ -37,8 +39,9 @@ function AddressPicker({
     isReady,
   );
 
-  const { getCurrentAddress, isResolving } = useCurrentLocation();
-  const isLoading = isQueryLoading || isResolving;
+  const { getCurrentAddress, isResolving: isResolvingLocation } = useCurrentLocation();
+  const { resolveAddress, isResolving: isGeocoding } = useGeocodeAddress();
+  const isLoading = isQueryLoading || isResolvingLocation || isGeocoding;
 
   useEffect(() => {
     setAddress(value ?? '');
@@ -48,12 +51,24 @@ function AddressPicker({
     e?.preventDefault?.();
     try {
       const resolved = await getCurrentAddress();
-      if (resolved) {
-        setAddress(resolved);
-        onChange?.(resolved);
+      if (resolved?.address) {
+        setAddress(resolved.address);
+        onChange?.(resolved.address);
+        onResolved?.(resolved);
       }
     } catch (err) {
       console.error('Failed to use current location:', err);
+    }
+  };
+
+  const handleOptionSubmit = async (val) => {
+    setAddress(val);
+    onChange?.(val);
+    try {
+      const resolved = await resolveAddress(val);
+      if (resolved) onResolved?.(resolved);
+    } catch (err) {
+      console.error('Failed to geocode address:', err);
     }
   };
 
@@ -66,6 +81,7 @@ function AddressPicker({
           setAddress(v);
           onChange?.(v);
         }}
+        onOptionSubmit={handleOptionSubmit}
         placeholder={placeholder}
         rightSection={isLoading ? <Loader size='xs' /> : null}
         leftSection={<IconSearch size={16} />}
