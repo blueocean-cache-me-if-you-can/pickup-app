@@ -29,11 +29,11 @@ export function CreateEvent({
 
   const form = useCreateEventForm();
 
-  const handleSubmit = (e) => {
-    // console.log('form submitted', values);
-    e.preventDefault();
-    const payload = form.values;
-    console.log('CreateEvent payload:', payload);
+  const handleSubmit = (values) => {
+    console.log('form submitted', values);
+    // e.preventDefault();
+    // const payload = form.values;
+    // console.log('CreateEvent payload:', payload);
     // onCreate?.(payload);
     // setIsOpen(false);
     // form.reset();
@@ -58,7 +58,7 @@ export function CreateEvent({
         title={<Text fw={600}>Create New Event</Text>}
         overlayProps={{ backgroundOpacity: 0.4, blur: 2 }}
       >
-        <form onSubmit={e => handleSubmit(e)}>
+        <form onSubmit={form.onSubmit(handleSubmit, (errors) => console.log('form errors', errors))}>
           <Stack align='flex-start' w='100%' mah='100%'>
             <ScrollArea flex={1} w='100%'>
               <Group align='flex-start' gap='xl' wrap='nowrap' w='100%'>
