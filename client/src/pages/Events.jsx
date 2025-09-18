@@ -89,9 +89,6 @@ function Events({
           { intensity: selectedIntensity },
           { distance: selectedDistance },
         ],
-        address: form.values.address,
-        lat: form.values.lat,
-        lng: form.values.lng,
       };
 
       // My Past Events params
