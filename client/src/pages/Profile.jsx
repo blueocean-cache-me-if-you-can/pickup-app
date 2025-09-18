@@ -27,6 +27,7 @@ import { updateUser } from '../api';
 export default function Profile({ user, setUser, activities, skillLevels }) {
   const [selectedSports, setSelectedSports] = useState({});
   const [showFirstLoginMsg, setShowFirstLoginMsg] = useState(false);
+  const [editPassword, setEditPassword] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem('firstLogin') === 'true') {
@@ -57,9 +58,9 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
         return 'Please enter a valid email';
       },
       password: (value) => {
-        if (value.length < 6) {
-          return 'Password must be at least 6 characters';
-        }
+        if (!editPassword) return null;
+        if (!value) return 'Password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
         return null;
       },
     },
@@ -124,6 +125,7 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
       address: values.preferredAddress,
       photo: values.photo,
       activities: activitiesArray,
+      ...(editPassword && values.password ? { password: values.password } : {}),
     };
 
     console.log(payload);
@@ -134,6 +136,9 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
 
       setUser(updated);
       localStorage.setItem('user', JSON.stringify(updated));
+
+      setEditPassword(false);
+      form.setFieldValue('password', '');
 
       if (localStorage.getItem('firstLogin') === 'true') {
         localStorage.removeItem('firstLogin');
@@ -249,12 +254,30 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             placeholder='Enter email'
             {...form.getInputProps('email')}
           />
+          <Space h='xs' />
 
-          {/* Password */}
+          <Checkbox
+            label='Change Password'
+            disabled={editPassword}
+            checked={editPassword}
+            onChange={(e) => {
+              const checked = e.currentTarget.checked;
+              if (!checked && form.values.password) {
+                return;
+              }
+              setEditPassword(checked);
+              if (!checked) {
+                // Reset password value if unchecking
+                form.setFieldValue('password', '');
+              }
+            }}
+          />
+
+          {/* Password input */}
           <PasswordInput
-            withAsterisk
-            label='Password'
-            placeholder='Enter password'
+            withAsterisk={editPassword} // only required if checkbox is checked
+            label='New Password'
+            disabled={!editPassword}
             {...form.getInputProps('password')}
           />
         </Stack>
