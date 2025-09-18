@@ -16,8 +16,8 @@ import useCreateEventForm from '../hooks/useCreateEventForm';
 import useImageUpload from '../hooks/useImageUpload';
 import useDateTimeFormatter from '../hooks/useDateTimeFormatter';
 
-function CreateEvent({
-  user,
+function EditEvent({
+  event,
   activities,
   skillLevels,
   intensities,
@@ -45,7 +45,7 @@ function CreateEvent({
 
     const payload = {
       title: values.title,
-      user_id: user._id,
+      user_id: event.owner.user_id,
       activityId: values.sport,
       skillId: values.skillLevel,
       intensityId: values.intensity,
@@ -72,11 +72,16 @@ function CreateEvent({
 
   return (
     <>
-      <Button variant='filled' color='teal' onClick={() => setIsOpen(true)}>
-        <Group gap='xs'>
-          <IconPlus size={16} />
-          Create Event
-        </Group>
+      <Button 
+        m='xs'
+        variant='filled' 
+        fullWidth 
+        onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(true);
+        }}
+      >
+        Edit
       </Button>
 
       <Modal
@@ -86,7 +91,7 @@ function CreateEvent({
         radius='md'
         padding='lg'
         centered
-        title={<Text fw={600}>Create New Event</Text>}
+        title={<Text fw={600}>Edit Event</Text>}
         overlayProps={{ backgroundOpacity: 0.4, blur: 2 }}
       >
         <form onSubmit={form.onSubmit(handleSubmit, (errors) => console.log('form errors', errors))}>
@@ -123,4 +128,4 @@ function CreateEvent({
   );
 }
 
-export default CreateEvent;
+export default EditEvent;

@@ -5,7 +5,7 @@ import {
 import { IconChevronDown } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
-import { CreateEvent } from './CreateEvent';
+import CreateEvent from './CreateEvent';
 import ProfileHeadline from './ProfileHeadline';
 
 function Navbar({
@@ -15,11 +15,11 @@ function Navbar({
     <Group justify='space-between' h='100%' p='0 20px'>
       <Logo activateLink />
       <Group>
-        <CreateEvent 
+        <CreateEvent
           user={user}
-          activities={activities} 
-          skillLevels={skillLevels} 
-          intensities={intensities} 
+          activities={activities}
+          skillLevels={skillLevels}
+          intensities={intensities}
         />
         <Divider orientation='vertical' />
         <Menu shadow='md' width={200}>

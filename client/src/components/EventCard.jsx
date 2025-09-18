@@ -3,8 +3,11 @@ import {
   AspectRatio, Box, Button, Image, Center,
 } from '@mantine/core';
 import { IconCrown } from '@tabler/icons-react';
+import EditEvent from './EditEvent';
 
-function EventCard({ event, currentUserId = 1, activities = [], intensities = [], skillLevels = [] }) {
+function EventCard({
+  event, currentUserId = 1, activities = [], intensities = [], skillLevels = [],
+}) {
   // HARDCODING DEFAULT current user_id = 1
   const [joined, setJoined] = useState(event.players.some((player) => player.user_id === currentUserId));
   const [created, setCreated] = useState(event.owner.user_id === currentUserId);
@@ -47,7 +50,7 @@ function EventCard({ event, currentUserId = 1, activities = [], intensities = []
           </Box>
         )}
         <Center pos='absolute' bottom={0} right={0} w='100%'>
-          {created ? <Button m='xs' variant='filled' fullWidth onClick={editEvent}>Edit</Button> : <Button m='xs' variant='filled' fullWidth onClick={toggleJoin}>{joined ? 'Leave' : 'Join'}</Button>}
+          {created ? <EditEvent event={event} activities={activities} intensities={intensities} skillLevels={skillLevels} /> : <Button m='xs' variant='filled' fullWidth onClick={toggleJoin}>{joined ? 'Leave' : 'Join'}</Button>}
         </Center>
       </Box>
     </Box>
