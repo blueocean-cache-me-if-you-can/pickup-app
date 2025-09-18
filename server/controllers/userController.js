@@ -24,11 +24,19 @@ exports.signUp = async (req, res) => {
     delete userObj.password;
     delete userObj.__v;
 
-    mail.sendMailWithHtmlFile({
+    // mail.sendMailWithHtmlFile({
+    //   recipients: [{ email: userObj.emailPrimary }],
+    //   subject: 'Welcome to Blue Ocean Pickup!',
+    //   text: `Hello ${userObj.firstName},\n\nThank you for signing up for Blue Ocean Pickup! We're excited to have you on board.\n\nBest regards,\nBlue Ocean Pickup Team`,
+    //   htmlFile: 'createAccount.html'
+    // });
+
+    mail.sendMailWithHtmlFileAndParams({
       recipients: [{ email: userObj.emailPrimary }],
       subject: 'Welcome to Blue Ocean Pickup!',
       text: `Hello ${userObj.firstName},\n\nThank you for signing up for Blue Ocean Pickup! We're excited to have you on board.\n\nBest regards,\nBlue Ocean Pickup Team`,
-      htmlFile: 'createAccount.html'
+      htmlFile: 'createAccount.html',
+      htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
     });
 
     res.status(201).json(userObj);
@@ -58,6 +66,9 @@ exports.login = async (req, res) => {
 
 exports.patchUsers = async (req, res) => {
   try {
+    if (req.body.password) {
+      req.body.password = await bcrypt.hash(req.body.password, 10);
+    }
     const updatedUser = await user.findByIdAndUpdate(req.query.id, req.body, { new: true }); // Return the updated document
     if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
