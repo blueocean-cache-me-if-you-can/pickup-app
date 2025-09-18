@@ -9,7 +9,7 @@ import EventsList from '../components/EventsList';
 import { events } from '../data';
 
 function Events({
-  currentUserId = 1, activities = [], intensities = [], skillLevels = [],
+  user, activities = [], intensities = [], skillLevels = [],
 }) {
   const [view, setView] = useState('events-near-me');
 
@@ -68,7 +68,7 @@ function Events({
     if (view === 'my-events') {
     // My Upcoming Events params
       upcomingParams = {
-        user_id: currentUserId,
+        user_id: user._id,
         finished: false,
         sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
         orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
@@ -82,7 +82,7 @@ function Events({
 
       // My Past Events params
       pastParams = {
-        user_id: currentUserId,
+        user_id: user._id,
         finished: true,
         sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
         orderByDesc: sortDirections[selectedPastSort] ?? true,
@@ -108,7 +108,7 @@ function Events({
     selectedSort,
     selectedUpcomingSort,
     selectedPastSort,
-    currentUserId,
+    user,
     view,
     orderByDesc,
     sortDirections,
@@ -184,6 +184,7 @@ function Events({
               activities={activities}
               intensities={intensities}
               skillLevels={skillLevels}
+              currentUserId={user._id}
             />
           )}
         </Box>
@@ -191,7 +192,7 @@ function Events({
 
       {view === 'my-events' && (
         <MyEvents
-          currentUserId={currentUserId}
+          currentUserId={user._id}
           selectedUpcomingSort={selectedUpcomingSort}
           setSelectedUpcomingSort={setSelectedUpcomingSort}
           selectedPastSort={selectedPastSort}
