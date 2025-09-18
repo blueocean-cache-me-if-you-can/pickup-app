@@ -34,6 +34,14 @@ export const getUsers = async () => {
   return response.data;
 };
 
+// PATCH /api/users?id=USER_ID
+export const updateUser = async (userId, userData) => {
+  const response = await api.patch('/users', userData, {
+    params: { id: userId },
+  });
+  return response.data;
+};
+
 // POST /api/users/signup
 export const signUp = async (userData) => {
   const response = await api.post('/users/signup', userData);
@@ -44,6 +52,28 @@ export const signUp = async (userData) => {
 export const login = async (credentials) => {
   const response = await api.post('/users/login', credentials);
   return response.data;
+};
+
+/* =========================
+   REFERENCE DATA API
+   ========================= */
+
+// GET /api/activities
+export const getActivities = async () => {
+  const { data } = await api.get('/activities');
+  return data;
+};
+
+// GET /api/skillLevels
+export const getSkillLevels = async () => {
+  const { data } = await api.get('/skillLevels');
+  return data;
+};
+
+// GET /api/intensityLevels
+export const getIntensityLevels = async () => {
+  const { data } = await api.get('/intensityLevels');
+  return data;
 };
 
 export default api;
