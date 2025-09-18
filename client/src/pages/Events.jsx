@@ -59,7 +59,6 @@ function Events({
     let pastParams = {};
     if (view === 'events-near-me') {
       eventsNearMeParams = {
-        user_id: null,
         finished: false,
         sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
         orderByDesc,
