@@ -6,9 +6,10 @@ import { IconChevronDown } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import { CreateEvent } from './CreateEvent';
+import ProfileHeadline from './ProfileHeadline';
 
 function Navbar({
-  setSessionId, activities, skillLevels, intensities,
+  user, setUser, activities, skillLevels, intensities,
 }) {
   return (
     <Group justify='space-between' h='100%' p='0 20px'>
@@ -19,10 +20,7 @@ function Navbar({
         <Menu shadow='md' width={200}>
           <Menu.Target>
             <Group gap='xs' style={{ cursor: 'pointer' }}>
-              <Text size='sm'>
-                {/* TODO: Replace with actual username */}
-                Username
-              </Text>
+              <ProfileHeadline name={user.displayName || user.firstName} pfp={user.photo} />
               <IconChevronDown size={24} />
             </Group>
           </Menu.Target>
@@ -34,7 +32,7 @@ function Navbar({
               <Text size='sm'>Profile</Text>
             </Menu.Item>
             <Menu.Divider />
-            <Menu.Item onClick={() => setSessionId(null)}>
+            <Menu.Item onClick={() => setUser(null)}>
               <Text size='sm' c='red'>Logout</Text>
             </Menu.Item>
           </Menu.Dropdown>

@@ -57,8 +57,10 @@ exports.login = async (req, res) => {
 };
 
 exports.patchUsers = async (req, res) => {
+  console.log('Update request for user:', req.query);
   try {
-    const updatedUser = await user.findByIdAndUpdate(req.query.emailPrimary, req.body, { new: true }); // Return the updated document
+    const updatedUser = await user.findByIdAndUpdate(req.query.id, req.body, { new: true }); // Return the updated document
+    console.log(updatedUser);
     if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
     }

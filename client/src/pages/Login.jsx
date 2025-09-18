@@ -8,7 +8,7 @@ import { useForm } from '@mantine/form';
 import Logo from '../components/Logo';
 import { login } from '../api';
 
-function Login({ setSessionId }) {
+function Login({ setUser }) {
   const form = useForm({
     initialValues: {
       email: '',
@@ -35,10 +35,8 @@ function Login({ setSessionId }) {
         emailPrimary: formValues.email,
         pwd: formValues.password,
       });
-
       console.log('Login response:', res);
-
-      setSessionId(res.user?._id || 'mock-session-id');
+      setUser(res);
     } catch (err) {
       console.error('Login failed:', err);
       const msg = err.response?.data?.error
