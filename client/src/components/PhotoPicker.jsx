@@ -1,3 +1,4 @@
+// client/src/components/PhotoPicker.jsx
 import React, {
   useEffect, useMemo, useRef, useState,
 } from 'react';
@@ -12,6 +13,8 @@ function PhotoPicker({
   accept = 'image/*',
   onChange,
   mode = 'profile',
+  onError,            // NEW: surface validation messages to parent
+  maxSizeMB = 5,      // NEW: default 5MB limit
 }) {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -19,6 +22,13 @@ function PhotoPicker({
   const resetRef = useRef(null);
 
   const handleFileChange = (f) => {
+    const maxBytes = maxSizeMB * 1024 * 1024;
+    if (f && f.size > maxBytes) {
+      onError?.(`Image must be ≤ ${maxSizeMB}MB`);
+      resetRef.current?.(); // clears the input
+      return;
+    }
+
     setFile(f);
     onChange?.(f ?? null);
     resetRef.current?.();

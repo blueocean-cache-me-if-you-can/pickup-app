@@ -13,6 +13,8 @@ import EventFormInfo from './EventFormInfo';
 import EventFormDetails from './EventFormDetails';
 import useEventSelectOptions from '../hooks/useEventSelectOptions';
 import useCreateEventForm from '../hooks/useCreateEventForm';
+import useImageUpload from '../hooks/useImageUpload';
+import useDateTimeFormatter from '../hooks/useDateTimeFormatter';
 
 export function CreateEvent({
   activities = [],
@@ -28,9 +30,36 @@ export function CreateEvent({
   });
 
   const form = useCreateEventForm();
+  const { uploadEventImage } = useImageUpload();
+  const { formatEventDateTime } = useDateTimeFormatter();
 
-  const handleSubmit = (values) => {
-    console.log('form submitted', values);
+  const handleSubmit = async (values) => {
+    const imageUrl = values.imageFile
+      ? await uploadEventImage(values.imageFile, { maxSizeMB: 25 })
+      : '';
+
+    const dateTimeString = formatEventDateTime(values.date, values.time);
+
+    // const location = [values.longitude, values.latitude];
+
+    const payload = {
+      title: values.title,
+      activityId: values.sport,
+      skillId: values.skillLevel,
+      intensityId: values.intensity,
+      brief_description: values.summary,
+      description: values.description,
+      additional_info: values.instructions,
+      time: dateTimeString,
+      imageUrl,
+      location: values.address,
+      minPlayers: values.minPlayers,
+      maxPlayers: values.maxPlayers,
+      latitude: values.lat,
+      longitude: values.lng,
+    };
+    console.log('payload', payload);
+
     // e.preventDefault();
     // const payload = form.values;
     // console.log('CreateEvent payload:', payload);
@@ -66,6 +95,8 @@ export function CreateEvent({
                   size={160}
                   label='Add an event photo'
                   onChange={(f) => form.setFieldValue('imageFile', f)}
+                  onError={(msg) => form.setFieldError('imageFile', msg)}
+                  maxSizeMB={5}
                   style={{ flex: '0 0 160px' }}
                   mode='event'
                 />
