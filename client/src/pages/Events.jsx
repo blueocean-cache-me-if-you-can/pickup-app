@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Container, SegmentedControl, Flex, Space, Select, Title, Box, Group, Text,
 } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
@@ -21,6 +22,13 @@ function Events({
   const [selectedUpcomingSort, setSelectedUpcomingSort] = useState('dateUpcoming');
   const [selectedPastSort, setSelectedPastSort] = useState('datePast');
 
+  const form = useForm({
+    initialValues: {
+      address: user?.address || '',
+      lat: user?.lat || null,
+      lng: user?.lng || null,
+    },
+  });
   // Clear filters when view changes
   useEffect(() => {
     setSelectedActivities([]);
@@ -61,6 +69,9 @@ function Events({
           { intensity: selectedIntensity },
           { distance: selectedDistance },
         ],
+        address: form.values.address,
+        lat: form.values.lat,
+        lng: form.values.lng,
       };
       upcomingParams = {};
       pastParams = {};
@@ -78,6 +89,9 @@ function Events({
           { intensity: selectedIntensity },
           { distance: selectedDistance },
         ],
+        address: form.values.address,
+        lat: form.values.lat,
+        lng: form.values.lng,
       };
 
       // My Past Events params
@@ -112,6 +126,7 @@ function Events({
     view,
     orderByDesc,
     sortDirections,
+    form.values.address, form.values.lat, form.values.lng,
   ]);
 
   return (
@@ -167,7 +182,17 @@ function Events({
       {view === 'events-near-me' && (
         <Box>
           <Group justify='space-between' mb='xl' gap='lg'>
-            <AddressPicker />
+            <AddressPicker
+              value={form.values.address}
+              onChange={(val) => form.setFieldValue('address', val)}
+              onResolved={({ address, lat, lng }) => {
+                if (address && address !== form.values.address) {
+                  form.setFieldValue('address', address);
+                }
+                form.setFieldValue('lat', lat);
+                form.setFieldValue('lng', lng);
+              }}
+            />
             <Select
               label='Sort by'
               data={[
