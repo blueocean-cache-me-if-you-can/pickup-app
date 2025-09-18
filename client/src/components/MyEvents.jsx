@@ -3,6 +3,7 @@ import {
   Box, Stack, Select, Title, Flex, Text,
 } from '@mantine/core';
 import Event from './Event';
+import EventsList from './EventsList';
 import { upcomingMyEvents, pastMyEvents } from '../data';
 
 function MyEvents({
@@ -34,11 +35,16 @@ function MyEvents({
             onChange={setSelectedUpcomingSort}
           />
         </Flex>
-        {upcomingEvents.length === 0 ? <Text>No upcoming events.</Text> : upcomingEvents.map(
-          (event) => (
-            <Event key={event.id} event={event} activities={activities} intensities={intensities} skillLevels={skillLevels} />
-          ),
+        {upcomingEvents.length === 0 ? <Text>No upcoming events.</Text> : (
+          <EventsList
+            events={upcomingEvents}
+            activities={activities}
+            intensities={intensities}
+            skillLevels={skillLevels}
+          />
         )}
+      </Box>
+      <Box>
         <Flex justify='space-between' mb='xl' gap='lg'>
           <Title order={2} tt='uppercase'>Past Events</Title>
           <Select
@@ -51,10 +57,13 @@ function MyEvents({
             onChange={setSelectedPastSort}
           />
         </Flex>
-        {pastEvents.length === 0 ? <Text>No past events.</Text> : pastEvents.map(
-          (event) => (
-            <Event key={event.id} event={event} isPast activities={activities} intensities={intensities} skillLevels={skillLevels} />
-          ),
+        {pastEvents.length === 0 ? <Text>No past events.</Text> : (
+          <EventsList
+            events={pastEvents}
+            activities={activities}
+            intensities={intensities}
+            skillLevels={skillLevels}
+          />
         )}
       </Box>
     </Stack>

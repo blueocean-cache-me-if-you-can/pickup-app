@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container, SegmentedControl, Flex, Space, Select, Title, Box, Group,
+  Container, SegmentedControl, Flex, Space, Select, Title, Box, Group, Text,
 } from '@mantine/core';
 import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
 import Event from '../components/Event';
+import EventsList from '../components/EventsList';
 import { events } from '../data';
 
 function Events({ currentUserId = 1, activities = [], intensities = [], skillLevels = [] }) {
@@ -176,17 +177,14 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
               onChange={setSelectedSort}
             />
           </Group>
-          <Box>
-            {events.map((event) => (
-              <Event
-                event={event}
-                key={event.id}
-                activities={activities}
-                intensities={intensities}
-                skillLevels={skillLevels}
-              />
-            ))}
-          </Box>
+          {events.length === 0 ? <Text>No events found.</Text> : (
+            <EventsList
+              events={events}
+              activities={activities}
+              intensities={intensities}
+              skillLevels={skillLevels}
+            />
+          )}
         </Box>
       )}
 
