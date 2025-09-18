@@ -3,6 +3,7 @@ const User = require('../models/user');
 const Activity = require('../models/activity');
 const IntensityLevel = require('../models/intensityLevel');
 const SkillLevel = require('../models/skillLevel');
+const { ObjectId } = require('mongodb');
 
 // Controller to get all events
 exports.getEvents = async (req, res) => {
@@ -15,41 +16,40 @@ exports.getEvents = async (req, res) => {
     //   "sort": "skillLevel", // e.g. skillLevel, intensity, activity
     //   "orderByDesc": true , //
     //   "coordinates": [27.13728, -10.362738],
-    //   "filter": [
-    //     { "skillLevel" :[401,402] },  // e.g. [401, 402, 403]
-    //     { "intensity" :[301] },  // e.g. [301, 302, 303]
-    //     { "activity" :[502, 504] },  // e.g. [502, 503, 504]
-    //     { "distance" :3 } // e.g. <= 3 (miles)
-    //   ]
+    //   "filter": {
+    //     "skillLevel" :[401,402],  // e.g. [401, 402, 403]
+    //     "intensity" :[301],  // e.g. [301, 302, 303]
+    //     "activity" :[502, 504],  // e.g. [502, 503, 504]
+    //     "distance" :3 // e.g. <= 3 (miles)
+    //   }
     // }
 
-    const radius = req.query?.filter?.distance || 5000; // 5 km in meters
-    const { user_id, finished, page, count, coordinates, filter, sort, orderByDesc } = req.query;
-    const pipeline = [];
+    let skip, limit;
+    let { user_id, finished, page, count, coordinates, filter, sort, orderByDesc } = req.query;
+    filter = filter ? JSON.parse(filter) : {};
+    coordinates = JSON.parse(coordinates);
+    console.log(user_id, finished, page, count, coordinates, filter, sort, orderByDesc);
+
+    const radius = filter?.distance * 1609.34 || 5000; // 5 km in meters
+    const intensity = filter?.intensity || null;
+    const skillLevel = filter?.skillLevel || null;
+    const activity = filter?.activity || null;
+    console.log(radius, intensity, skillLevel, activity);
 
     // Filtering
 
-    if (coordinates) {
-      pipeline.push({
-        $geoNear: {
-          near: { type: "Point", coordinates: [parseFloat(coordinates[0]), parseFloat(coordinates[1])] },
-          distanceField: "dist.calculated",
-          spherical: true
+    const pipeline = [
+      {
+        $match: {
+          location: {$geoWithin: { $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100] }},
+          ...(intensity ? { intensityId: new ObjectId(intensity) } : {}),
+          ...(skillLevel ? { skillId: new ObjectId(skillLevel) } : {}),
+          ...(activity ? { activityId: new ObjectId(activity) } : {}),
+          ...(user_id ? { 'players.userId': new ObjectId(user_id) } : {}),
+          ...(finished === 'true' ? { time: { $lt: new Date() } } : { time: { $gte: new Date() } })
         }
-      });
-    }
-
-    if (user_id) {
-      pipeline.push({ $match: { user_id: user_id } });
-    }
-
-    if (finished) {
-      if (finished === 'true') {
-        pipeline.push({ $match: { time: { $lt: new Date() } } });
-      } else {
-        pipeline.push({ $match: { time: { $gte: new Date() } } });
       }
-    }
+    ];
 
     if (page && count) {
       skip = (parseInt(page) - 1) * parseInt(count);
@@ -74,7 +74,7 @@ exports.getEvents = async (req, res) => {
       pipeline.push(
         {
           $lookup: {
-            from: "intensitylevels",
+            from: "intensityLevel",
             localField: "intensityId",
             foreignField: "_id",
             as: "intensity"
@@ -84,10 +84,11 @@ exports.getEvents = async (req, res) => {
         { $sort: { "intensity.displayOrder": order } }
       );
     } else if (sort === 'skillLevel') {
+      console.log('Sorting by skill level');
       pipeline.push(
         {
           $lookup: {
-            from: "skilllevels",
+            from: "skillLevel",
             localField: "skillId",
             foreignField: "_id",
             as: "skillLevel"
@@ -111,27 +112,21 @@ exports.getEvents = async (req, res) => {
       );
     }
 
-    console.log('Pipeline:', JSON.stringify(pipeline, null, 2));
-
-    const intensityId = filter?.intensity || null;
-    const skillLevelId = filter?.skillLevel || null;
-    const date = filter?.date || null;
-
     // Fetch events based on query
+    console.log('Aggregation Pipeline:', JSON.stringify(pipeline, null, 2));
 
-    console.log(
-      [
-      {
-        $match: {
-          ...(intensityId ? { intensityId: new ObjectId(intensityId) } : {}),
-          ...(skillLevelId ? { skillLevelId: new ObjectId(skillLevelId) } : {}),
-          ...(date ? { date: { $gte: new Date(date) } } : {})
-        }
-      },
-      ...pipeline
-    ]
-    );
-    const events = await Event.aggregate(pipeline).skip(skip).limit(limit).exec();
+    let events = await Event.aggregate(pipeline).skip(skip).limit(limit).exec();
+    for (let event of events) {
+      if (event.intensity && Object.keys(event.intensity).length > 0) {
+        event.intensity = event.intensity[0];
+      }
+      if (event.skillLevel && Object.keys(event.skillLevel).length > 0) {
+        event.skillLevel = event.skillLevel[0];
+      }
+      if (event.activity && Object.keys(event.activity).length > 0) {
+        event.activity = event.activity[0];
+      }
+    }
     res.status(200).json(events);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch events', details: err.message });
@@ -141,11 +136,6 @@ exports.getEvents = async (req, res) => {
 exports.getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
-      // .populate('activityId')
-      // .populate('intensityId')
-      // .populate('skillId');
-      // .populate('owner.userId', 'displayName')
-      // .populate('players.userId', 'displayName');
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
@@ -154,6 +144,46 @@ exports.getEventById = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch event', details: err.message });
   }
 };
+
+exports.updateEvent = async (req, res) => {
+  try {
+    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedEvent) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    res.status(200).json(updatedEvent);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update event', details: err.message });
+  }
+};
+
+exports.updateEventPlayer = async (req, res) => {
+  try {
+    const user = await User.findById(req.query.user_id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    // Check if user is already a player
+    if (event.players.some(player => player.userId.toString() === req.query.user_id)) {
+      // if they are remove them from player list
+      event.players = event.players.filter(player => player.userId.toString() !== req.query.user_id);
+      const updatedEvent = await event.save();
+      return res.status(200).json(updatedEvent);
+    }
+
+    event.players.push({ userId: req.query.user_id, displayName: user.displayName || 'Anonymous' });
+    const updatedEvent = await event.save();
+    res.status(200).json(updatedEvent);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add player to event', details: err.message });
+  }
+}
 
 exports.createEvent = async (req, res) => {
   try {
@@ -189,3 +219,15 @@ exports.createEvent = async (req, res) => {
     res.status(400).json({ error: 'Failed to create event', details: err.message });
   }
 };
+
+exports.deleteEvent = async (req, res) => {
+  try {
+    const deletedEvent = await Event.findByIdAndDelete(req.query.event_id);
+    if (!deletedEvent) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    res.status(200).json({ message: 'Event deleted successfully' });
+  } catch (err) {
+    res.status(400).json({ error: 'Failed to delete event', details: err.message });
+  }
+}
