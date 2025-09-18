@@ -15,7 +15,9 @@ function Signup({ setUser }) {
     initialValues: {
       firstName: '',
       lastName: '',
-      address: 'GET FROM AddressPicker',
+      address: '',
+      lat: null,
+      lng: null,
       email: '',
       password: '',
       confirmPassword: '',
@@ -60,7 +62,8 @@ function Signup({ setUser }) {
         address: formValues.address,
         atLeastEighteen: true,
       });
-
+      newUser.lat = formValues.lat;
+      newUser.lng = formValues.lng;
       setUser(newUser);
 
       navigate('/profile', { replace: true });
@@ -100,7 +103,17 @@ function Signup({ setUser }) {
                 flex={1}
               />
             </Group>
-            <AddressPicker />
+            <AddressPicker
+              value={form.values.address}
+              onChange={(val) => form.setFieldValue('address', val)}
+              onResolved={({ address, lat, lng }) => {
+                if (address && address !== form.values.address) {
+                  form.setFieldValue('address', address);
+                }
+                form.setFieldValue('lat', lat);
+                form.setFieldValue('lng', lng);
+              }}
+            />
             <TextInput
               withAsterisk
               label='Email'
