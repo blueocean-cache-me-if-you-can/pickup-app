@@ -4,13 +4,14 @@ import React, {
 import {
   ActionIcon, Avatar, Box, FileButton, Stack, Text, rem,
 } from '@mantine/core';
-import { Plus, User } from '@phosphor-icons/react';
+import { IconPlus, IconUser, IconPhoto } from '@tabler/icons-react';
 
 function PhotoPicker({
   size = 160,
   label = 'Upload a photo for your profile',
   accept = 'image/*',
   onChange,
+  mode = 'profile',
 }) {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -69,7 +70,8 @@ function PhotoPicker({
               color='gray'
               variant={previewUrl ? 'filled' : 'light'}
             >
-              {!previewUrl && <User size={Math.max(48, Math.floor(size * 0.35))} />}
+              {(!previewUrl && mode === 'profile') && <IconUser size={Math.max(48, Math.floor(size * 0.35))} />}
+              {(!previewUrl && mode === 'event') && <IconPhoto size={Math.max(48, Math.floor(size * 0.35))} />}
             </Avatar>
 
             <ActionIcon
@@ -85,7 +87,7 @@ function PhotoPicker({
                 boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
               }}
             >
-              <Plus size={Math.floor(badgeSize * 0.6)} />
+              <IconPlus size={Math.floor(badgeSize * 0.6)} />
             </ActionIcon>
           </Box>
         )}
