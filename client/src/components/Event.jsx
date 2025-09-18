@@ -32,7 +32,7 @@ function Event({ event, activities, intensities, skillLevels, isPast = false }) 
             <Group spacing='xs'>
               <IconInfo iconType='time' infoText={new Date(event.time).toLocaleString()} size='sm' grayscale={grayscale} />
               <IconInfo iconType='location' infoText={street} size='sm' grayscale={grayscale} />
-              <IconInfo iconType='owner' infoText={event.owner.name} size='sm' grayscale={grayscale} />
+              <IconInfo iconType='owner' infoText={event.owner.displayName} size='sm' grayscale={grayscale} />
             </Group>
             <div style={{ borderTop: '1px solid #e0e0e0', margin: '12px 0' }} />
             <Text fw={700} size='lg' style={{ color: grayscale ? '#888' : undefined }}>{event.title}</Text>

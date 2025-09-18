@@ -6,7 +6,7 @@ function AttendingPlayers({ players = [] }) {
   return (
     <Stack>
       {players.map((player) => (
-        <ProfileHeadline key={player.user_id} name={player.name} pfp={player.photo} />
+        <ProfileHeadline key={player.userId} name={player.displayName} pfp={player.photo} />
       ))}
     </Stack>
   );

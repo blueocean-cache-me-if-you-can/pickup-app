@@ -5,11 +5,12 @@ import {
 import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
-import Event from '../components/Event';
 import EventsList from '../components/EventsList';
 import { events } from '../data';
 
-function Events({ currentUserId = 1, activities = [], intensities = [], skillLevels = [] }) {
+function Events({
+  currentUserId = 1, activities = [], intensities = [], skillLevels = [],
+}) {
   const [view, setView] = useState('events-near-me');
 
   const [selectedActivities, setSelectedActivities] = useState([]);
@@ -203,9 +204,9 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
 
       {/* debug my filter params here:  */}
 
-      {/* <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
+      <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
         {JSON.stringify(debugParams, null, 2)}
-      </pre> */}
+      </pre>
       <Space h='xl' />
     </Container>
   );
