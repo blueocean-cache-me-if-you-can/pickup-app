@@ -203,9 +203,9 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
 
       {/* debug my filter params here:  */}
 
-      <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
+      {/* <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
         {JSON.stringify(debugParams, null, 2)}
-      </pre>
+      </pre> */}
       <Space h='xl' />
     </Container>
   );

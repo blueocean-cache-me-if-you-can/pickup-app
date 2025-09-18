@@ -41,6 +41,7 @@ function MyEvents({
             activities={activities}
             intensities={intensities}
             skillLevels={skillLevels}
+            height='35vh'
           />
         )}
       </Box>
@@ -63,6 +64,7 @@ function MyEvents({
             activities={activities}
             intensities={intensities}
             skillLevels={skillLevels}
+            height='35vh'
           />
         )}
       </Box>
