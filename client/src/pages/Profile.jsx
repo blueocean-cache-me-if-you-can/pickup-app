@@ -23,6 +23,7 @@ import { useForm } from '@mantine/form';
 import PhotoPicker from '../components/PhotoPicker';
 import AddressPicker from '../components/AddressPicker';
 import { updateUser } from '../api';
+import useImageUpload from '../hooks/useImageUpload';
 
 export default function Profile({ user, setUser, activities, skillLevels }) {
   const [selectedSports, setSelectedSports] = useState({});
@@ -114,7 +115,13 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
     setSelectedSports((prev) => ({ ...prev, [sport]: value }));
   };
 
+  const { uploadEventImage } = useImageUpload();
+
   const handleSubmit = async (values) => {
+    const imageUrl = values.photo
+      ? await uploadEventImage(values.photo, { maxSizeMB: 25 })
+      : '';
+
     const activitiesArray = Object.entries(selectedSports)
       .map(([activityId, skillLevelName]) => {
         const skillLevel = skillLevels.find((lvl) => lvl.name === skillLevelName);
@@ -132,7 +139,7 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
       lastName: values.lastName,
       emailPrimary: values.email,
       address: values.preferredAddress,
-      photo: values.photo,
+      photo: imageUrl,
       activities: activitiesArray,
 <<<<<<< HEAD
 =======
@@ -186,8 +193,14 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
         <Stack>
           {/* Photo Picker */}
           <PhotoPicker
+            size={120}
             value={form.values.photo}
             onChange={(file) => form.setFieldValue('photo', file)}
+            onError={(msg) => form.setFieldError('photo', msg)}
+            maxSizeMB={5}
+            style={{ flex: '0 0 160px' }}
+            mode='profile'
+            initialUrl={user?.photo || null}
           />
 
           {/* Display Name */}

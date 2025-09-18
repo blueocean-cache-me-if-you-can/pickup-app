@@ -1,9 +1,9 @@
 import React from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Group, Divider, Text, Menu,
 } from '@mantine/core';
 import { IconChevronDown } from '@tabler/icons-react';
-import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import { CreateEvent } from './CreateEvent';
 import ProfileHeadline from './ProfileHeadline';
@@ -11,6 +11,7 @@ import ProfileHeadline from './ProfileHeadline';
 function Navbar({
   user, setUser, activities, skillLevels, intensities,
 }) {
+  const navigate = useNavigate();
   return (
     <Group justify='space-between' h='100%' p='0 20px'>
       <Logo activateLink />
@@ -32,7 +33,11 @@ function Navbar({
               <Text size='sm'>Profile</Text>
             </Menu.Item>
             <Menu.Divider />
-            <Menu.Item onClick={() => setUser(null)}>
+            <Menu.Item onClick={() => {
+              setUser(null);
+              navigate('/login', { replace: true });
+            }}
+            >
               <Text size='sm' c='red'>Logout</Text>
             </Menu.Item>
           </Menu.Dropdown>

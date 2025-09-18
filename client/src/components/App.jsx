@@ -77,7 +77,7 @@ function App() {
           <Route path='/login' element={<Login setUser={setUser} />} />
           <Route path='/signup' element={<Signup setUser={setUser} />} />
           <Route path='/profile' element={<Profile user={user} setUser={setUser} activities={activities} skillLevels={skillLevels} />} />
-          <Route path='/events' element={<Events />} />
+          <Route path='/events' element={<Events user={user} activities={activities} skillLevels={skillLevels} intensities={intensities} />} />
           <Route path='*' element={<Navigate to={user ? '/events' : '/login'} />} />
         </Routes>
       </AppShell.Main>
