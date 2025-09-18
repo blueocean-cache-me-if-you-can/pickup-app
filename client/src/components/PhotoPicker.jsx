@@ -12,13 +12,15 @@ function PhotoPicker({
   accept = 'image/*',
   onChange,
   mode = 'profile',
+  initialUrl = null,
 }) {
   const [file, setFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(initialUrl);
 
   const resetRef = useRef(null);
 
   const handleFileChange = (f) => {
+    console.log('PhotoPicker selected file:', f);
     setFile(f);
     onChange?.(f ?? null);
     resetRef.current?.();

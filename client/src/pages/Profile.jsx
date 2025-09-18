@@ -185,6 +185,7 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             maxSizeMB={5}
             style={{ flex: '0 0 160px' }}
             mode='profile'
+            initialUrl={user?.photo || null}
           />
 
           {/* Display Name */}
