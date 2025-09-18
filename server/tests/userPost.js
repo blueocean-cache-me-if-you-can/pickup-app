@@ -15,13 +15,13 @@ const bcrypt = require('bcrypt');
 // });
 
 const newUser = {
-  displayName: 'johndoe',
-  firstName: 'John',
-  lastName: 'Doe',
-  emailPrimary: 'john.doe@example.com',
-  emailSecondary: 'john.doe+secondary@example.com',
-  password: 'securepassword',
-  address: '123 Main St, Anytown, USA',
+  displayName: 'carrotCake42',
+  firstName: 'Todd',
+  lastName: 'Baker',
+  emailPrimary: 'toddbaker@example.com',
+  emailSecondary: 'toddbaker.double@example.com',
+  password: 'ilikebaking010',
+  address: '1251 16th St, Denver, CO 80202',
   photo: 'http://example.com/photo.jpg',
   atLeastEighteen: true
 }

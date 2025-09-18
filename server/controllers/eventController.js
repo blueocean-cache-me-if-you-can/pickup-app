@@ -1,63 +1,161 @@
 const Event = require('../models/event');
 const User = require('../models/user');
+const Activity = require('../models/activity');
+const IntensityLevel = require('../models/intensityLevel');
+const SkillLevel = require('../models/skillLevel');
 
 // Controller to get all events
 exports.getEvents = async (req, res) => {
   try {
-    const radius = req.query.filter.distance || 5000; // 5 km in meters
-    const query = {};
+    // {
+    //   "user_id": 123145634,
+    //   "finished": false,
+    //   "page": 1,
+    //   "count": 2,
+    //   "sort": "skillLevel", // e.g. skillLevel, intensity, activity
+    //   "orderByDesc": true , //
+    //   "coordinates": [27.13728, -10.362738],
+    //   "filter": [
+    //     { "skillLevel" :[401,402] },  // e.g. [401, 402, 403]
+    //     { "intensity" :[301] },  // e.g. [301, 302, 303]
+    //     { "activity" :[502, 504] },  // e.g. [502, 503, 504]
+    //     { "distance" :3 } // e.g. <= 3 (miles)
+    //   ]
+    // }
 
-    if (req.query.coordinates && radius) {
-      query.location = {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [parseFloat(req.query.coordinates[0]), parseFloat(req.query.coordinates[1])]
-          },
-          $maxDistance: radius // in meters
+    const radius = req.query?.filter?.distance || 5000; // 5 km in meters
+    const { user_id, finished, page, count, coordinates, filter, sort, orderByDesc } = req.query;
+    const pipeline = [];
+
+    // Filtering
+
+    if (coordinates) {
+      pipeline.push({
+        $geoNear: {
+          near: { type: "Point", coordinates: [parseFloat(coordinates[0]), parseFloat(coordinates[1])] },
+          distanceField: "dist.calculated",
+          spherical: true
         }
-      };
+      });
     }
 
-    if (req.sort === 'date') {
-      query.time = {};
-      // start date is now, and the end date is forever
-      query.time.$gte = new Date();
-      query.time.$lte = new Date('9999-12-31');
+    if (user_id) {
+      pipeline.push({ $match: { user_id: user_id } });
     }
 
-    const filteredEvents = await Event.find(query)
-      .populate('activityId')
-      .populate('intensityId')
-      .populate('skillId')
-      .populate('owner.userId', 'displayName')
-      .populate('players.userId', 'displayName');
+    if (finished) {
+      if (finished === 'true') {
+        pipeline.push({ $match: { time: { $lt: new Date() } } });
+      } else {
+        pipeline.push({ $match: { time: { $gte: new Date() } } });
+      }
+    }
 
-    res.status(200).json(filteredEvents);
+    if (page && count) {
+      skip = (parseInt(page) - 1) * parseInt(count);
+      limit = parseInt(count);
+    } else {
+      skip = 0;
+      limit = 10;
+    }
+
+    // Sorting
+
+    let order;
+    if (req.query.orderByDesc) {
+      order = -1;
+    } else {
+      order = 1;
+    }
+
+    if (sort === 'date' || sort === '' || !sort) {
+      pipeline.push({ $sort: { time: order } });
+    } else if (sort === 'intensity') {
+      pipeline.push(
+        {
+          $lookup: {
+            from: "intensitylevels",
+            localField: "intensityId",
+            foreignField: "_id",
+            as: "intensity"
+          }
+        },
+        { $unwind: "$intensity" },
+        { $sort: { "intensity.displayOrder": order } }
+      );
+    } else if (sort === 'skillLevel') {
+      pipeline.push(
+        {
+          $lookup: {
+            from: "skilllevels",
+            localField: "skillId",
+            foreignField: "_id",
+            as: "skillLevel"
+          }
+        },
+        { $unwind: "$skillLevel" },
+        { $sort: { "skillLevel.displayOrder": order } }
+      );
+    } else if (sort === 'activity') {
+      pipeline.push(
+        {
+          $lookup: {
+            from: "activities",
+            localField: "activityId",
+            foreignField: "_id",
+            as: "activity"
+          }
+        },
+        { $unwind: "$activity" },
+        { $sort: { "activity.name": order } }
+      );
+    }
+
+    console.log('Pipeline:', JSON.stringify(pipeline, null, 2));
+
+    const intensityId = filter?.intensity || null;
+    const skillLevelId = filter?.skillLevel || null;
+    const date = filter?.date || null;
+
+    // Fetch events based on query
+
+    console.log(
+      [
+      {
+        $match: {
+          ...(intensityId ? { intensityId: new ObjectId(intensityId) } : {}),
+          ...(skillLevelId ? { skillLevelId: new ObjectId(skillLevelId) } : {}),
+          ...(date ? { date: { $gte: new Date(date) } } : {})
+        }
+      },
+      ...pipeline
+    ]
+    );
+    const events = await Event.aggregate(pipeline).skip(skip).limit(limit).exec();
+    res.status(200).json(events);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch events', details: err.message });
   }
 };
 
-exports.createEvent = async (req, res) => {
-  // this is an example of what the info: title, userId, activity_id, skill_id, intensity_id, brief_description, description, additional_info, time, address, location (lat, long), minPlayers, maxPlayers; like so:
-  const unformatedEvent = {
-    title: "Pick Up Pickleball Game @ Mile Hi Pickleball",
-    userId: null,
-    photo: "https://as2.ftcdn.net/v2/jpg/04/20/26/01/1000_F_420260100_aOyfSD6bs6l1yezMPNyEd6gYREDMPF2q.jpg",
-    activityId: null,
-    skillId: null,
-    intensityId: null,
-    brief_description: "A pick up game, 2 on 2, at the courts behind the school",
-    description: "We will meet up at the courts, the games shouldn't last longer than 2 hours so don't forget to bring water and a snack. If you want to play again or some other time please message me @(303) 704-9999",
-    additional_info: "Go through the gate on the East side of the parking lot, it should be open",
-    time: null,
-    coordinates: [-104.8667063, 39.7700105],
-    address: "3700 Havana St STE 305, Denver, CO 80239",
-    minPlayers: 4,
-    maxPlayers: 8
+exports.getEventById = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+      // .populate('activityId')
+      // .populate('intensityId')
+      // .populate('skillId');
+      // .populate('owner.userId', 'displayName')
+      // .populate('players.userId', 'displayName');
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    res.status(200).json(event);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch event', details: err.message });
   }
-  // make it into the schema format and save to db
+};
+
+exports.createEvent = async (req, res) => {
   try {
     const user = await User.findById(req.body.user_id);
     const newEvent = new Event({
@@ -81,7 +179,9 @@ exports.createEvent = async (req, res) => {
       skillId: req.body.skillId,
       minPlayers: req.body.minPlayers,
       maxPlayers: req.body.maxPlayers,
-      players: []
+      players: [
+        { userId: req.body.user_id, displayName: user ? user.displayName : 'Anonymous' }
+      ]
     });
     const savedEvent = await newEvent.save();
     res.status(201).json(savedEvent);
