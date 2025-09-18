@@ -63,15 +63,14 @@ function Events({
         finished: false,
         sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
         orderByDesc,
-        filter: [
-          { activities: selectedActivities },
-          { skillLevels: selectedSkillLevels },
-          { intensity: selectedIntensity },
-          { distance: selectedDistance },
-        ],
-        address: form.values.address,
-        lat: form.values.lat,
-        lng: form.values.lng,
+        filter: {
+          activities: activities.filter((activity) => selectedActivities.includes(activity.name)).map((a) => a._id),
+          skillLevels: skillLevels.filter((level) => selectedSkillLevels.includes(level.name)).map((s) => s._id),
+          intensity: intensities.filter((intensity) => selectedIntensity.includes(intensity.name)).map((i) => i._id),
+          distance: selectedDistance,
+        },
+        // address: form.values.address,
+        coordinates: [form.values.lng, form.values.lat],
       };
       upcomingParams = {};
       pastParams = {};
@@ -83,12 +82,12 @@ function Events({
         finished: false,
         sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
         orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
-        filter: [
-          { activities: selectedActivities },
-          { skillLevels: selectedSkillLevels },
-          { intensity: selectedIntensity },
-          { distance: selectedDistance },
-        ],
+        filter: {
+          activities: activities.filter((activity) => selectedActivities.includes(activity.name)).map((a) => a._id),
+          skillLevels: skillLevels.filter((level) => selectedSkillLevels.includes(level.name)).map((s) => s._id),
+          intensity: intensities.filter((intensity) => selectedIntensity.includes(intensity.name)).map((i) => i._id),
+          distance: selectedDistance,
+        },
       };
 
       // My Past Events params
@@ -97,12 +96,12 @@ function Events({
         finished: true,
         sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
         orderByDesc: sortDirections[selectedPastSort] ?? true,
-        filter: [
-          { activities: [] },
-          { skillLevels: [] },
-          { intensity: [] },
-          { distance: 20 },
-        ],
+        filter: {
+          activities: [],
+          skillLevels: [],
+          intensity: [],
+          distance: 20,
+        },
       };
       eventsNearMeParams = {};
     }
@@ -112,6 +111,9 @@ function Events({
       'My Past Events': pastParams,
     });
   }, [
+    activities,
+    intensities,
+    skillLevels,
     selectedActivities,
     selectedSkillLevels,
     selectedIntensity,
@@ -148,21 +150,21 @@ function Events({
         <Title size='h4'>Filter by: </Title>
         <PrimaryFilter
           label='Activities'
-          values={['Pickleball', 'Volleyball', 'Basketball', 'Ultimate Frisbee', 'Kickball']}
+          values={activities.map((a) => a.name)}
           value={selectedActivities}
           onChange={setSelectedActivities}
         />
 
         <PrimaryFilter
           label='Skill Levels'
-          values={['Beginner', 'Intermediate', 'Advanced']}
+          values={skillLevels.map((level) => level.name)}
           value={selectedSkillLevels}
           onChange={setSelectedSkillLevels}
         />
 
         <PrimaryFilter
           label='Intensities'
-          values={['Casual', 'Spirited', 'Competitive']}
+          values={intensities.map((i) => i.name)}
           value={selectedIntensity}
           onChange={setSelectedIntensity}
         />
