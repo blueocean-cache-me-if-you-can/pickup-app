@@ -10,7 +10,7 @@ import Logo from '../components/Logo';
 import AddressPicker from '../components/AddressPicker';
 import { signUp } from '../api';
 
-function Signup({ setSessionId }) {
+function Signup({ setUser }) {
   const form = useForm({
     initialValues: {
       firstName: '',
@@ -61,7 +61,7 @@ function Signup({ setSessionId }) {
         atLeastEighteen: true,
       });
 
-      setSessionId(newUser._id || 'mock-session-id');
+      setUser(newUser);
 
       navigate('/profile', { replace: true });
     } catch (err) {

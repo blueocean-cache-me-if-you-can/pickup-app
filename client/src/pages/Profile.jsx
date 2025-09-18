@@ -8,39 +8,25 @@ import {
   PasswordInput,
   Button,
   Checkbox,
-  Slider,
   Box,
   Title,
   Stack,
   Divider,
   Space,
+  Select,
+  MantineProvider,
+  createTheme,
+  Group,
 } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import PhotoPicker from '../components/PhotoPicker';
 import AddressPicker from '../components/AddressPicker';
+import { updateUser } from '../api';
 
-export default function Profile({ activities = [], skillLevels = [] }) {
+export default function Profile({ user, setUser, activities, skillLevels }) {
   const [selectedSports, setSelectedSports] = useState({});
   const [showFirstLoginMsg, setShowFirstLoginMsg] = useState(false);
-
-  // TODO: Remove placeholder data when backend is ready
-  const placeholderActivities = [
-    { id: '301', name: 'Pickleball' },
-    { id: '302', name: 'Volleyball' },
-    { id: '303', name: 'Basketball' },
-    { id: '304', name: 'Ultimate Frisbee' },
-    { id: '305', name: 'Kickball' },
-  ];
-
-  const placeholderSkillLevels = [
-    { id: '501', name: 'Beginner', displayOrder: 1 },
-    { id: '502', name: 'Intermediate', displayOrder: 2 },
-    { id: '503', name: 'Expert', displayOrder: 3 },
-  ];
-
-  const activitiesToUse = activities.length > 0 ? activities : placeholderActivities;
-  const skillLevelsToUse = skillLevels.length > 0 ? skillLevels : placeholderSkillLevels;
 
   useEffect(() => {
     if (localStorage.getItem('firstLogin') === 'true') {
@@ -51,13 +37,13 @@ export default function Profile({ activities = [], skillLevels = [] }) {
   const form = useForm({
     initialValues: {
       displayName: '',
-      firstName: '',
-      lastName: '',
-      preferredAddress: '',
-      email: '',
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      preferredAddress: user?.address || '',
+      email: user?.emailPrimary || '',
       password: '',
       photo: null,
-      sports: {},
+      sports: user?.activities || {},
     },
 
     validate: {
@@ -79,6 +65,29 @@ export default function Profile({ activities = [], skillLevels = [] }) {
     },
   });
 
+  useEffect(() => {
+    if (user) {
+      form.setValues({
+        displayName: user.displayName || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        preferredAddress: user.address || '',
+        email: user.emailPrimary || '',
+        sports: user.activities || {},
+      });
+
+      // Transform activities array into selectedSports object
+      const initialSports = {};
+      (user.activities || []).forEach((act) => {
+        const skillLevel = skillLevels.find((level) => level._id === act.skillLevelId);
+        if (skillLevel) {
+          initialSports[act.activityId] = skillLevel.name;
+        }
+      });
+      setSelectedSports(initialSports);
+    }
+  }, [user, skillLevels]);
+
   const toggleSport = (sport) => {
     setSelectedSports((prev) => {
       const updated = { ...prev };
@@ -95,14 +104,49 @@ export default function Profile({ activities = [], skillLevels = [] }) {
     setSelectedSports((prev) => ({ ...prev, [sport]: value }));
   };
 
-  const handleSubmit = (values) => {
-    if (localStorage.getItem('firstLogin') === 'true') {
-      localStorage.removeItem('firstLogin');
-      setShowFirstLoginMsg(false);
-    }
+  const handleSubmit = async (values) => {
+    const activitiesArray = Object.entries(selectedSports)
+      .map(([activityId, skillLevelName]) => {
+        const skillLevel = skillLevels.find((lvl) => lvl.name === skillLevelName);
+        if (!skillLevel) return null; // skip invalid entries
+        return {
+          activityId,
+          skillLevelId: skillLevel._id,
+        };
+      })
+      .filter(Boolean);
 
-    console.log('Form submitted:', { ...values, sports: selectedSports });
+    const payload = {
+      displayName: values.displayName,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      emailPrimary: values.email,
+      address: values.preferredAddress,
+      photo: values.photo,
+      activities: activitiesArray,
+    };
+
+    console.log(payload);
+
+    try {
+      const updated = await updateUser(user._id, payload);
+      console.log('User updated successfully:', updated);
+
+      setUser(updated);
+      localStorage.setItem('user', JSON.stringify(updated));
+
+      if (localStorage.getItem('firstLogin') === 'true') {
+        localStorage.removeItem('firstLogin');
+        setShowFirstLoginMsg(false);
+      }
+    } catch (err) {
+      console.error('Failed to update user:', err);
+    }
   };
+
+  const theme = createTheme({
+    cursorType: 'pointer',
+  });
 
   return (
     <Container size={500}>
@@ -160,30 +204,33 @@ export default function Profile({ activities = [], skillLevels = [] }) {
         {/* Activity Info */}
         <Title order={2} mb='sm' size='h4'>Activity Info</Title>
         <Stack>
-          {activitiesToUse.map((activity) => (
-            <Box key={activity.id}>
-              <Checkbox
-                label={activity.name}
-                checked={!!selectedSports[activity.id]}
-                onChange={() => toggleSport(activity.id)}
-                size='xs'
-              />
-              {selectedSports[activity.id] && (
-                <Box mt='lg' mb='lg'>
-                  <Slider
+          {activities.map((activity) => (
+            <Box key={activity._id}>
+              <Group align='center' grow>
+                <MantineProvider theme={theme}>
+                  <Checkbox
                     color='teal'
-                    size='md'
-                    min={1}
-                    max={3}
-                    step={1}
-                    value={selectedSports[activity.key]}
-                    onChange={(val) => handleSkillChange(activity.id, val)}
-                    marks={skillLevelsToUse.map((level) => ({
-                      value: parseInt(level.displayOrder, 10), label: level.name,
-                    }))}
+                    label={activity.name}
+                    checked={!!selectedSports[activity._id]}
+                    onChange={() => toggleSport(activity._id)}
+                    size='xs'
                   />
-                </Box>
-              )}
+                </MantineProvider>
+                {selectedSports[activity._id] && (
+                  <Box>
+                    <Select
+                      size='xs'
+                      placeholder='Select skill level'
+                      value={selectedSports[activity._id] || ''}
+                      onChange={(val) => handleSkillChange(activity._id, val)}
+                      data={skillLevels.map((level) => ({
+                        value: level.name,
+                        label: level.name,
+                      }))}
+                    />
+                  </Box>
+                )}
+              </Group>
             </Box>
           ))}
         </Stack>
@@ -216,7 +263,7 @@ export default function Profile({ activities = [], skillLevels = [] }) {
         <Divider my='sm' />
         <Space h='md' />
 
-        <Button fullWidth type='submit'>Save Profile</Button>
+        <Button color='teal' fullWidth type='submit'>Save Profile</Button>
       </form>
 
       <Space h='xl' />
