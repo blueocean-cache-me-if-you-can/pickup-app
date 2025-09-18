@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container, SegmentedControl, Flex, Space, Select, Title, Box, Group, MultiSelect,
+  Container, SegmentedControl, Flex, Space, Select, Title, Box, Group, Text,
 } from '@mantine/core';
 import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
+import Event from '../components/Event';
+import EventsList from '../components/EventsList';
+import { events } from '../data';
 
-function Events({ currentUserId = 1 }) {
+function Events({ currentUserId = 1, activities = [], intensities = [], skillLevels = [] }) {
   const [view, setView] = useState('events-near-me');
 
   const [selectedActivities, setSelectedActivities] = useState([]);
@@ -174,6 +177,14 @@ function Events({ currentUserId = 1 }) {
               onChange={setSelectedSort}
             />
           </Group>
+          {events.length === 0 ? <Text>No events found.</Text> : (
+            <EventsList
+              events={events}
+              activities={activities}
+              intensities={intensities}
+              skillLevels={skillLevels}
+            />
+          )}
         </Box>
       )}
 
@@ -184,14 +195,17 @@ function Events({ currentUserId = 1 }) {
           setSelectedUpcomingSort={setSelectedUpcomingSort}
           selectedPastSort={selectedPastSort}
           setSelectedPastSort={setSelectedPastSort}
+          activities={activities}
+          intensities={intensities}
+          skillLevels={skillLevels}
         />
       )}
 
       {/* debug my filter params here:  */}
 
-      <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
+      {/* <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
         {JSON.stringify(debugParams, null, 2)}
-      </pre>
+      </pre> */}
       <Space h='xl' />
     </Container>
   );

@@ -3,6 +3,8 @@ import {
   Box, Stack, Select, Title, Flex, Text,
 } from '@mantine/core';
 import Event from './Event';
+import EventsList from './EventsList';
+import { upcomingMyEvents, pastMyEvents } from '../data';
 
 function MyEvents({
   currentUserId = 1,
@@ -10,10 +12,13 @@ function MyEvents({
   setSelectedUpcomingSort,
   selectedPastSort,
   setSelectedPastSort,
+  activities = [],
+  intensities = [],
+  skillLevels = [],
 }) {
   // TODO: set these states with API calls
-  const [upcomingMyEvents, setUpcomingMyEvents] = useState([]);
-  const [pastMyEvents, setPastMyEvents] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([...upcomingMyEvents]);
+  const [pastEvents, setPastEvents] = useState([...pastMyEvents]);
 
   return (
     <Stack>
@@ -30,11 +35,17 @@ function MyEvents({
             onChange={setSelectedUpcomingSort}
           />
         </Flex>
-        {upcomingMyEvents.length === 0 ? <Text>No upcoming events.</Text> : upcomingMyEvents.map(
-          (event) => (
-            <Event key={event.id} event={event} />
-          ),
+        {upcomingEvents.length === 0 ? <Text>No upcoming events.</Text> : (
+          <EventsList
+            events={upcomingEvents}
+            activities={activities}
+            intensities={intensities}
+            skillLevels={skillLevels}
+            height='35vh'
+          />
         )}
+      </Box>
+      <Box>
         <Flex justify='space-between' mb='xl' gap='lg'>
           <Title order={2} tt='uppercase'>Past Events</Title>
           <Select
@@ -47,10 +58,14 @@ function MyEvents({
             onChange={setSelectedPastSort}
           />
         </Flex>
-        {pastMyEvents.length === 0 ? <Text>No past events.</Text> : pastMyEvents.map(
-          (event) => (
-            <Event key={event.id} event={event} isPast />
-          ),
+        {pastEvents.length === 0 ? <Text>No past events.</Text> : (
+          <EventsList
+            events={pastEvents}
+            activities={activities}
+            intensities={intensities}
+            skillLevels={skillLevels}
+            height='35vh'
+          />
         )}
       </Box>
     </Stack>
