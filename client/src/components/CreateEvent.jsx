@@ -17,9 +17,10 @@ import useImageUpload from '../hooks/useImageUpload';
 import useDateTimeFormatter from '../hooks/useDateTimeFormatter';
 
 export function CreateEvent({
-  activities = [],
-  skillLevels = [],
-  intensities = [],
+  user,
+  activities,
+  skillLevels,
+  intensities,
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -44,6 +45,7 @@ export function CreateEvent({
 
     const payload = {
       title: values.title,
+      user_id: user._id,
       activityId: values.sport,
       skillId: values.skillLevel,
       intensityId: values.intensity,

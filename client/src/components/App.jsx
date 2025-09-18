@@ -18,6 +18,7 @@ function App() {
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem('user')) || null,
   );
+  console.log('user', user);
   const location = useLocation();
   const navigate = useNavigate();
   const [activities, setActivities] = useState([]);

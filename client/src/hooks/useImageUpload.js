@@ -1,4 +1,3 @@
-// client/src/hooks/useImageUpload.js
 const useImageUpload = () => {
     const readFileAsBase64 = (file) =>
       new Promise((resolve, reject) => {

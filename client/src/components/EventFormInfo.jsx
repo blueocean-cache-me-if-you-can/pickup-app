@@ -45,6 +45,7 @@ function EventFormInfo({ form }) {
           form.setFieldValue('lat', lat);
           form.setFieldValue('lng', lng);
         }}
+        error={form.errors.address || form.errors.lat || form.errors.lng}
       />
     </Stack>
   );
