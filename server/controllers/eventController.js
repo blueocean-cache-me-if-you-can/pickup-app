@@ -187,12 +187,13 @@ exports.updateEventPlayer = async (req, res) => {
 
 exports.createEvent = async (req, res) => {
   try {
-    const user = await User.findById(req.body.user_id);
+    const user = await User.findById(new ObjectId(req.body.user_id));
+    console.log('Creating event for user:', user);
     const newEvent = new Event({
       title: req.body.title,
       owner: {
-        userId: req.body.user_id,
-        displayName: user ? user.displayName : 'Anonymous'
+        userId: new ObjectId(req.body.user_id),
+        displayName: user.displayName ? user.displayName : user.firstName + ' ' + user.lastName
       },
       brief_description: req.body.brief_description,
       description: req.body.description,
@@ -204,13 +205,13 @@ exports.createEvent = async (req, res) => {
         type: "Point",
         coordinates: req.body.coordinates
       },
-      activityId: req.body.activityId,
-      intensityId: req.body.intensityId,
-      skillId: req.body.skillId,
+      activityId: new ObjectId(req.body.activityId),
+      intensityId: new ObjectId(req.body.intensityId),
+      skillId: new ObjectId(req.body.skillId),
       minPlayers: req.body.minPlayers,
       maxPlayers: req.body.maxPlayers,
       players: [
-        { userId: req.body.user_id, displayName: user ? user.displayName : 'Anonymous' }
+        { userId: req.body.user_id, displayName: user.displayName ? user.displayName : user.firstName + ' ' + user.lastName }
       ]
     });
     const savedEvent = await newEvent.save();
