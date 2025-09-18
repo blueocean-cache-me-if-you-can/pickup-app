@@ -13,11 +13,12 @@ function PhotoPicker({
   accept = 'image/*',
   onChange,
   mode = 'profile',
-  onError, // NEW: surface validation messages to parent
-  maxSizeMB = 5, // NEW: default 5MB limit
+  onError, 
+  maxSizeMB = 5,
+  initialUrl = null,
 }) {
   const [file, setFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(initialUrl);
 
   const resetRef = useRef(null);
 

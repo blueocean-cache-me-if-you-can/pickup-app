@@ -18,7 +18,6 @@ function App() {
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem('user')) || null,
   );
-  console.log('user', user);
   const location = useLocation();
   const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
@@ -78,7 +77,7 @@ function App() {
           <Route path='/login' element={<Login setUser={setUser} />} />
           <Route path='/signup' element={<Signup setUser={setUser} />} />
           <Route path='/profile' element={<Profile user={user} setUser={setUser} activities={activities} skillLevels={skillLevels} />} />
-          <Route path='/events' element={<Events />} />
+          <Route path='/events' element={<Events user={user} activities={activities} skillLevels={skillLevels} intensities={intensities} />} />
           <Route path='*' element={<Navigate to={user ? '/events' : '/login'} />} />
         </Routes>
       </AppShell.Main>

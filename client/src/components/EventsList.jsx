@@ -6,7 +6,7 @@ import EventDetails from './EventDetails';
 // import Event from './Event';
 
 function EventsList({
-  events, activities, intensities, skillLevels, height = '70vh',
+  currentUserId, events, activities, intensities, skillLevels, height = '70vh',
 }) {
   const [page, setPage] = useState(1);
   const eventsPerPage = 5;

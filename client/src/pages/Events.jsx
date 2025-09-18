@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import {
   Container, SegmentedControl, Flex, Space, Select, Title, Box, Group, Text,
 } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
-import Event from '../components/Event';
 import EventsList from '../components/EventsList';
 import { events } from '../data';
 
-function Events({ currentUserId = 1, activities = [], intensities = [], skillLevels = [] }) {
+function Events({
+  user, activities = [], intensities = [], skillLevels = [],
+}) {
   const [view, setView] = useState('events-near-me');
 
   const [selectedActivities, setSelectedActivities] = useState([]);
@@ -20,6 +22,13 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
   const [selectedUpcomingSort, setSelectedUpcomingSort] = useState('dateUpcoming');
   const [selectedPastSort, setSelectedPastSort] = useState('datePast');
 
+  const form = useForm({
+    initialValues: {
+      address: user?.address || '',
+      lat: user?.lat || null,
+      lng: user?.lng || null,
+    },
+  });
   // Clear filters when view changes
   useEffect(() => {
     setSelectedActivities([]);
@@ -60,6 +69,9 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
           { intensity: selectedIntensity },
           { distance: selectedDistance },
         ],
+        address: form.values.address,
+        lat: form.values.lat,
+        lng: form.values.lng,
       };
       upcomingParams = {};
       pastParams = {};
@@ -67,7 +79,7 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
     if (view === 'my-events') {
     // My Upcoming Events params
       upcomingParams = {
-        user_id: currentUserId,
+        user_id: user._id,
         finished: false,
         sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
         orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
@@ -81,7 +93,7 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
 
       // My Past Events params
       pastParams = {
-        user_id: currentUserId,
+        user_id: user._id,
         finished: true,
         sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
         orderByDesc: sortDirections[selectedPastSort] ?? true,
@@ -107,10 +119,11 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
     selectedSort,
     selectedUpcomingSort,
     selectedPastSort,
-    currentUserId,
+    user,
     view,
     orderByDesc,
     sortDirections,
+    form.values.address, form.values.lat, form.values.lng,
   ]);
 
   return (
@@ -166,7 +179,17 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
       {view === 'events-near-me' && (
         <Box>
           <Group justify='space-between' mb='xl' gap='lg'>
-            <AddressPicker />
+            <AddressPicker
+              value={form.values.address}
+              onChange={(val) => form.setFieldValue('address', val)}
+              onResolved={({ address, lat, lng }) => {
+                if (address && address !== form.values.address) {
+                  form.setFieldValue('address', address);
+                }
+                form.setFieldValue('lat', lat);
+                form.setFieldValue('lng', lng);
+              }}
+            />
             <Select
               label='Sort by'
               data={[
@@ -183,6 +206,7 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
               activities={activities}
               intensities={intensities}
               skillLevels={skillLevels}
+              currentUserId={user._id}
             />
           )}
         </Box>
@@ -190,7 +214,7 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
 
       {view === 'my-events' && (
         <MyEvents
-          currentUserId={currentUserId}
+          currentUserId={user._id}
           selectedUpcomingSort={selectedUpcomingSort}
           setSelectedUpcomingSort={setSelectedUpcomingSort}
           selectedPastSort={selectedPastSort}
@@ -203,9 +227,9 @@ function Events({ currentUserId = 1, activities = [], intensities = [], skillLev
 
       {/* debug my filter params here:  */}
 
-      {/* <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
+      <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
         {JSON.stringify(debugParams, null, 2)}
-      </pre> */}
+      </pre>
       <Space h='xl' />
     </Container>
   );
