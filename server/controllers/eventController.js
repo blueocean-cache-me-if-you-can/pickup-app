@@ -38,13 +38,19 @@ exports.getEvents = async (req, res) => {
 
     // Filtering
 
+    // intensity could be a list of intensity ids, but it can also be a single id
+    // skillLevel could be a list of skillLevel ids
+    // activity could be a list of activity ids
+
+    // Build aggregation pipeline
+
     const pipeline = [
       {
         $match: {
           location: {$geoWithin: { $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100] }},
-          ...(intensity ? { intensityId: new ObjectId(intensity) } : {}),
-          ...(skillLevel ? { skillId: new ObjectId(skillLevel) } : {}),
-          ...(activity ? { activityId: new ObjectId(activity) } : {}),
+          ...(intensity ? { intensityId: { $in: Array.isArray(intensity) ? intensity.map(id => new ObjectId(id)) : [new ObjectId(intensity)] } } : {}),
+          ...(skillLevel ? { skillId: { $in: Array.isArray(skillLevel) ? skillLevel.map(id => new ObjectId(id)) : [new ObjectId(skillLevel)] } } : {}),
+          ...(activity ? { activityId: { $in: Array.isArray(activity) ? activity.map(id => new ObjectId(id)) : [new ObjectId(activity)] } } : {}),
           ...(user_id ? { 'players.userId': new ObjectId(user_id) } : {}),
           ...(finished === 'true' ? { time: { $lt: new Date() } } : { time: { $gte: new Date() } })
         }
@@ -62,53 +68,55 @@ exports.getEvents = async (req, res) => {
     // Sorting
 
     let order;
-    if (req.query.orderByDesc) {
+    if (orderByDesc === 'true') {
       order = -1;
     } else {
       order = 1;
     }
 
-    if (sort === 'date' || sort === '' || !sort) {
+    if (sort === 'date') {
       pipeline.push({ $sort: { time: order } });
-    } else if (sort === 'intensity') {
+    } else if (sort === 'distance') {
       pipeline.push(
         {
-          $lookup: {
-            from: "intensityLevel",
-            localField: "intensityId",
-            foreignField: "_id",
-            as: "intensity"
+          $addFields: {
+            distance: {
+              $let: {
+                vars: {
+                  coords: { $arrayElemAt: ["$location.coordinates", 0] }
+                },
+                in: {
+                  $multiply: [
+                    3963.2, // Radius of the Earth in miles
+                    {
+                      $acos: {
+                        $min: [
+                          1,
+                          {
+                            $add: [
+                              { $multiply: [
+                                  { $sin: { $degreesToRadians: coordinates[1] } },
+                                  { $sin: { $degreesToRadians: { $arrayElemAt: ["$location.coordinates", 1] } } }
+                                ]
+                              },
+                              { $multiply: [
+                                  { $cos: { $degreesToRadians: coordinates[1] } },
+                                  { $cos: { $degreesToRadians: { $arrayElemAt: ["$location.coordinates", 1] } } },
+                                  { $cos: { $degreesToRadians: { $subtract: [ { $arrayElemAt: ["$location.coordinates", 0] }, coordinates[0] ] } } }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           }
         },
-        { $unwind: "$intensity" },
-        { $sort: { "intensity.displayOrder": order } }
-      );
-    } else if (sort === 'skillLevel') {
-      console.log('Sorting by skill level');
-      pipeline.push(
-        {
-          $lookup: {
-            from: "skillLevel",
-            localField: "skillId",
-            foreignField: "_id",
-            as: "skillLevel"
-          }
-        },
-        { $unwind: "$skillLevel" },
-        { $sort: { "skillLevel.displayOrder": order } }
-      );
-    } else if (sort === 'activity') {
-      pipeline.push(
-        {
-          $lookup: {
-            from: "activities",
-            localField: "activityId",
-            foreignField: "_id",
-            as: "activity"
-          }
-        },
-        { $unwind: "$activity" },
-        { $sort: { "activity.name": order } }
+        { $sort: { distance: order } }
       );
     }
 
@@ -126,6 +134,8 @@ exports.getEvents = async (req, res) => {
       if (event.activity && Object.keys(event.activity).length > 0) {
         event.activity = event.activity[0];
       }
+      event.coordinates = event.location.coordinates;
+      delete event.location;
     }
     res.status(200).json(events);
   } catch (err) {
