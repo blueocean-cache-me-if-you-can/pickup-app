@@ -26,7 +26,7 @@ const eventSchema = new mongoose.Schema({
   skillId: { type: mongoose.Schema.Types.ObjectId, ref: 'SkillLevel', required: true },
   minPlayers: { type: Number, required: true },
   maxPlayers: { type: Number, required: true },
-  players: [{ userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, displayName: String }],
+  players: [{_id: false, userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, displayName: String }],
 });
 
 eventSchema.index({ location: "2dsphere" });

@@ -2,8 +2,8 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
+const eventEmails = require('./eventEmails');
 
-// create reusable transporter object using the default SMTP transport
 let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -12,11 +12,7 @@ let transporter = nodemailer.createTransport({
     }
 });
 
-/**
- * Reads an HTML file from the blueoceanEmails folder.
- * @param {string} filename - The name of the HTML file to read.
- * @returns {Promise<string>} - Resolves with the HTML content.
- */
+
 function getHtmlFromFile(filename) {
   const filePath = path.join(__dirname, '..', 'blueoceanEmails', filename);
   return new Promise((resolve, reject) => {
@@ -27,24 +23,84 @@ function getHtmlFromFile(filename) {
   });
 }
 
-/**
- * Sends an email using the provided parameters and an HTML file as the body.
- * @param {Object} options
- * @param {Array} options.recipients - Array of recipient objects.
- * @param {string} options.subject - Email subject.
- * @param {string} options.text - Plain text body.
- * @param {string} options.htmlFile - Name of the HTML file to use as body.
- * @returns {Promise<Object>}
- */
-async function sendMailWithHtmlFile({ recipients, subject, text, htmlFile }) {
+async function sendEventReminders(startTime, endTime) {
+  const events = await eventEmails.getEventsPlayersWithEmailsBetween(startTime, endTime);
+  if (!events || events.length === 0) {
+   return;
+  }
+  let html = await getHtmlFromFile('eventReminder.html');
+  events.forEach(event => {
+    const { players } = event;
+    if (!players || players.length === 0) {
+      return;
+    }
+
+    const filteredPlayers = players.filter(player => player.emailPrimary);
+    const validPlayers = filteredPlayers.filter(
+      player => player.emailPrimary || player.emailSecondary
+    );
+
+    if (validPlayers.length === 0) {
+      return;
+    }
+
+    const emailPromises = validPlayers.map(player => {
+      const { emailPrimary, emailSecondary } = player;
+      const subject = `Reminder: Upcoming Event - ${event.title}`;
+      const text = `Hi there! Just a reminder about the upcoming event: ${event.title}`;
+
+      const recipients = [{ email: emailPrimary }];
+      if (emailSecondary) {
+        recipients.push({ email: emailSecondary });
+      }
+      return sendMailWithHtmlFileAndParams({
+        recipients: [{ email: emailPrimary }, { email: emailSecondary }],
+        subject,
+        text,
+        htmlFile: 'eventReminder.html',
+        htmlParams: {
+          EVENT_TITLE: event.title,
+          EVENT_TIME: event.time,
+          SITE_NAME: process.env.EMAIL_SITE_LABEL,
+          PICKNROLL_URL: `${process.env.HOST}/login`}
+      });
+    });
+
+    Promise.all(emailPromises)
+      .then(results => {
+        //console.log(`Successfully sent reminder emails for event ${event._id}`);
+      })
+      .catch(error => {
+        console.error(`Error sending reminder emails for event ${event._id}:`, error);
+      });
+  });
+
+}
+
+async function getHtmlFromFileWithParams(filename, params = {}) {
+  let html = await getHtmlFromFile(filename);
+  for (const [key, value] of Object.entries(params)) {
+    //console.log(`Replacing {{${key}}} with ${value}`);
+    const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+    html = html.replace(regex, value);
+  }
+  return html;
+}
+
+async function sendMailWithHtmlFileAndParams({ recipients, subject, text, htmlFile, htmlParams }) {
   const to = recipients.map(obj => Object.values(obj)[0]).join(',');
   let html = '';
   if (htmlFile) {
-    html = await getHtmlFromFile(htmlFile);
+    html = await getHtmlFromFileWithParams(htmlFile, htmlParams || {});
   }
-  return new Promise((resolve, reject) => {
+  //console.log('HTML Params:', htmlParams);
+  //console.log('HTML:', html);
+  // The placeholder format in the HTML file should be: {{key}}
+  // For example, if your htmlParams is { "PICKNROLL_URL": `${process.env.HOST}/login` },
+  // then your HTML file should contain {{PICKNROLL_URL}} where you want `${process.env.HOST}/login` to appear.
+ return new Promise((resolve, reject) => {
     const mailOptions = {
-      from: `"Blue Ocean Pickup" <${process.env.EMAIL_ID}>`,
+      from: `"${process.env.EMAIL_SITE_LABEL}" <${process.env.EMAIL_ID}>`,
       to,
       subject,
       text,
@@ -57,43 +113,8 @@ async function sendMailWithHtmlFile({ recipients, subject, text, htmlFile }) {
   });
 }
 
-// send mail
-/**
- * Sends an email using the provided parameters.
- * @param {Object} options
- * @param {Array} options.recipients - Array of recipient objects.
- * @param {string} options.subject - Email subject.
- * @param {string} options.text - Plain text body.
- * @param {string} [options.html] - HTML body (optional).
- * @returns {Promise<Object>} - Resolves with info if sent, rejects with error.
- */
-function sendMailWithText({ recipients, subject, text, html }) {
-  // Extract all email addresses from the array
-
-  const to = recipients.map(obj => Object.values(obj)[0]).join(',')
-
-
-  return new Promise((resolve, reject) => {
-    const mailOptions = {
-      from: `"Blue Ocean Pickup" <${process.env.EMAIL_ID}>`,
-      to,
-      subject,
-      text,
-      ...(html && { html })
-    };
-
-    console.log(JSON.stringify(mailOptions, null, 2));
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        return reject(error);
-      }
-      resolve(info);
-    });
-  });
-}
 
 module.exports = {
-  sendMailWithHtmlFile,
-  sendMailWithText
+  sendEventReminders,
+  sendMailWithHtmlFileAndParams
 };
