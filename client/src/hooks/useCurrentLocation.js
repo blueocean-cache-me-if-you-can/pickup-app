@@ -21,17 +21,18 @@ const useCurrentLocation = () => {
       const { latitude: lat, longitude: lng } = pos.coords;
       const geocoder = new google.maps.Geocoder();
 
-      const address = await new Promise((resolve, reject) => {
+      const result = await new Promise((resolve, reject) => {
         geocoder.geocode({ location: { lat, lng } }, (results, status) => {
           if (status === 'OK' && Array.isArray(results) && results[0]) {
-            resolve(results[0].formatted_address);
+            resolve(results[0]);
           } else {
             reject(new Error(`Reverse geocoding failed: ${status}`));
           }
         });
       });
 
-      return address;
+      const address = result.formatted_address;
+      return { address, lat, lng };
     } finally {
       setIsResolving(false);
     }
