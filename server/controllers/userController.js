@@ -6,9 +6,6 @@ const mail = require('./sendMail');
 exports.getUsers = async (req, res) => {
   try {
     const users = await user.find({ "_id": req.query.id });
-    // if (!users[0]) {
-    //   return res.status(404).json({ error: 'User not found' });
-    // }
     const userObj = users[0].toObject();
     delete userObj.password;
     delete userObj.__v;
