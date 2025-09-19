@@ -141,24 +141,30 @@ function Events({
   useEffect(() => {
     async function fetchEvents() {
       if (lastUpdated === 'eventsNearMe') {
+        console.log('Fetching Events Near Me with params:', eventsNearMeParams);
         try {
           const res = await getEvents(eventsNearMeParams);
           setEvents(res);
         } catch (err) {
+          console.error('Error fetching Events Near Me:', err);
           setEvents([]);
         }
       } else if (lastUpdated === 'upcoming') {
+        console.log('Fetching My Upcoming Events with params:', upcomingParams);
         try {
           const res = await getEvents(upcomingParams);
           setUpcomingMyEvents(res);
         } catch (err) {
+          console.error('Error fetching My Upcoming Events:', err);
           setUpcomingMyEvents([]);
         }
       } else if (lastUpdated === 'past') {
+        console.log('Fetching My Past Events with params:', pastParams);
         try {
           const res = await getEvents(pastParams);
           setPastMyEvents(res);
         } catch (err) {
+          console.error('Error fetching My Past Events:', err);
           setPastMyEvents([]);
         }
       }

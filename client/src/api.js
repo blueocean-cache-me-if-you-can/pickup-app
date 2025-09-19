@@ -12,9 +12,10 @@ const api = axios.create({
    EVENTS API
    ========================= */
 
-// POST /api/events for filtering events
+// POST /api/search
 export const getEvents = async (params) => {
-  const response = await api.post('/events', { params });
+  const response = await api.post('/events/get', params);
+  console.log('getEvents response:', response);
   return response.data;
 };
 
