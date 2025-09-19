@@ -101,8 +101,9 @@ function PrimaryFilter({
         {type === 'slider' && (
           <Flex direction='column' px='sm' mt='lg' mb='lg'>
             <Text size='xs' mb='md'>
-              Search within
+              Search within&nbsp;
               {selected}
+              &nbsp;
               miles of my location
             </Text>
             <Slider
