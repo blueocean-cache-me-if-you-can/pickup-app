@@ -20,7 +20,7 @@ function AddressPicker({
   label = 'Preferred address',
   placeholder = 'Preferred address',
   onResolved,
-  error, // controlled error from parent form
+  error,
 }) {
   const [address, setAddress] = useState(value ?? '');
 
@@ -41,7 +41,6 @@ function AddressPicker({
   const { resolveAddress, isResolving: isGeocoding } = useGeocodeAddress();
   const isLoading = isQueryLoading || isResolvingLocation || isGeocoding;
 
-  // keep in sync with parent
   useEffect(() => {
     setAddress(value ?? '');
   }, [value]);
