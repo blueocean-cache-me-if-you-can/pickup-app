@@ -4,7 +4,7 @@ const Event = require('../models/event');
 
 async function getEventPlayersWithEmails(eventId) {
   const event = await Event.findById(eventId).populate({
-    path: 'players',
+    path: 'players.userId',
     select: 'emailPrimary emailSecondary'
   }).lean();
 
