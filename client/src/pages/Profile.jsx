@@ -1,3 +1,4 @@
+
 // src/pages/UserProfilePage.jsx
 import React, { useState, useEffect } from 'react';
 import {
@@ -24,12 +25,10 @@ import PhotoPicker from '../components/PhotoPicker';
 import AddressPicker from '../components/AddressPicker';
 import { updateUser } from '../api';
 import useImageUpload from '../hooks/useImageUpload';
-
 export default function Profile({ user, setUser, activities, skillLevels }) {
   const [selectedSports, setSelectedSports] = useState({});
   const [showMoreInfoAlert, setShowMoreInfoAlert] = useState(false);
   const [editPassword, setEditPassword] = useState(false);
-
   const form = useForm({
     initialValues: {
       displayName: '',
@@ -41,7 +40,6 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
       photo: null,
       sports: user?.activities || {},
     },
-
     validate: {
       firstName: (value) => (!value ? 'First name required' : null),
       lastName: (value) => (!value ? 'Last name required' : null),
@@ -60,10 +58,8 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
       },
     },
   });
-
   const isProfileComplete = () => {
     if (!user) return false;
-
     const requiredFields = [
       'displayName',
       'firstName',
@@ -72,20 +68,15 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
       'emailPrimary',
       'photo',
     ];
-
     const basicFieldsFilled = requiredFields.every((field) => !!user[field]);
-
     const hasActivitySelected = (user.activities || []).some(
       (act) => !!act.skillLevelId,
     );
-
     return basicFieldsFilled && hasActivitySelected;
   };
-
   useEffect(() => {
     setShowMoreInfoAlert(!isProfileComplete());
   }, [user, selectedSports]);
-
   useEffect(() => {
     if (user) {
       form.setValues({
@@ -98,7 +89,6 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
         lat: user?.lat || null,
         lng: user?.lng || null,
       });
-
       const initialSports = {};
       (user.activities || []).forEach((act) => {
         const skillLevel = skillLevels.find((level) => level._id === act.skillLevelId);
@@ -109,7 +99,6 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
       setSelectedSports(initialSports);
     }
   }, [user, skillLevels]);
-
   const toggleSport = (sport) => {
     setSelectedSports((prev) => {
       const updated = { ...prev };
@@ -121,18 +110,14 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
       return updated;
     });
   };
-
   const handleSkillChange = (sport, value) => {
     setSelectedSports((prev) => ({ ...prev, [sport]: value }));
   };
-
   const { uploadEventImage } = useImageUpload();
-
   const handleSubmit = async (values) => {
     const imageUrl = values.photo
       ? await uploadEventImage(values.photo, { maxSizeMB: 25 })
       : user?.photo;
-
     const activitiesArray = Object.entries(selectedSports)
       .map(([activityId, skillLevelName]) => {
         const skillLevel = skillLevels.find((lvl) => lvl.name === skillLevelName);
@@ -143,7 +128,6 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
         };
       })
       .filter(Boolean);
-
     const payload = {
       displayName: values.displayName,
       firstName: values.firstName,
@@ -154,13 +138,10 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
       activities: activitiesArray,
       ...(editPassword && values.password ? { password: values.password } : {}),
     };
-
     console.log(payload);
-
     try {
       const updated = await updateUser(user._id, payload);
       console.log('User updated successfully:', updated);
-
       const mergedUser = {
         ...updated,
         lat:
@@ -172,21 +153,17 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             ? user?.lng
             : values.lng,
       };
-
       setUser(mergedUser);
       localStorage.setItem('user', JSON.stringify(mergedUser));
-
       setEditPassword(false);
       form.setFieldValue('password', '');
     } catch (err) {
       console.error('Failed to update user:', err);
     }
   };
-
   const theme = createTheme({
     cursorType: 'pointer',
   });
-
   return (
     <Container size={500}>
       <Space h='lg' />
@@ -195,10 +172,8 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
           <Text size='xs'>Please fill out the additional fields in your profile.</Text>
         </Alert>
       )}
-
       <Space h='lg' />
       <Title order={1} size='h2'>Profile</Title>
-
       <form onSubmit={form.onSubmit(handleSubmit)}>
         {/* User Info */}
         <Title order={2} size='h4'>User Info</Title>
@@ -214,14 +189,12 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             mode='profile'
             initialUrl={user?.photo || null}
           />
-
           {/* Display Name */}
           <TextInput
             label='Display Name'
             placeholder='Enter display name'
             {...form.getInputProps('displayName')}
           />
-
           {/* First Name */}
           <TextInput
             withAsterisk
@@ -229,7 +202,6 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             placeholder='Enter first name'
             {...form.getInputProps('firstName')}
           />
-
           {/* Last Name */}
           <TextInput
             withAsterisk
@@ -237,7 +209,6 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             placeholder='Enter last name'
             {...form.getInputProps('lastName')}
           />
-
           {/* Preferred Address */}
           <AddressPicker
             error={form.errors.preferredAddress}
@@ -254,11 +225,9 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             }}
           />
         </Stack>
-
         <Space h='md' />
         <Divider my='sm' />
         <Space h='md' />
-
         {/* Activity Info */}
         <Title order={2} mb='sm' size='h4'>Activity Info</Title>
         <Stack>
@@ -292,11 +261,9 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             </Box>
           ))}
         </Stack>
-
         <Space h='md' />
         <Divider my='sm' />
         <Space h='md' />
-
         {/* Account Info */}
         <Title order={2} size='h4'>Account Info</Title>
         <Stack>
@@ -308,7 +275,6 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             {...form.getInputProps('email')}
           />
           <Space h='xs' />
-
           <Checkbox
             label='Change Password'
             disabled={editPassword}
@@ -325,7 +291,6 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
               }
             }}
           />
-
           {/* Password input */}
           <PasswordInput
             withAsterisk={editPassword} // only required if checkbox is checked
@@ -334,14 +299,11 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
             {...form.getInputProps('password')}
           />
         </Stack>
-
         <Space h='md' />
         <Divider my='sm' />
         <Space h='md' />
-
         <Button color='teal' fullWidth type='submit'>Save Profile</Button>
       </form>
-
       <Space h='xl' />
     </Container>
   );
