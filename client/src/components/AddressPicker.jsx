@@ -1,6 +1,4 @@
-import React, {
-  useEffect, useMemo, useState,
-} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Anchor,
   Autocomplete,
@@ -21,7 +19,6 @@ function AddressPicker({
   onChange,
   label = 'Preferred address',
   placeholder = 'Preferred address',
-  required = false,
   onResolved,
   error,
 }) {
@@ -89,16 +86,13 @@ function AddressPicker({
         limit={10}
         filter={optionsFilter}
         label={label}
-        required={required}
         disabled={!isReady && !address}
         error={error}
       />
       <Group align='center' justify='center' gap='xs'>
         <IconLocation size={16} />
         <Anchor c='black' underline='always' onClick={handleUseMyLocation}>
-          <Text size='xs'>
-            Use my current location
-          </Text>
+          <Text size='xs'>Use my current location</Text>
         </Anchor>
       </Group>
     </Stack>
