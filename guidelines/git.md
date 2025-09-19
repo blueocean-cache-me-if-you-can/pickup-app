@@ -20,8 +20,8 @@
 git stash -u                                  # stash tracked + untracked changes
 git fetch origin                              # get all active branch references locally
 git checkout <target-branch>                  # move to the branch to review
-# ...review there are no breaking changes... 
-# ...sign off on PR... 
+# ...review there are no breaking changes...
+# ...sign off on PR...
 git checkout <your-branch>                    # return to your feature branch
 git stash pop                                 # restore your work (resolve any conflicts)
 ```
@@ -49,7 +49,7 @@ git branch -d <your-branch>                    # delete local branch
 
 ```bash
 # remove deleted remote branch references
-git fetch --prune   
+git fetch --prune
 
 # delete all local branches except main:
 git branch -D $(git branch --list --no-color | grep -v "^*" | grep -v "main")
