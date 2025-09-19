@@ -25,7 +25,8 @@ exports.getEvents = async (req, res) => {
     const pipeline = [
       {
         $match: {
-          location: {$geoWithin: { $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100] }},
+          // location: {$geoWithin: { $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100] }},
+          ...(coordinates ? { location: { $geoWithin: { $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100] } } } : {}),
           ...(intensity ? { intensityId: { $in: Array.isArray(intensity) ? intensity.map(id => new ObjectId(id)) : [new ObjectId(intensity)] } } : {}),
           ...(skillLevel ? { skillId: { $in: Array.isArray(skillLevel) ? skillLevel.map(id => new ObjectId(id)) : [new ObjectId(skillLevel)] } } : {}),
           ...(activity ? { activityId: { $in: Array.isArray(activity) ? activity.map(id => new ObjectId(id)) : [new ObjectId(activity)] } } : {}),
