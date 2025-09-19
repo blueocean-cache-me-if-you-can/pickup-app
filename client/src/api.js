@@ -13,8 +13,8 @@ const api = axios.create({
    ========================= */
 
 // GET /api/events
-export const getEvents = async () => {
-  const response = await api.get('/events');
+export const getEvents = async (params) => {
+  const response = await api.get('/events', { params });
   return response.data;
 };
 

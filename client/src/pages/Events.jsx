@@ -7,7 +7,8 @@ import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
 import EventsList from '../components/EventsList';
-import { events } from '../data';
+// import { events } from '../data';
+import { getEvents } from '../api';
 
 function Events({
   user, activities = [], intensities = [], skillLevels = [],
@@ -52,66 +53,67 @@ function Events({
   // - GET /api/events with params above for "My Upcoming Events"
   // - GET /api/events with params above for "My Past Events" DO NOT APPLY FILTERS
 
+  // State for params and last updated
+  const [eventsNearMeParams, setEventsNearMeParams] = useState({});
+  const [upcomingParams, setUpcomingParams] = useState({});
+  const [pastParams, setPastParams] = useState({});
+  const [lastUpdated, setLastUpdated] = useState(null); // 'eventsNearMe' | 'upcoming' | 'past'
+  const [events, setEvents] = useState([]); // for events-near-me
+  const [upcomingMyEvents, setUpcomingMyEvents] = useState([]); // for my-events upcoming
+  const [pastMyEvents, setPastMyEvents] = useState([]); // for my-events past
+
+  // Update params when dependencies change
   useEffect(() => {
-    // Events Near Me params
-    let eventsNearMeParams = {};
-    let upcomingParams = {};
-    let pastParams = {};
     if (view === 'events-near-me') {
-      eventsNearMeParams = {
-        user_id: null,
+      const params = {
         finished: false,
         sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
         orderByDesc,
-        filter: [
-          { activities: selectedActivities },
-          { skillLevels: selectedSkillLevels },
-          { intensity: selectedIntensity },
-          { distance: selectedDistance },
-        ],
-        address: form.values.address,
-        lat: form.values.lat,
-        lng: form.values.lng,
+        filter: {
+          activities: activities.filter((activity) => selectedActivities.includes(activity.name)).map((a) => a._id),
+          skillLevels: skillLevels.filter((level) => selectedSkillLevels.includes(level.name)).map((s) => s._id),
+          intensity: intensities.filter((intensity) => selectedIntensity.includes(intensity.name)).map((i) => i._id),
+          distance: selectedDistance,
+        },
+        coordinates: [form.values.lng, form.values.lat],
       };
-      upcomingParams = {};
-      pastParams = {};
-    }
-    if (view === 'my-events') {
-    // My Upcoming Events params
-      upcomingParams = {
+      setEventsNearMeParams(params);
+      setLastUpdated('eventsNearMe');
+    } else if (view === 'my-events') {
+      const upcoming = {
         user_id: user._id,
         finished: false,
         sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
         orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
-        filter: [
-          { activities: selectedActivities },
-          { skillLevels: selectedSkillLevels },
-          { intensity: selectedIntensity },
-          { distance: selectedDistance },
-        ],
+        filter: {
+          activities: activities.filter((activity) => selectedActivities.includes(activity.name)).map((a) => a._id),
+          skillLevels: skillLevels.filter((level) => selectedSkillLevels.includes(level.name)).map((s) => s._id),
+          intensity: intensities.filter((intensity) => selectedIntensity.includes(intensity.name)).map((i) => i._id),
+          distance: selectedDistance,
+        },
       };
+      setUpcomingParams(upcoming);
+      setLastUpdated('upcoming');
 
-      // My Past Events params
-      pastParams = {
+      const past = {
         user_id: user._id,
         finished: true,
         sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
         orderByDesc: sortDirections[selectedPastSort] ?? true,
-        filter: [
-          { activities: [] },
-          { skillLevels: [] },
-          { intensity: [] },
-          { distance: 20 },
-        ],
+        filter: {
+          activities: [],
+          skillLevels: [],
+          intensity: [],
+          distance: 20,
+        },
       };
-      eventsNearMeParams = {};
+      setPastParams(past);
+      setLastUpdated('past');
     }
-    setDebugParams({
-      'Events Near Me': eventsNearMeParams,
-      'My Upcoming Events': upcomingParams,
-      'My Past Events': pastParams,
-    });
   }, [
+    activities,
+    intensities,
+    skillLevels,
     selectedActivities,
     selectedSkillLevels,
     selectedIntensity,
@@ -125,6 +127,43 @@ function Events({
     sortDirections,
     form.values.address, form.values.lat, form.values.lng,
   ]);
+
+  // Call getEvents when params change
+  useEffect(() => {
+    async function fetchEvents() {
+      if (lastUpdated === 'eventsNearMe') {
+        try {
+          const res = await getEvents(eventsNearMeParams);
+          setEvents(res);
+        } catch (err) {
+          setEvents([]);
+        }
+      } else if (lastUpdated === 'upcoming') {
+        try {
+          const res = await getEvents(upcomingParams);
+          setUpcomingMyEvents(res);
+        } catch (err) {
+          setUpcomingMyEvents([]);
+        }
+      } else if (lastUpdated === 'past') {
+        try {
+          const res = await getEvents(pastParams);
+          setPastMyEvents(res);
+        } catch (err) {
+          setPastMyEvents([]);
+        }
+      }
+    }
+    fetchEvents();
+  }, [eventsNearMeParams, upcomingParams, pastParams, lastUpdated]);
+
+  useEffect(() => {
+    setDebugParams({
+      'Events Near Me': eventsNearMeParams,
+      'My Upcoming Events': upcomingParams,
+      'My Past Events': pastParams,
+    });
+  }, [eventsNearMeParams, upcomingParams, pastParams]);
 
   return (
     <Container size='lg'>
@@ -148,21 +187,21 @@ function Events({
         <Title size='h4'>Filter by: </Title>
         <PrimaryFilter
           label='Activities'
-          values={['Pickleball', 'Volleyball', 'Basketball', 'Ultimate Frisbee', 'Kickball']}
+          values={activities.map((a) => a.name)}
           value={selectedActivities}
           onChange={setSelectedActivities}
         />
 
         <PrimaryFilter
           label='Skill Levels'
-          values={['Beginner', 'Intermediate', 'Advanced']}
+          values={skillLevels.map((level) => level.name)}
           value={selectedSkillLevels}
           onChange={setSelectedSkillLevels}
         />
 
         <PrimaryFilter
           label='Intensities'
-          values={['Casual', 'Spirited', 'Competitive']}
+          values={intensities.map((i) => i.name)}
           value={selectedIntensity}
           onChange={setSelectedIntensity}
         />
@@ -200,7 +239,7 @@ function Events({
               onChange={setSelectedSort}
             />
           </Group>
-          {events.length === 0 ? <Text>No events found.</Text> : (
+          {Array.isArray(events) && events.length === 0 ? <Text>No events found.</Text> : (
             <EventsList
               events={events}
               activities={activities}
@@ -222,6 +261,8 @@ function Events({
           activities={activities}
           intensities={intensities}
           skillLevels={skillLevels}
+          upcomingEvents={upcomingMyEvents}
+          pastEvents={pastMyEvents}
         />
       )}
 
