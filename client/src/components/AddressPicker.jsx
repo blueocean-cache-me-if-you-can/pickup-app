@@ -23,6 +23,7 @@ function AddressPicker({
   placeholder = 'Preferred address',
   required = false,
   onResolved,
+  error,
 }) {
   const [address, setAddress] = useState(value ?? '');
 
@@ -90,6 +91,7 @@ function AddressPicker({
         label={label}
         required={required}
         disabled={!isReady && !address}
+        error={error}
       />
       <Group align='center' justify='center' gap='xs'>
         <IconLocation size={16} />

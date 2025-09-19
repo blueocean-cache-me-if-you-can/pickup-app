@@ -1,5 +1,3 @@
-
-require('dotenv').config();
 const express = require('express');
 const logger = require('./middleware/logger');
 const sbdb = require('./db');
@@ -24,14 +22,6 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/dist')));
 app.use(logger);
-
-
-// Connecting to google cloud storage to upload images, creating a storage instance
-const storage = new Storage({
-  projectId: process.env.GCS_PROJECT_ID,
-  keyFilename: path.join(__dirname, process.env.PATH_TO_GCS_KEY),
-});
-const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
 
 // Server Routes
 app.use('/api/upload', uploadRoutes);

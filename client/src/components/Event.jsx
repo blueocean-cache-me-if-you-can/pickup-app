@@ -1,10 +1,14 @@
 import React from 'react';
-import { Stack, Group, Grid, Text } from '@mantine/core';
+import {
+  Stack, Group, Grid, Text,
+} from '@mantine/core';
 import EventCard from './EventCard';
 import IconInfo from './IconInfo';
 import AttendeesRatio from './AttendeesRatio';
 
-function Event({ currentUserId, event, activities, intensities, skillLevels, isPast = false }) {
+function Event({
+  event, activities, intensities, skillLevels, isPast = false,
+}) {
   const expandEvent = () => {
     // TODO: trigger event details modal
     console.log(`Event ${event.title} expanded`);

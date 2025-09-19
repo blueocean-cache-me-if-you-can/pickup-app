@@ -5,7 +5,7 @@ import {
 } from '@mantine/core';
 import { IconChevronDown } from '@tabler/icons-react';
 import Logo from './Logo';
-import { CreateEvent } from './CreateEvent';
+import CreateEvent from './CreateEvent';
 import ProfileHeadline from './ProfileHeadline';
 
 function Navbar({
@@ -16,7 +16,12 @@ function Navbar({
     <Group justify='space-between' h='100%' p='0 20px'>
       <Logo activateLink />
       <Group>
-        <CreateEvent activities={activities} skillLevels={skillLevels} intensities={intensities} />
+        <CreateEvent
+          user={user}
+          activities={activities}
+          skillLevels={skillLevels}
+          intensities={intensities}
+        />
         <Divider orientation='vertical' />
         <Menu shadow='md' width={200}>
           <Menu.Target>
