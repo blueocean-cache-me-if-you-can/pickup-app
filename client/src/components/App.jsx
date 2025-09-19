@@ -24,6 +24,7 @@ function App() {
   const [skillLevels, setSkillLevels] = useState([]);
   const [intensities, setIntensities] = useState([]);
 
+  // Handle user navigation and localStorage
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
@@ -39,7 +40,10 @@ function App() {
         navigate('/login', { replace: true });
       }
     }
+  }, [user, location.pathname, navigate]);
 
+  // Fetch reference data only once on mount
+  useEffect(() => {
     Promise.all([getActivities(), getSkillLevels(), getIntensityLevels()])
       .then(([activitiesRes, skillLevelsRes, intensitiesRes]) => {
         console.log('Activities response:', activitiesRes);
@@ -53,7 +57,7 @@ function App() {
       .catch((err) => {
         console.error('Error fetching reference data:', err);
       });
-  }, [user, location.pathname, navigate]);
+  }, []);
 
   return (
     <AppShell

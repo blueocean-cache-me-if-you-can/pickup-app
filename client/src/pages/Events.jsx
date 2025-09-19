@@ -64,17 +64,37 @@ function Events({
 
   // Update params when dependencies change
   useEffect(() => {
+    // Helper to build filter object with only non-empty arrays
+    const buildFilter = () => {
+      const filter = {};
+      const activityArr = activities
+        .filter((activity) => selectedActivities.includes(activity.name))
+        .map((a) => a._id);
+      if (activityArr.length) {
+        filter.activity = activityArr;
+      }
+      const skillLevelArr = skillLevels
+        .filter((level) => selectedSkillLevels.includes(level.name))
+        .map((s) => s._id);
+      if (skillLevelArr.length) {
+        filter.skillLevel = skillLevelArr;
+      }
+      const intensityArr = intensities
+        .filter((intensity) => selectedIntensity.includes(intensity.name))
+        .map((i) => i._id);
+      if (intensityArr.length) {
+        filter.intensity = intensityArr;
+      }
+      filter.distance = selectedDistance;
+      return filter;
+    };
+
     if (view === 'events-near-me') {
       const params = {
         finished: false,
         sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
         orderByDesc,
-        filter: {
-          activities: activities.filter((activity) => selectedActivities.includes(activity.name)).map((a) => a._id),
-          skillLevels: skillLevels.filter((level) => selectedSkillLevels.includes(level.name)).map((s) => s._id),
-          intensity: intensities.filter((intensity) => selectedIntensity.includes(intensity.name)).map((i) => i._id),
-          distance: selectedDistance,
-        },
+        filter: buildFilter(),
         coordinates: [form.values.lng, form.values.lat],
       };
       setEventsNearMeParams(params);
@@ -85,12 +105,7 @@ function Events({
         finished: false,
         sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
         orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
-        filter: {
-          activities: activities.filter((activity) => selectedActivities.includes(activity.name)).map((a) => a._id),
-          skillLevels: skillLevels.filter((level) => selectedSkillLevels.includes(level.name)).map((s) => s._id),
-          intensity: intensities.filter((intensity) => selectedIntensity.includes(intensity.name)).map((i) => i._id),
-          distance: selectedDistance,
-        },
+        filter: buildFilter(),
       };
       setUpcomingParams(upcoming);
       setLastUpdated('upcoming');
@@ -100,12 +115,6 @@ function Events({
         finished: true,
         sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
         orderByDesc: sortDirections[selectedPastSort] ?? true,
-        filter: {
-          activities: [],
-          skillLevels: [],
-          intensity: [],
-          distance: 20,
-        },
       };
       setPastParams(past);
       setLastUpdated('past');
