@@ -22,19 +22,9 @@ exports.getEvents = async (req, res) => {
     const skillLevel = filter.skillLevel || null;
     const activity = filter.activity || null;
 
-    // ← Insert logging here
-    console.log('Filters:');
-    console.log('intensity:', intensity);
-    console.log('skillLevel:', skillLevel);
-    console.log('activity:', activity);
-    console.log('user_id:', user_id);
-    console.log('finished:', finished);
-
-    // Build aggregation pipeline
     const pipeline = [
       {
         $match: {
-          // Geospatial filter
           location: {
             $geoWithin: {
               $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100],
