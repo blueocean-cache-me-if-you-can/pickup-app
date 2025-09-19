@@ -70,13 +70,20 @@ function Events({
         sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
         orderByDesc,
         filter: {
-          activities: activities.filter((activity) => selectedActivities.includes(activity.name)).map((a) => a._id),
-          skillLevels: skillLevels.filter((level) => selectedSkillLevels.includes(level.name)).map((s) => s._id),
-          intensity: intensities.filter((intensity) => selectedIntensity.includes(intensity.name)).map((i) => i._id),
+          activity: activities
+            .filter((activity) => selectedActivities.includes(activity.name))
+            .map((a) => a._id),
+          skillLevel: skillLevels
+            .filter((level) => selectedSkillLevels.includes(level.name))
+            .map((s) => s._id),
+          intensity: intensities
+            .filter((intensity) => selectedIntensity.includes(intensity.name))
+            .map((i) => i._id),
           distance: selectedDistance,
         },
         coordinates: [form.values.lng, form.values.lat],
       };
+
       setEventsNearMeParams(params);
       setLastUpdated('eventsNearMe');
     } else if (view === 'my-events') {
@@ -86,14 +93,18 @@ function Events({
         sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
         orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
         filter: {
-          activities: activities.filter((activity) => selectedActivities.includes(activity.name)).map((a) => a._id),
-          skillLevels: skillLevels.filter((level) => selectedSkillLevels.includes(level.name)).map((s) => s._id),
-          intensity: intensities.filter((intensity) => selectedIntensity.includes(intensity.name)).map((i) => i._id),
+          activity: activities
+            .filter((activity) => selectedActivities.includes(activity.name))
+            .map((a) => a._id),
+          skillLevel: skillLevels
+            .filter((level) => selectedSkillLevels.includes(level.name))
+            .map((s) => s._id),
+          intensity: intensities
+            .filter((intensity) => selectedIntensity.includes(intensity.name))
+            .map((i) => i._id),
           distance: selectedDistance,
         },
       };
-      setUpcomingParams(upcoming);
-      setLastUpdated('upcoming');
 
       const past = {
         user_id: user._id,
@@ -101,14 +112,16 @@ function Events({
         sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
         orderByDesc: sortDirections[selectedPastSort] ?? true,
         filter: {
-          activities: [],
-          skillLevels: [],
+          activity: [],
+          skillLevel: [],
           intensity: [],
           distance: 20,
         },
       };
+
+      setUpcomingParams(upcoming);
       setPastParams(past);
-      setLastUpdated('past');
+      setLastUpdated('upcoming');
     }
   }, [
     activities,
@@ -125,35 +138,40 @@ function Events({
     view,
     orderByDesc,
     sortDirections,
-    form.values.address, form.values.lat, form.values.lng,
+    form.values.address,
+    form.values.lat,
+    form.values.lng,
   ]);
-
   // Call getEvents when params change
   useEffect(() => {
     async function fetchEvents() {
-      if (lastUpdated === 'eventsNearMe') {
-        try {
-          const res = await getEvents(eventsNearMeParams);
-          setEvents(res);
-        } catch (err) {
-          setEvents([]);
+      try {
+        let params;
+        if (lastUpdated === 'eventsNearMe') {
+          params = eventsNearMeParams;
+        } else if (lastUpdated === 'upcoming') {
+          params = upcomingParams;
+        } else if (lastUpdated === 'past') {
+          params = pastParams;
         }
-      } else if (lastUpdated === 'upcoming') {
-        try {
-          const res = await getEvents(upcomingParams);
-          setUpcomingMyEvents(res);
-        } catch (err) {
-          setUpcomingMyEvents([]);
-        }
-      } else if (lastUpdated === 'past') {
-        try {
-          const res = await getEvents(pastParams);
-          setPastMyEvents(res);
-        } catch (err) {
-          setPastMyEvents([]);
-        }
+
+        console.log('Fetching events with params:', params);
+
+        const res = await getEvents(params);
+
+        console.log('Response from getEvents:', res); //
+
+        if (lastUpdated === 'eventsNearMe') setEvents(res);
+        else if (lastUpdated === 'upcoming') setUpcomingMyEvents(res);
+        else if (lastUpdated === 'past') setPastMyEvents(res);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        if (lastUpdated === 'eventsNearMe') setEvents([]);
+        else if (lastUpdated === 'upcoming') setUpcomingMyEvents([]);
+        else if (lastUpdated === 'past') setPastMyEvents([]);
       }
     }
+
     fetchEvents();
   }, [eventsNearMeParams, upcomingParams, pastParams, lastUpdated]);
 

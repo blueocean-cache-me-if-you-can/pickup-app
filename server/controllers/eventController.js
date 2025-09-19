@@ -8,72 +8,68 @@ const { ObjectId } = require('mongodb');
 // Controller to get all events
 exports.getEvents = async (req, res) => {
   try {
-    // {
-    //   "user_id": 123145634,
-    //   "finished": false,
-    //   "page": 1,
-    //   "count": 2,
-    //   "sort": "skillLevel", // e.g. skillLevel, intensity, activity
-    //   "orderByDesc": true , //
-    //   "coordinates": [27.13728, -10.362738],
-    //   "filter": {
-    //     "skillLevel" :[401,402],  // e.g. [401, 402, 403]
-    //     "intensity" :[301],  // e.g. [301, 302, 303]
-    //     "activity" :[502, 504],  // e.g. [502, 503, 504]
-    //     "distance" :3 // e.g. <= 3 (miles)
-    //   }
-    // }
+    let { user_id, finished, page, count, coordinates, filter, sort, orderByDesc } = req.body;
+    console.log('Received getEvents with params:', req.body);
 
-    let skip, limit;
-    let { user_id, finished, page, count, coordinates, filter, sort, orderByDesc } = req.query;
-    filter = filter ? JSON.parse(filter) : {};
-    coordinates = JSON.parse(coordinates);
-    console.log(user_id, finished, page, count, coordinates, filter, sort, orderByDesc);
+    // Set defaults
+    filter = filter || {};
+    coordinates = coordinates || [0, 0];
+    page = page || 1;
+    count = count || 10;
 
-    const radius = filter?.distance * 1609.34 || 5000; // 5 km in meters
-    const intensity = filter?.intensity || null;
-    const skillLevel = filter?.skillLevel || null;
-    const activity = filter?.activity || null;
-    console.log(radius, intensity, skillLevel, activity);
+    const radius = (filter.distance || 5) * 1609.34; // miles to meters
+    const intensity = filter.intensity || null;
+    const skillLevel = filter.skillLevel || null;
+    const activity = filter.activity || null;
 
-    // Filtering
-
-    // intensity could be a list of intensity ids, but it can also be a single id
-    // skillLevel could be a list of skillLevel ids
-    // activity could be a list of activity ids
+    // ← Insert logging here
+    console.log('Filters:');
+    console.log('intensity:', intensity);
+    console.log('skillLevel:', skillLevel);
+    console.log('activity:', activity);
+    console.log('user_id:', user_id);
+    console.log('finished:', finished);
 
     // Build aggregation pipeline
-
     const pipeline = [
       {
         $match: {
-          location: {$geoWithin: { $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100] }},
-          ...(intensity ? { intensityId: { $in: Array.isArray(intensity) ? intensity.map(id => new ObjectId(id)) : [new ObjectId(intensity)] } } : {}),
-          ...(skillLevel ? { skillId: { $in: Array.isArray(skillLevel) ? skillLevel.map(id => new ObjectId(id)) : [new ObjectId(skillLevel)] } } : {}),
-          ...(activity ? { activityId: { $in: Array.isArray(activity) ? activity.map(id => new ObjectId(id)) : [new ObjectId(activity)] } } : {}),
-          ...(user_id ? { 'players.userId': new ObjectId(user_id) } : {}),
-          ...(finished === 'true' ? { time: { $lt: new Date() } } : { time: { $gte: new Date() } })
-        }
-      }
+          // Geospatial filter
+          location: {
+            $geoWithin: {
+              $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100],
+            },
+          },
+
+          ...(intensity && intensity.length > 0
+            ? { intensityId: { $in: intensity.map((id) => new ObjectId(id)) } }
+            : {}),
+
+          ...(skillLevel && skillLevel.length > 0
+            ? { skillId: { $in: skillLevel.map((id) => new ObjectId(id)) } }
+            : {}),
+
+          ...(activity && activity.length > 0
+            ? { activityId: { $in: activity.map((id) => new ObjectId(id)) } }
+            : {}),
+
+          ...(user_id
+            ? { 'players.userId': new ObjectId(user_id) }
+            : {}),
+
+          ...(finished
+            ? { time: { $lt: new Date() } }
+            : { time: { $gte: new Date() } }),
+        },
+      },
     ];
 
-    if (page && count) {
-      skip = (parseInt(page) - 1) * parseInt(count);
-      limit = parseInt(count);
-    } else {
-      skip = 0;
-      limit = 10;
-    }
+    // Pagination
+    const skip = (page - 1) * count;
+    const limit = count;
 
     // Sorting
-
-    let order;
-    if (orderByDesc === 'true') {
-      order = -1;
-    } else {
-      order = 1;
-    }
-
+    const order = orderByDesc ? -1 : 1;
     if (sort === 'date') {
       pipeline.push({ $sort: { time: order } });
     } else if (sort === 'distance') {
@@ -82,12 +78,10 @@ exports.getEvents = async (req, res) => {
           $addFields: {
             distance: {
               $let: {
-                vars: {
-                  coords: { $arrayElemAt: ["$location.coordinates", 0] }
-                },
+                vars: { coords: { $arrayElemAt: ["$location.coordinates", 0] } },
                 in: {
                   $multiply: [
-                    3963.2, // Radius of the Earth in miles
+                    3963.2,
                     {
                       $acos: {
                         $min: [
@@ -95,14 +89,14 @@ exports.getEvents = async (req, res) => {
                           {
                             $add: [
                               { $multiply: [
-                                  { $sin: { $degreesToRadians: coordinates[1] } },
-                                  { $sin: { $degreesToRadians: { $arrayElemAt: ["$location.coordinates", 1] } } }
+                                { $sin: { $degreesToRadians: coordinates[1] } },
+                                { $sin: { $degreesToRadians: { $arrayElemAt: ["$location.coordinates", 1] } } }
                                 ]
                               },
                               { $multiply: [
-                                  { $cos: { $degreesToRadians: coordinates[1] } },
-                                  { $cos: { $degreesToRadians: { $arrayElemAt: ["$location.coordinates", 1] } } },
-                                  { $cos: { $degreesToRadians: { $subtract: [ { $arrayElemAt: ["$location.coordinates", 0] }, coordinates[0] ] } } }
+                                { $cos: { $degreesToRadians: coordinates[1] } },
+                                { $cos: { $degreesToRadians: { $arrayElemAt: ["$location.coordinates", 1] } } },
+                                { $cos: { $degreesToRadians: { $subtract: [ { $arrayElemAt: ["$location.coordinates", 0] }, coordinates[0] ] } } }
                                 ]
                               }
                             ]
@@ -120,23 +114,18 @@ exports.getEvents = async (req, res) => {
       );
     }
 
-    // Fetch events based on query
-    console.log('Aggregation Pipeline:', JSON.stringify(pipeline, null, 2));
-
     let events = await Event.aggregate(pipeline).skip(skip).limit(limit).exec();
-    for (let event of events) {
-      if (event.intensity && Object.keys(event.intensity).length > 0) {
-        event.intensity = event.intensity[0];
-      }
-      if (event.skillLevel && Object.keys(event.skillLevel).length > 0) {
-        event.skillLevel = event.skillLevel[0];
-      }
-      if (event.activity && Object.keys(event.activity).length > 0) {
-        event.activity = event.activity[0];
-      }
+
+    // Flatten subdocs
+    events = events.map(event => {
+      if (event.intensity && Object.keys(event.intensity).length > 0) event.intensity = event.intensity[0];
+      if (event.skillLevel && Object.keys(event.skillLevel).length > 0) event.skillLevel = event.skillLevel[0];
+      if (event.activity && Object.keys(event.activity).length > 0) event.activity = event.activity[0];
       event.coordinates = event.location.coordinates;
       delete event.location;
-    }
+      return event;
+    });
+
     res.status(200).json(events);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch events', details: err.message });
