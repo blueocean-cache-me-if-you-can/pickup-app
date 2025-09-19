@@ -24,7 +24,7 @@ function EventsList({
         <Stack>
           {paginatedEvents.map((event) => (
             <Event
-              key={event.id}
+              key={event._id}
               event={event}
               activities={activities}
               intensities={intensities}
