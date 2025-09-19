@@ -17,7 +17,7 @@ import AttendeesRatio from './AttendeesRatio';
 import useGeocodeAddress from '../hooks/useGeocodeAddress';
 import AttendingPlayers from './AttendingPlayers';
 
-function EventDetails({ event, activities, intensities, skillLevels, isPast = false }) {
+function EventDetails({ event, activities, intensities, skillLevels, isPast = false, currentUserId }) {
   console.log('event', event);
   const [isOpen, setIsOpen] = useState(false);
   const grayscale = isPast || new Date(event.time) < new Date();
@@ -45,6 +45,7 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
             intensities={intensities} 
             skillLevels={skillLevels} 
             isPast={isPast}
+            currentUserId={currentUserId}
         />
       </Box>
 
