@@ -4,30 +4,14 @@ const Activity = require('../models/activity');
 const IntensityLevel = require('../models/intensityLevel');
 const SkillLevel = require('../models/skillLevel');
 const { ObjectId } = require('mongodb');
+const mail = require('./sendMail');
+const { getEventPlayersWithEmails } = require('./eventEmails');
 
 // Controller to get all events
 exports.getEvents = async (req, res) => {
   try {
-    // {
-    //   "user_id": 123145634,
-    //   "finished": false,
-    //   "page": 1,
-    //   "count": 2,
-    //   "sort": "skillLevel", // e.g. skillLevel, intensity, activity
-    //   "orderByDesc": true , //
-    //   "coordinates": [27.13728, -10.362738],
-    //   "filter": {
-    //     "skillLevel" :[401,402],  // e.g. [401, 402, 403]
-    //     "intensity" :[301],  // e.g. [301, 302, 303]
-    //     "activity" :[502, 504],  // e.g. [502, 503, 504]
-    //     "distance" :3 // e.g. <= 3 (miles)
-    //   }
-    // }
-
     let skip, limit;
-    let { user_id, finished, page, count, coordinates, filter, sort, orderByDesc } = req.query;
-    filter = filter ? JSON.parse(filter) : {};
-    coordinates = JSON.parse(coordinates);
+    let { user_id, finished, page, count, coordinates, filter, sort, orderByDesc } = req.body;
     console.log(user_id, finished, page, count, coordinates, filter, sort, orderByDesc);
 
     const radius = filter?.distance * 1609.34 || 5000; // 5 km in meters
@@ -38,12 +22,6 @@ exports.getEvents = async (req, res) => {
 
     // Filtering
 
-    // intensity could be a list of intensity ids, but it can also be a single id
-    // skillLevel could be a list of skillLevel ids
-    // activity could be a list of activity ids
-
-    // Build aggregation pipeline
-
     const pipeline = [
       {
         $match: {
@@ -52,7 +30,7 @@ exports.getEvents = async (req, res) => {
           ...(skillLevel ? { skillId: { $in: Array.isArray(skillLevel) ? skillLevel.map(id => new ObjectId(id)) : [new ObjectId(skillLevel)] } } : {}),
           ...(activity ? { activityId: { $in: Array.isArray(activity) ? activity.map(id => new ObjectId(id)) : [new ObjectId(activity)] } } : {}),
           ...(user_id ? { 'players.userId': new ObjectId(user_id) } : {}),
-          ...(finished === 'true' ? { time: { $lt: new Date() } } : { time: { $gte: new Date() } })
+          ...(finished ? { time: { $lt: new Date() } } : { time: { $gte: new Date() } })
         }
       }
     ];
@@ -68,7 +46,7 @@ exports.getEvents = async (req, res) => {
     // Sorting
 
     let order;
-    if (orderByDesc === 'true') {
+    if (orderByDesc) {
       order = -1;
     } else {
       order = 1;
@@ -161,6 +139,19 @@ exports.updateEvent = async (req, res) => {
     if (!updatedEvent) {
       return res.status(404).json({ error: 'Event not found' });
     }
+
+    await getEventPlayersWithEmails(req.params.id).then(eventWithEmails => {
+      eventWithEmails.players.forEach(userObj => {
+        mail.sendMailWithHtmlFileAndParams({
+          recipients: [{ email: userObj.emailPrimary }],
+          subject: 'An Event You\'ve joined has Updated on PicknRoll!',
+          text: `Hello ${userObj.firstName},\n\nThe event with the title: ${updatedEvent.title} has been updated.\n\nBest regards,\nBlue Ocean Pickup Team`,
+          htmlFile: 'updateEvent.html',
+          htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
+        });
+      });
+    });
+
     res.status(200).json(updatedEvent);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update event', details: err.message });
@@ -189,6 +180,15 @@ exports.updateEventPlayer = async (req, res) => {
 
     event.players.push({ userId: req.query.user_id, displayName: user.displayName || 'Anonymous' });
     const updatedEvent = await event.save();
+
+    mail.sendMailWithHtmlFileAndParams({
+      recipients: [{ email: user.emailPrimary }],
+      subject: 'You joined an Event on PicknRoll!',
+      text: `Hello ${user.firstName},\n\nThank you for joining the event: ${event.title}.\n\nBest regards,\nBlue Ocean Pickup Team`,
+      htmlFile: 'joinEvent.html',
+      htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
+    });
+
     res.status(200).json(updatedEvent);
   } catch (err) {
     res.status(500).json({ error: 'Failed to add player to event', details: err.message });
@@ -198,7 +198,9 @@ exports.updateEventPlayer = async (req, res) => {
 exports.createEvent = async (req, res) => {
   try {
     const user = await User.findById(new ObjectId(req.body.user_id));
-    console.log('Creating event for user:', user);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
     const newEvent = new Event({
       title: req.body.title,
       owner: {
@@ -225,6 +227,15 @@ exports.createEvent = async (req, res) => {
       ]
     });
     const savedEvent = await newEvent.save();
+
+    mail.sendMailWithHtmlFileAndParams({
+      recipients: [{ email: user.emailPrimary }],
+      subject: 'You created an Event on PicknRoll!',
+      text: `Success ${user.firstName}!\n\nYou created the event: ${newEvent.title}.\n\nBest regards,\nBlue Ocean Pickup Team`,
+      htmlFile: 'createEvent.html',
+      htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
+    });
+
     res.status(201).json(savedEvent);
   } catch (err) {
     res.status(400).json({ error: 'Failed to create event', details: err.message });
@@ -237,6 +248,19 @@ exports.deleteEvent = async (req, res) => {
     if (!deletedEvent) {
       return res.status(404).json({ error: 'Event not found' });
     }
+
+    await getEventPlayersWithEmails(req.query.event_id).then(eventWithEmails => {
+      eventWithEmails.players.forEach(userObj => {
+        mail.sendMailWithHtmlFileAndParams({
+          recipients: [{ email: userObj.emailPrimary }],
+          subject: 'An Event You\'ve joined has been Canceled on PicknRoll!',
+          text: `Hello ${userObj.firstName},\n\nThe event with the title: ${deletedEvent.title} has been canceled.\n\nBest regards,\nBlue Ocean Pickup Team`,
+          htmlFile: 'eventCanceled.html',
+          htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
+        });
+      });
+    });
+
     res.status(200).json({ message: 'Event deleted successfully' });
   } catch (err) {
     res.status(400).json({ error: 'Failed to delete event', details: err.message });

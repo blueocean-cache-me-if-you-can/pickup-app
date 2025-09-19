@@ -57,7 +57,7 @@ function sendReminders(interval) {
   lastReminderSent += interval;
 
   const oneYearLater = Date.UTC(new Date().getUTCFullYear() + 1, new Date().getUTCMonth(), new Date().getUTCDate());
-  sendMail.sendEventReminders(lastReminderSent, oneYearLater);
+  // sendMail.sendEventReminders(lastReminderSent, oneYearLater);
 }
 sendReminders(process.env.EMAIL_REMINDER_INTERVAL_INITIAL_MINS * 60 * 1000);
 setInterval(sendReminders, process.env.EMAIL_REMINDER_INTERVAL_SUBSEQUENT_MINS * 60 * 1000);
