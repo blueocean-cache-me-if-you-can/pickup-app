@@ -38,6 +38,7 @@ function EventCard({
         <Box pos='absolute' top={0} left={0}>
           <Image
             src={activity.image}
+            fallbackSrc='https://placehold.co/600x400?text=Placeholder'
             alt={activity.name}
             style={{ borderRadius: '16px 0 16px 0', border: '2px solid #fff' }}
             w='30%'
