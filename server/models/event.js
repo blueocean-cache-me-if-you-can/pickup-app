@@ -29,7 +29,7 @@ const eventSchema = new mongoose.Schema({
   players: [{_id: false, userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, displayName: String }],
 });
 
-eventSchema.index({ location: "2dsphere" });
+eventSchema.index({ location: "2dsphere", "players.userId": 1 });
 
 const Event = mongoose.model('Event', eventSchema);
 
