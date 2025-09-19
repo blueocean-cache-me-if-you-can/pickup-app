@@ -22,7 +22,13 @@ function getHtmlFromFile(filename) {
     });
   });
 }
-
+transporter.verify(function(error, success) {
+  if (error) {
+    console.error('Error with mail transporter:', error);
+  } else {
+    console.log('Mail transporter is ready');
+  }
+});
 async function sendEventReminders(startTime, endTime) {
   const events = await eventEmails.getEventsPlayersWithEmailsBetween(startTime, endTime);
   if (!events || events.length === 0) {
@@ -107,7 +113,17 @@ async function sendMailWithHtmlFileAndParams({ recipients, subject, text, htmlFi
       ...(html && { html })
     };
     transporter.sendMail(mailOptions, (error, info) => {
-      if (error) return reject(error);
+      if (error) {
+        if (
+          error.response &&
+          error.response.includes('Daily user sending limit exceeded')
+        ) {
+          console.error('Email sending failed: Daily user sending limit exceeded.');
+          // Optionally, you can resolve or reject based on your application's needs
+          return resolve({ warning: 'Daily user sending limit exceeded', error });
+        }
+        return reject(error);
+      }
       resolve(info);
     });
   });

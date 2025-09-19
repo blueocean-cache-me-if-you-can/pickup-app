@@ -12,7 +12,7 @@ const intensityLevelRoutes = require("./routes/intensityLevelRoutes");
 const path = require('path');
 const uploadRoutes = require("./routes/uploadRoutes");
 const { Storage } = require('@google-cloud/storage');
-const eventController = require('./controllers/eventController');
+// const eventController = require('./controllers/eventController');
 const sendMail = require('./controllers/sendMail');
 
 
@@ -56,8 +56,10 @@ function sendReminders(interval) {
   let startDate = lastReminderSent
   lastReminderSent += interval;
 
-  const oneYearLater = Date.UTC(new Date().getUTCFullYear() + 1, new Date().getUTCMonth(), new Date().getUTCDate());
-  sendMail.sendEventReminders(lastReminderSent, oneYearLater);
+  sendMail.sendEventReminders(startDate, lastReminderSent);
+
+  //const oneYearLater = Date.UTC(new Date().getUTCFullYear() + 1, new Date().getUTCMonth(), new Date().getUTCDate());
+  //sendMail.sendEventReminders(lastReminderSent, oneYearLater);
 }
 sendReminders(process.env.EMAIL_REMINDER_INTERVAL_INITIAL_MINS * 60 * 1000);
 setInterval(sendReminders, process.env.EMAIL_REMINDER_INTERVAL_SUBSEQUENT_MINS * 60 * 1000);
