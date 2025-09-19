@@ -35,15 +35,15 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
 
   return (
     <>
-      <Box 
-        onClick={modalOnClick} 
+      <Box
+        onClick={modalOnClick}
         style={{ cursor: 'pointer' }}
       >
-        <Event 
-            event={event} 
-            activities={activities} 
-            intensities={intensities} 
-            skillLevels={skillLevels} 
+        <Event
+            event={event}
+            activities={activities}
+            intensities={intensities}
+            skillLevels={skillLevels}
             isPast={isPast}
             currentUserId={currentUserId}
         />
@@ -62,7 +62,7 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
         <Stack align='flex-start' w='100%' mah='100%'>
           <Group align='flex-start' gap='xl' wrap='nowrap' w='100%'>
             <Stack w='250px'>
-                <EventCard event={event} activities={activities} intensities={intensities} skillLevels={skillLevels} />
+                <EventCard event={event} activities={activities} intensities={intensities} skillLevels={skillLevels} currentUserId={currentUserId}/>
                 <IconInfo iconType='time' infoText={new Date(event.time).toLocaleString()} size={rem(11)} grayscale={grayscale} />
                 <IconInfo iconType='location' infoText={event.address} size={rem(11)} grayscale={grayscale} />
                 <IconInfo iconType='owner' infoText={event.owner.displayName} size={rem(11)} grayscale={grayscale} />

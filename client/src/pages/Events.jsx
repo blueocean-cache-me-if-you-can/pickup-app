@@ -217,11 +217,11 @@ function Events({
             <Flex justify='center'><Text>Sorry! No events found.</Text></Flex>
           ) : (
             <EventsList
+              currentUserId={user._id || null}
               events={events}
               activities={activities}
               intensities={intensities}
               skillLevels={skillLevels}
-              currentUserId={user?._id || null}
             />
           )}
         </Box>
