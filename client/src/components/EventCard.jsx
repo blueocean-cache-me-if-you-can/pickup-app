@@ -28,6 +28,7 @@ function EventCard({
         <AspectRatio ratio={1}>
           <Image
             src={event.photo}
+            fallbackSrc='https://placehold.co/600x400?text=Placeholder'
             alt={event.title}
             radius='lg'
             w='100%'
@@ -50,20 +51,20 @@ function EventCard({
           </Box>
         )}
         <Center pos='absolute' bottom={0} right={0} w='100%'>
-          {created ? 
-            <EditEvent 
-              event={event} 
-              activities={activities} 
-              intensities={intensities} 
-              skillLevels={skillLevels} 
+          {created ?
+            <EditEvent
+              event={event}
+              activities={activities}
+              intensities={intensities}
+              skillLevels={skillLevels}
               onEdit={editEvent}
-            /> 
-            : 
-            <Button 
-              m='xs' 
+            />
+            :
+            <Button
+              m='xs'
               data-no-expand
-              variant='filled' 
-              fullWidth 
+              variant='filled'
+              fullWidth
               onClick={toggleJoin}
             >
               {joined ? 'Leave' : 'Join'}
