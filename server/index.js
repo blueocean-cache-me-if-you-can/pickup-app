@@ -12,6 +12,8 @@ const intensityLevelRoutes = require("./routes/intensityLevelRoutes");
 const path = require('path');
 const uploadRoutes = require("./routes/uploadRoutes");
 const { Storage } = require('@google-cloud/storage');
+const eventController = require('./controllers/eventController');
+const sendMail = require('./controllers/sendMail');
 
 
 require('dotenv').config();
@@ -44,6 +46,21 @@ app.use("/api/intensityLevels", intensityLevelRoutes);
 app.get("/*", (_, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
+
+// Function to send reminder emails at regular intervals
+let lastReminderSent = Date.now();
+function sendReminders(interval) {
+  let period = interval ? process.env.EMAIL_REMINDER_INTERVAL_INITIAL_MINS : process.env.EMAIL_REMINDER_INTERVAL_SUBSEQUENT_MINS ;
+
+  interval = interval || process.env.EMAIL_REMINDER_INTERVAL_SUBSEQUENT_MINS * 60 * 1000;
+  let startDate = lastReminderSent
+  lastReminderSent += interval;
+
+  const oneYearLater = Date.UTC(new Date().getUTCFullYear() + 1, new Date().getUTCMonth(), new Date().getUTCDate());
+  sendMail.sendEventReminders(lastReminderSent, oneYearLater);
+}
+sendReminders(process.env.EMAIL_REMINDER_INTERVAL_INITIAL_MINS * 60 * 1000);
+setInterval(sendReminders, process.env.EMAIL_REMINDER_INTERVAL_SUBSEQUENT_MINS * 60 * 1000);
 
 const PORT = process.env.PORT || 3000;
 
