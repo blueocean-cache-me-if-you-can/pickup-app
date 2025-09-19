@@ -24,7 +24,10 @@ function IconInfo({
   return (
     <Group h={size} style={{ minWidth: 0, flexGrow: 1 }}>
       <AspectRatio ratio={1} w={size} style={{ minWidth: 0 }}>
-        <IconComponent style={{ width: '100%', height: '100%', minWidth: '16px', fill: grayscale ? '#888' : undefined }} />
+        <IconComponent style={{
+          width: '100%', height: '100%', minWidth: '16px', fill: grayscale ? '#888' : undefined,
+        }}
+        />
       </AspectRatio>
       <Text size={size} tt='uppercase' style={{ minWidth: 0, flexGrow: 1, color: grayscale ? '#888' : undefined }}>{infoText}</Text>
     </Group>

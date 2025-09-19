@@ -13,6 +13,7 @@ import {
   getSkillLevels,
   getIntensityLevels,
 } from '../api';
+import useGeocodeAddress from '../hooks/useGeocodeAddress';
 
 function App() {
   const [user, setUser] = useState(
@@ -23,14 +24,12 @@ function App() {
   const [activities, setActivities] = useState([]);
   const [skillLevels, setSkillLevels] = useState([]);
   const [intensities, setIntensities] = useState([]);
+  const { resolveAddress } = useGeocodeAddress();
 
   // Handle user navigation and localStorage
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
-      if (!localStorage.getItem('firstLogin')) {
-        localStorage.setItem('firstLogin', 'true');
-      }
       if (['/login', '/signup', '/'].includes(location.pathname)) {
         navigate('/events', { replace: true });
       }
@@ -46,10 +45,6 @@ function App() {
   useEffect(() => {
     Promise.all([getActivities(), getSkillLevels(), getIntensityLevels()])
       .then(([activitiesRes, skillLevelsRes, intensitiesRes]) => {
-        console.log('Activities response:', activitiesRes);
-        console.log('Skill Levels response:', skillLevelsRes);
-        console.log('Intensity Levels response:', intensitiesRes);
-
         setActivities(activitiesRes);
         setSkillLevels(skillLevelsRes);
         setIntensities(intensitiesRes);
@@ -58,6 +53,29 @@ function App() {
         console.error('Error fetching reference data:', err);
       });
   }, []);
+
+  useEffect(() => {
+    const runGeocode = async () => {
+      if (user?.address && (!user.lat || !user.lng)) {
+        try {
+          const result = await resolveAddress(user.address);
+          if (result) {
+            const mergedUser = {
+              ...user,
+              address: result.address,
+              lat: result.lat,
+              lng: result.lng,
+            };
+            setUser(mergedUser);
+            localStorage.setItem('user', JSON.stringify(mergedUser));
+          }
+        } catch (err) {
+          console.error('Error resolving user address:', err);
+        }
+      }
+    };
+    runGeocode();
+  }, [user, resolveAddress]);
 
   return (
     <AppShell

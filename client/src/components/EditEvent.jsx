@@ -7,7 +7,7 @@ import {
   Text,
   ScrollArea,
 } from '@mantine/core';
-import { IconPlus } from '@tabler/icons-react';
+import { useDisclosure } from '@mantine/hooks';
 import PhotoPicker from './PhotoPicker';
 import EventFormInfo from './EventFormInfo';
 import EventFormDetails from './EventFormDetails';
@@ -15,15 +15,14 @@ import useEventSelectOptions from '../hooks/useEventSelectOptions';
 import useCreateEventForm from '../hooks/useCreateEventForm';
 import useImageUpload from '../hooks/useImageUpload';
 import useDateTimeFormatter from '../hooks/useDateTimeFormatter';
-import { createEvent } from '../api';
 
-function CreateEvent({
-  user,
+function EditEvent({
+  event,
   activities,
   skillLevels,
   intensities,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, { open, close }] = useDisclosure(false);
 
   const { sportOptions, skillOptions, intensityOptions } = useEventSelectOptions({
     activities,
@@ -36,66 +35,67 @@ function CreateEvent({
   const { formatEventDateTime } = useDateTimeFormatter();
 
   const handleSubmit = async (values) => {
-    let imageUrl = '';
-    try {
-      imageUrl = values.imageFile
-        ? await uploadEventImage(values.imageFile, { maxSizeMB: 25 })
-        : '';
-    } catch (error) {
-      console.error('error', error);
-      return;
-    } finally {
-      const dateTimeString = formatEventDateTime(values.date, values.time);
-  
-      const location = [values.lng, values.lat];
-  
-      const payload = {
-        title: values.title,
-        user_id: user._id,
-        activityId: values.sport,
-        skillId: values.skillLevel,
-        intensityId: values.intensity,
-        brief_description: values.summary,
-        description: values.description,
-        additional_info: values.instructions,
-        time: dateTimeString,
-        photo: imageUrl,
-        address: values.address,
-        minPlayers: values.minPlayers,
-        maxPlayers: values.maxPlayers,
-        coordinates: location,
-      };
-  
-      try {
-        const event = await createEvent(payload);
-        console.log('success event created', event);
-      } catch (error) {
-        console.error('error', error);
-      } finally {
-        setIsOpen(false);
-        form.reset();
-      }
-    }
+    const imageUrl = values.imageFile
+      ? await uploadEventImage(values.imageFile, { maxSizeMB: 25 })
+      : '';
+
+    const dateTimeString = formatEventDateTime(values.date, values.time);
+
+    // const location = [values.longitude, values.latitude];
+
+    const payload = {
+      title: values.title,
+      user_id: event.owner.user_id,
+      activityId: values.sport,
+      skillId: values.skillLevel,
+      intensityId: values.intensity,
+      brief_description: values.summary,
+      description: values.description,
+      additional_info: values.instructions,
+      time: dateTimeString,
+      imageUrl,
+      location: values.address,
+      minPlayers: values.minPlayers,
+      maxPlayers: values.maxPlayers,
+      latitude: values.lat,
+      longitude: values.lng,
+    };
+    console.log('payload', payload);
+
+    // e.preventDefault();
+    // const payload = form.values;
+    // console.log('CreateEvent payload:', payload);
+    // onCreate?.(payload);
+    close();
+    form.reset();
   };
 
   return (
     <>
-      <Button variant='filled' color='teal' onClick={() => setIsOpen(true)}>
-        <Group gap='xs'>
-          <IconPlus size={16} />
-          Create Event
-        </Group>
+      <Button 
+        m='xs'
+        variant='filled' 
+        fullWidth
+        data-no-expand
+        onClick={(e) => {
+            e.stopPropagation();
+            open();
+        }}
+      >
+        Edit
       </Button>
 
       <Modal
         opened={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => close()}
         size='80rem'
         radius='md'
         padding='lg'
         centered
-        title={<Text fw={600}>Create New Event</Text>}
+        title={<Text fw={600}>Edit Event</Text>}
         overlayProps={{ backgroundOpacity: 0.4, blur: 2 }}
+        // onClickCapture={(e) => e.stopPropagation() }
+        // closeOnClickOutside={false}
       >
         <form onSubmit={form.onSubmit(handleSubmit, (errors) => console.log('form errors', errors))}>
           <Stack align='flex-start' w='100%' mah='100%'>
@@ -121,8 +121,24 @@ function CreateEvent({
             </ScrollArea>
 
             <Group w='100%' justify='flex-end'>
-              <Button variant='default' onClick={() => setIsOpen(false)}>Cancel</Button>
-              <Button color='dark' type='submit'>Create Event</Button>
+                <Button 
+                    variant='default' 
+                    data-no-expand 
+                    onClick={(e) => { 
+                        e.stopPropagation(); 
+                        close(); 
+                    }}
+                >
+                    Cancel
+                </Button>
+                <Button 
+                    color='dark' 
+                    type='submit' 
+                    data-no-expand 
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    Create Event
+                </Button>
             </Group>
           </Stack>
         </form>
@@ -131,4 +147,4 @@ function CreateEvent({
   );
 }
 
-export default CreateEvent;
+export default EditEvent;
