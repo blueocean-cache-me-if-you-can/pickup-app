@@ -23,12 +23,13 @@ function EventsList({
       <ScrollArea h={height}>
         <Stack>
           {paginatedEvents.map((event) => (
-            <Event
+            <EventDetails
               key={event._id}
               event={event}
               activities={activities}
               intensities={intensities}
               skillLevels={skillLevels}
+              currentUserId={currentUserId}
             />
           ))}
         </Stack>
