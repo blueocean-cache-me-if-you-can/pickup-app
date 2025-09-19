@@ -18,23 +18,20 @@ exports.getUsers = async (req, res) => {
 exports.signUp = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    req.body.displayName = req.body.firstName + (req.body.lastName ? (' ' + req.body.lastName) : '');
+
     const newUser = new user({ ...req.body, password: hashedPassword });
     const savedUser = await newUser.save();
     const userObj = savedUser.toObject();
     delete userObj.password;
     delete userObj.__v;
 
-    // mail.sendMailWithHtmlFile({
-    //   recipients: [{ email: userObj.emailPrimary }],
-    //   subject: 'Welcome to Blue Ocean Pickup!',
-    //   text: `Hello ${userObj.firstName},\n\nThank you for signing up for Blue Ocean Pickup! We're excited to have you on board.\n\nBest regards,\nBlue Ocean Pickup Team`,
-    //   htmlFile: 'createAccount.html'
-    // });
 
     mail.sendMailWithHtmlFileAndParams({
       recipients: [{ email: userObj.emailPrimary }],
-      subject: 'Welcome to Blue Ocean Pickup!',
-      text: `Hello ${userObj.firstName},\n\nThank you for signing up for Blue Ocean Pickup! We're excited to have you on board.\n\nBest regards,\nBlue Ocean Pickup Team`,
+      subject: `Welcome to ${process.env.EMAIL_SITE_LABEL}!`,
+      text: `Hello ${userObj.firstName},\n\nThank you for signing up for ${process.env.EMAIL_SITE_LABEL}! We're excited to have you on board.\n\nBest regards,\n${process.env.EMAIL_SITE_LABEL} Team`,
+
       htmlFile: 'createAccount.html',
       htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
     });
