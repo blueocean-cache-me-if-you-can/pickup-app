@@ -15,7 +15,7 @@ function PrimaryFilter({
 }) {
   const [menuOpened, setMenuOpened] = useState(false);
 
-  const initialSelected = React.useMemo(() => type === 'checkbox' ? [] : Math.max(...values), [type, values]);
+  const initialSelected = React.useMemo(() => (type === 'checkbox' ? [] : Math.max(...values)), [type, values]);
   const [committed, setCommitted] = useState(value ?? initialSelected);
   const [selected, setSelected] = useState(value ?? initialSelected);
 

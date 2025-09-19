@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Stack, Button, Group, Text, ScrollArea } from '@mantine/core';
-import Event from './Event';
+import {
+  Stack, Button, Group, Text, ScrollArea,
+} from '@mantine/core';
+import EventDetails from './EventDetails';
+// import Event from './Event';
 
 function EventsList({
   currentUserId, events, activities, intensities, skillLevels, height = '70vh',
@@ -19,7 +22,7 @@ function EventsList({
     <ScrollArea h={height}>
       <Stack>
         {paginatedEvents.map((event) => (
-          <Event
+          <EventDetails
             key={event.id}
             event={event}
             activities={activities}
