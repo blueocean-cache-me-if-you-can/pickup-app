@@ -89,3 +89,12 @@ exports.createEvent = async (req, res) => {
     res.status(400).json({ error: 'Failed to create event', details: err.message });
   }
 };
+
+exports.updateEvent = async (req, res) => {
+  try {
+    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.status(200).json(updatedEvent);
+  } catch (err) {
+    res.status(400).json({ error: 'Failed to update event', details: err.message });
+  }
+};
