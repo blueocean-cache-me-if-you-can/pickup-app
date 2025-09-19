@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Container, SegmentedControl, Flex, Space, Select, Title, Box, Group, Text,
 } from '@mantine/core';
@@ -7,7 +7,6 @@ import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
 import EventsList from '../components/EventsList';
-// import { events } from '../data';
 import { getEvents } from '../api';
 
 function Events({
@@ -19,17 +18,43 @@ function Events({
   const [selectedSkillLevels, setSelectedSkillLevels] = useState([]);
   const [selectedIntensity, setSelectedIntensity] = useState([]);
   const [selectedDistance, setSelectedDistance] = useState(20);
-  const [selectedSort, setSelectedSort] = useState('distance'); // for events-near-me
+  const [selectedSort, setSelectedSort] = useState('distance');
   const [selectedUpcomingSort, setSelectedUpcomingSort] = useState('dateUpcoming');
   const [selectedPastSort, setSelectedPastSort] = useState('datePast');
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 
   const form = useForm({
     initialValues: {
       address: user?.address || '',
-      lat: user?.lat || null,
-      lng: user?.lng || null,
     },
   });
+
+  const [confirmedCoords, setConfirmedCoords] = useState({ lat: null, lng: null });
+
+  useEffect(() => {
+    if (user?.lat && user?.lng) {
+      setConfirmedCoords({ lat: user.lat, lng: user.lng });
+    }
+  }, [user]);
+
+  const sortDirections = useMemo(() => ({
+    distance: false,
+    dateUpcoming: false,
+    datePast: true,
+  }), []);
+
+  const orderByDesc = sortDirections[selectedSort] ?? false;
+
+  // State for API params
+  const [eventsNearMeParams, setEventsNearMeParams] = useState({});
+  const [upcomingParams, setUpcomingParams] = useState({});
+  const [pastParams, setPastParams] = useState({});
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  const [events, setEvents] = useState([]);
+  const [upcomingMyEvents, setUpcomingMyEvents] = useState([]);
+  const [pastMyEvents, setPastMyEvents] = useState([]);
+
   // Clear filters when view changes
   useEffect(() => {
     setSelectedActivities([]);
@@ -40,151 +65,87 @@ function Events({
     setSelectedUpcomingSort('dateUpcoming');
     setSelectedPastSort('datePast');
   }, [view]);
-  const sortDirections = React.useMemo(() => ({
-    distance: false,
-    dateUpcoming: false,
-    datePast: true,
-  }), []);
-  const orderByDesc = sortDirections[selectedSort] ?? false;
-  // Debugging state to view filter params being sent to backend
-  const [debugParams, setDebugParams] = useState({});
-  // TODO: Call API in a useEffect:
-  // - GET /api/events with params above for "Events Near Me"
-  // - GET /api/events with params above for "My Upcoming Events"
-  // - GET /api/events with params above for "My Past Events" DO NOT APPLY FILTERS
 
-  // State for params and last updated
-  const [eventsNearMeParams, setEventsNearMeParams] = useState({});
-  const [upcomingParams, setUpcomingParams] = useState({});
-  const [pastParams, setPastParams] = useState({});
-  const [lastUpdated, setLastUpdated] = useState(null); // 'eventsNearMe' | 'upcoming' | 'past'
-  const [events, setEvents] = useState([]); // for events-near-me
-  const [upcomingMyEvents, setUpcomingMyEvents] = useState([]); // for my-events upcoming
-  const [pastMyEvents, setPastMyEvents] = useState([]); // for my-events past
+  // Build filter helper
+  const buildFilter = () => {
+    const filter = {};
+    const activityArr = activities
+      .filter(a => selectedActivities.includes(a.name))
+      .map(a => a._id);
+    if (activityArr.length) filter.activity = activityArr;
+
+    const skillLevelArr = skillLevels
+      .filter(s => selectedSkillLevels.includes(s.name))
+      .map(s => s._id);
+    if (skillLevelArr.length) filter.skillLevel = skillLevelArr;
+
+    const intensityArr = intensities
+      .filter(i => selectedIntensity.includes(i.name))
+      .map(i => i._id);
+    if (intensityArr.length) filter.intensity = intensityArr;
+
+    filter.distance = selectedDistance;
+    return filter;
+  };
 
   // Update params when dependencies change
   useEffect(() => {
-    // Helper to build filter object with only non-empty arrays
-    const buildFilter = () => {
-      const filter = {};
-      const activityArr = activities
-        .filter((activity) => selectedActivities.includes(activity.name))
-        .map((a) => a._id);
-      if (activityArr.length) {
-        filter.activity = activityArr;
-      }
-      const skillLevelArr = skillLevels
-        .filter((level) => selectedSkillLevels.includes(level.name))
-        .map((s) => s._id);
-      if (skillLevelArr.length) {
-        filter.skillLevel = skillLevelArr;
-      }
-      const intensityArr = intensities
-        .filter((intensity) => selectedIntensity.includes(intensity.name))
-        .map((i) => i._id);
-      if (intensityArr.length) {
-        filter.intensity = intensityArr;
-      }
-      filter.distance = selectedDistance;
-      return filter;
+    if (view !== 'events-near-me') return;
+    if (!confirmedCoords.lat || !confirmedCoords.lng) return;
+
+    const params = {
+      finished: false,
+      sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
+      orderByDesc,
+      filter: buildFilter(),
+      coordinates: [confirmedCoords.lng, confirmedCoords.lat],
     };
 
-    if (view === 'events-near-me') {
-      const params = {
-        finished: false,
-        sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
-        orderByDesc,
-        filter: buildFilter(),
-        coordinates: [form.values.lng, form.values.lat],
-      };
-      setEventsNearMeParams(params);
-      setLastUpdated('eventsNearMe');
-    } else if (view === 'my-events') {
-      const upcoming = {
-        user_id: user._id,
-        finished: false,
-        sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
-        orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
-        filter: buildFilter(),
-      };
-      setUpcomingParams(upcoming);
-      setLastUpdated('upcoming');
-
-      const past = {
-        user_id: user._id,
-        finished: true,
-        sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
-        orderByDesc: sortDirections[selectedPastSort] ?? true,
-      };
-      setPastParams(past);
-      setLastUpdated('past');
-    }
+    setEventsNearMeParams(params);
+    setLastUpdated('eventsNearMe');
   }, [
-    activities,
-    intensities,
-    skillLevels,
+    view,
+    confirmedCoords,
     selectedActivities,
     selectedSkillLevels,
     selectedIntensity,
     selectedDistance,
-    selectedSort,
-    selectedUpcomingSort,
-    selectedPastSort,
-    user,
-    view,
-    orderByDesc,
-    sortDirections,
-    form.values.address, form.values.lat, form.values.lng,
+    selectedSort
   ]);
 
-  // Call getEvents when params change
+
+  // Fetch events
   useEffect(() => {
     async function fetchEvents() {
-      if (lastUpdated === 'eventsNearMe') {
-        console.log('Fetching Events Near Me with params:', eventsNearMeParams);
-        try {
+      try {
+        setIsLoadingEvents(true);
+        if (lastUpdated === 'eventsNearMe') {
           const res = await getEvents(eventsNearMeParams);
           setEvents(res);
-        } catch (err) {
-          console.error('Error fetching Events Near Me:', err);
-          setEvents([]);
-        }
-      } else if (lastUpdated === 'upcoming') {
-        console.log('Fetching My Upcoming Events with params:', upcomingParams);
-        try {
+        } else if (lastUpdated === 'upcoming') {
           const res = await getEvents(upcomingParams);
           setUpcomingMyEvents(res);
-        } catch (err) {
-          console.error('Error fetching My Upcoming Events:', err);
-          setUpcomingMyEvents([]);
-        }
-      } else if (lastUpdated === 'past') {
-        console.log('Fetching My Past Events with params:', pastParams);
-        try {
+        } else if (lastUpdated === 'past') {
           const res = await getEvents(pastParams);
           setPastMyEvents(res);
-        } catch (err) {
-          console.error('Error fetching My Past Events:', err);
-          setPastMyEvents([]);
         }
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        if (lastUpdated === 'eventsNearMe') setEvents([]);
+        if (lastUpdated === 'upcoming') setUpcomingMyEvents([]);
+        if (lastUpdated === 'past') setPastMyEvents([]);
+      } finally {
+        setIsLoadingEvents(false);
       }
     }
     fetchEvents();
   }, [eventsNearMeParams, upcomingParams, pastParams, lastUpdated]);
 
-  useEffect(() => {
-    setDebugParams({
-      'Events Near Me': eventsNearMeParams,
-      'My Upcoming Events': upcomingParams,
-      'My Past Events': pastParams,
-    });
-  }, [eventsNearMeParams, upcomingParams, pastParams]);
-
   return (
     <Container size='lg'>
       <Space h='md' />
 
-      {/* View toggle & filter */}
+      {/* View toggle */}
       <Flex justify='center' mt='md' mb='xl'>
         <SegmentedControl
           fullWidth
@@ -202,25 +163,22 @@ function Events({
         <Title size='h4'>Filter by: </Title>
         <PrimaryFilter
           label='Activities'
-          values={activities.map((a) => a.name)}
+          values={activities.map(a => a.name)}
           value={selectedActivities}
           onChange={setSelectedActivities}
         />
-
         <PrimaryFilter
           label='Skill Levels'
-          values={skillLevels.map((level) => level.name)}
+          values={skillLevels.map(s => s.name)}
           value={selectedSkillLevels}
           onChange={setSelectedSkillLevels}
         />
-
         <PrimaryFilter
           label='Intensities'
-          values={intensities.map((i) => i.name)}
+          values={intensities.map(i => i.name)}
           value={selectedIntensity}
           onChange={setSelectedIntensity}
         />
-
         <PrimaryFilter
           label='Distance'
           type='slider'
@@ -235,13 +193,12 @@ function Events({
           <Group justify='space-between' mb='xl' gap='lg'>
             <AddressPicker
               value={form.values.address}
-              onChange={(val) => form.setFieldValue('address', val)}
+              onChange={val => form.setFieldValue('address', val)}
               onResolved={({ address, lat, lng }) => {
+                setConfirmedCoords({ lat, lng });
                 if (address && address !== form.values.address) {
                   form.setFieldValue('address', address);
                 }
-                form.setFieldValue('lat', lat);
-                form.setFieldValue('lng', lng);
               }}
             />
             <Select
@@ -254,13 +211,17 @@ function Events({
               onChange={setSelectedSort}
             />
           </Group>
-          {Array.isArray(events) && events.length === 0 ? <Text>No events found.</Text> : (
+          {isLoadingEvents ? (
+            <Flex justify='center'><Text>Loading events...</Text></Flex>
+          ) : Array.isArray(events) && events.length === 0 ? (
+            <Flex justify='center'><Text>Sorry! No events found.</Text></Flex>
+          ) : (
             <EventsList
               events={events}
               activities={activities}
               intensities={intensities}
               skillLevels={skillLevels}
-              currentUserId={user._id}
+              currentUserId={user?._id || null}
             />
           )}
         </Box>
@@ -268,7 +229,7 @@ function Events({
 
       {view === 'my-events' && (
         <MyEvents
-          currentUserId={user._id}
+          currentUserId={user?._id || null}
           selectedUpcomingSort={selectedUpcomingSort}
           setSelectedUpcomingSort={setSelectedUpcomingSort}
           selectedPastSort={selectedPastSort}
@@ -280,12 +241,6 @@ function Events({
           pastEvents={pastMyEvents}
         />
       )}
-
-      {/* debug my filter params here:  */}
-
-      <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
-        {JSON.stringify(debugParams, null, 2)}
-      </pre>
       <Space h='xl' />
     </Container>
   );
