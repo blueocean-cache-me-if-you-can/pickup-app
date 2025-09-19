@@ -27,14 +27,8 @@ import useImageUpload from '../hooks/useImageUpload';
 
 export default function Profile({ user, setUser, activities, skillLevels }) {
   const [selectedSports, setSelectedSports] = useState({});
-  const [showFirstLoginMsg, setShowFirstLoginMsg] = useState(false);
+  const [showMoreInfoAlert, setShowMoreInfoAlert] = useState(false);
   const [editPassword, setEditPassword] = useState(false);
-
-  useEffect(() => {
-    if (localStorage.getItem('firstLogin') === 'true') {
-      setShowFirstLoginMsg(true);
-    }
-  }, []);
 
   const form = useForm({
     initialValues: {
@@ -67,6 +61,31 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
     },
   });
 
+  const isProfileComplete = () => {
+    if (!user) return false;
+
+    const requiredFields = [
+      'displayName',
+      'firstName',
+      'lastName',
+      'address',
+      'emailPrimary',
+      'photo',
+    ];
+
+    const basicFieldsFilled = requiredFields.every((field) => !!user[field]);
+
+    const hasActivitySelected = (user.activities || []).some(
+      (act) => !!act.skillLevelId,
+    );
+
+    return basicFieldsFilled && hasActivitySelected;
+  };
+
+  useEffect(() => {
+    setShowMoreInfoAlert(!isProfileComplete());
+  }, [user, selectedSports]);
+
   useEffect(() => {
     if (user) {
       form.setValues({
@@ -76,9 +95,10 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
         preferredAddress: user.address || '',
         email: user.emailPrimary || '',
         sports: user.activities || {},
+        lat: user?.lat || null,
+        lng: user?.lng || null,
       });
 
-      // Transform activities array into selectedSports object
       const initialSports = {};
       (user.activities || []).forEach((act) => {
         const skillLevel = skillLevels.find((level) => level._id === act.skillLevelId);
@@ -111,12 +131,12 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
   const handleSubmit = async (values) => {
     const imageUrl = values.photo
       ? await uploadEventImage(values.photo, { maxSizeMB: 25 })
-      : '';
+      : user?.photo;
 
     const activitiesArray = Object.entries(selectedSports)
       .map(([activityId, skillLevelName]) => {
         const skillLevel = skillLevels.find((lvl) => lvl.name === skillLevelName);
-        if (!skillLevel) return null; // skip invalid entries
+        if (!skillLevel) return null;
         return {
           activityId,
           skillLevelId: skillLevel._id,
@@ -141,16 +161,23 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
       const updated = await updateUser(user._id, payload);
       console.log('User updated successfully:', updated);
 
-      setUser(updated);
-      localStorage.setItem('user', JSON.stringify(updated));
+      const mergedUser = {
+        ...updated,
+        lat:
+          values.preferredAddress === user?.preferredAddress
+            ? user?.lat
+            : values.lat,
+        lng:
+          values.preferredAddress === user?.preferredAddress
+            ? user?.lng
+            : values.lng,
+      };
+
+      setUser(mergedUser);
+      localStorage.setItem('user', JSON.stringify(mergedUser));
 
       setEditPassword(false);
       form.setFieldValue('password', '');
-
-      if (localStorage.getItem('firstLogin') === 'true') {
-        localStorage.removeItem('firstLogin');
-        setShowFirstLoginMsg(false);
-      }
     } catch (err) {
       console.error('Failed to update user:', err);
     }
@@ -163,9 +190,9 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
   return (
     <Container size={500}>
       <Space h='lg' />
-      {showFirstLoginMsg && (
+      {showMoreInfoAlert && (
         <Alert variant='light' color='teal' title='Info Needed' icon={<IconInfoCircle size={20} />}>
-          <Text size='xs'>Please fill out the required fields in your profile.</Text>
+          <Text size='xs'>Please fill out the additional fields in your profile.</Text>
         </Alert>
       )}
 
@@ -212,7 +239,19 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
           />
 
           {/* Preferred Address */}
-          <AddressPicker />
+          <AddressPicker
+            value={form.values.preferredAddress}
+            onChange={(val) => form.setFieldValue('preferredAddress', val)}
+            onResolved={({ preferredAddress, lat, lng }) => {
+              if (preferredAddress && preferredAddress !== form.values.preferredAddress) {
+                form.setFieldValue('preferredAddress', preferredAddress);
+              }
+              if (lat && lng) {
+                form.setFieldValue('lat', lat);
+                form.setFieldValue('lng', lng);
+              }
+            }}
+          />
         </Stack>
 
         <Space h='md' />
