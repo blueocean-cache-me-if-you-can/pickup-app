@@ -14,14 +14,14 @@ import EventCard from './EventCard';
 import Event from './Event';
 import IconInfo from './IconInfo';
 import AttendeesRatio from './AttendeesRatio';
-import useGeocodeAddress from '../hooks/useGeocodeAddress';
 import AttendingPlayers from './AttendingPlayers';
 
 function EventDetails({ event, activities, intensities, skillLevels, isPast = false, currentUserId }) {
   console.log('event', event);
   const [isOpen, setIsOpen] = useState(false);
   const grayscale = isPast || new Date(event.time) < new Date();
-  const { lng, lat } = useGeocodeAddress(event.address);
+  const [lng, lat] = event.coordinates;
+  const mapUrl = `https://maps.google.com/maps?q=${lat},${lng}&hl=en&z=14&output=embed`;
 
   const modalOnClick = (e) => {
     // bug fix: prevents the event modal from triggering when edit modal opens and closes
@@ -81,11 +81,11 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
                   <Anchor size='xs' fw={600} underline='always' c='black'>{event.address}</Anchor>
                   <AspectRatio ratio={16/9} w='100%'>
                     <iframe
-                      src={`https://maps.google.com/maps?q=${lat},${lng}&hl=en&z=14&output=embed`}
+                      src={mapUrl}
                       width='100%'
                       height='100%'
                       title='Event location map'
-                      style={{ border: 0, pointerEvents: 'none' }}
+                      style={{ border: 0}}
                       loading='lazy'
                       referrerPolicy='no-referrer-when-downgrade'
                       allowFullScreen
