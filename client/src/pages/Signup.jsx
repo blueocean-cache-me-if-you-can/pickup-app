@@ -1,3 +1,4 @@
+// client/pages/Signup.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -7,62 +8,67 @@ import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import Logo from '../components/Logo';
 import AddressPicker from '../components/AddressPicker';
+import { signUp } from '../api';
 
-function Signup({ setSessionId }) {
+function Signup({ setUser }) {
   const form = useForm({
     initialValues: {
       firstName: '',
       lastName: '',
-      address: 'GET FROM AddressPicker',
+      address: '',
       email: '',
       password: '',
       confirmPassword: '',
+      atLeastEighteen: false,
     },
     validate: {
+      firstName: (value) => (value.trim().length > 0 ? null : 'Required'),
+      lastName: (value) => (value.trim().length > 0 ? null : 'Required'),
       email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-      confirmPassword: (value, values) => (value === values.password ? null : 'Passwords must match'),
+      password: (value) => {
+        if (!value) return 'Password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
+        return null;
+      },
+
+      confirmPassword: (value, values) => {
+        if (!value) return 'Confirm password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
+        if (value !== values.password) return 'Passwords must match';
+        return null;
+      },
+      atLeastEighteen: (value) => (value ? null : 'You must confirm you are at least 18'),
     },
   });
+
   const [visible, { toggle }] = useDisclosure(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
   const handleSubmit = async (formValues) => {
-    console.log('Will signup with:\nfirst name:', formValues.firstName, 'last name:', formValues.lastName, 'address:', formValues.address, 'email:', formValues.email, 'password:', formValues.password);
     if (formValues.password !== formValues.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    setError('');
-    setSessionId('1234567890'); // temporary for testing without backend
-    // redirect to onboarding page after signup
-    navigate('/profile', { replace: true });
-    // try {
-    //   const res = await fetch('/api/users/signup', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({
-    //       firstName: formValues.firstName,
-    //       lastName: formValues.lastName,
-    //       email: formValues.email,
-    //       password: formValues.password,
-    //       address: formValues.address,
-    //       atLeastEighteen: true,
-    //     }),
-    //   });
-    //   const data = await res.json();
-    //   if (res.ok) {
-    //     setSessionId(data.sessionId);
-    //   } else {
-    //     setError(data.error || 'Signup failed');
-    //   }
-    // } catch (err) {
-    //   // setError('Network error');
-    //   console.error('This error is expected in development without a backend', err);
-    //   setSessionId('1234567890'); // temporary for testing without backend
-    //   // redirect to onboarding page after signup
-    //   navigate('/profile', { replace: true });
-    // }
+
+    try {
+      const newUser = await signUp({
+        firstName: formValues.firstName,
+        lastName: formValues.lastName,
+        emailPrimary: formValues.email,
+        password: formValues.password,
+        address: formValues.address,
+        atLeastEighteen: true,
+      });
+      setUser(newUser);
+
+      navigate('/profile', { replace: true });
+    } catch (err) {
+      console.error('Signup failed:', err);
+      setError(err.response?.data?.error || 'Signup failed');
+    }
   };
+
   return (
     <div style={{
       display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',
@@ -71,9 +77,7 @@ function Signup({ setSessionId }) {
       <Box>
         <form
           onSubmit={form.onSubmit((values) => handleSubmit(values))}
-          style={{
-            maxWidth: 350, margin: 'auto',
-          }}
+          style={{ maxWidth: 350, margin: 'auto' }}
         >
           <Stack gap='xs'>
             <Logo showText />
@@ -85,7 +89,6 @@ function Signup({ setSessionId }) {
                 key={form.key('firstName')}
                 {...form.getInputProps('firstName')}
                 flex={1}
-                required
               />
               <TextInput
                 withAsterisk
@@ -94,17 +97,23 @@ function Signup({ setSessionId }) {
                 key={form.key('lastName')}
                 {...form.getInputProps('lastName')}
                 flex={1}
-                required
               />
             </Group>
-            <AddressPicker />
+            <AddressPicker
+              value={form.values.address}
+              onChange={(val) => form.setFieldValue('address', val)}
+              onResolved={({ address }) => {
+                if (address && address !== form.values.address) {
+                  form.setFieldValue('address', address);
+                }
+              }}
+            />
             <TextInput
               withAsterisk
               label='Email'
               placeholder='your@email.com'
               key={form.key('email')}
               {...form.getInputProps('email')}
-              required
             />
             <PasswordInput
               label='Password'
@@ -114,7 +123,6 @@ function Signup({ setSessionId }) {
               withAsterisk
               key={form.key('password')}
               {...form.getInputProps('password')}
-              required
             />
             <PasswordInput
               label='Confirm Password'
@@ -124,15 +132,15 @@ function Signup({ setSessionId }) {
               withAsterisk
               key={form.key('confirmPassword')}
               {...form.getInputProps('confirmPassword')}
-              withErrorStyles={false}
-              required
             />
-            <Checkbox label='I confirm I am at least 18 years old' required />
+            <Checkbox
+              label='I confirm I am at least 18 years old'
+              {...form.getInputProps('atLeastEighteen', { type: 'checkbox' })}
+            />
             <Button variant='filled' fullWidth type='submit'>Sign Up</Button>
             {error && <div style={{ color: 'red' }}>{error}</div>}
             <Text size='sm' ta='center'>
-              Already have an account?
-              {' '}
+              Already have an account?{' '}
               <Link to='/login' style={{ textDecoration: 'underline' }}>Log in</Link>
             </Text>
           </Stack>
@@ -144,4 +152,5 @@ function Signup({ setSessionId }) {
     </div>
   );
 }
+
 export default Signup;

@@ -8,56 +8,38 @@ import {
   PasswordInput,
   Button,
   Checkbox,
-  Slider,
   Box,
   Title,
   Stack,
   Divider,
   Space,
+  Select,
+  MantineProvider,
+  createTheme,
+  Group,
 } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import PhotoPicker from '../components/PhotoPicker';
 import AddressPicker from '../components/AddressPicker';
+import { updateUser } from '../api';
+import useImageUpload from '../hooks/useImageUpload';
 
-export default function Profile({ activities = [], skillLevels = [] }) {
+export default function Profile({ user, setUser, activities, skillLevels }) {
   const [selectedSports, setSelectedSports] = useState({});
-  const [showFirstLoginMsg, setShowFirstLoginMsg] = useState(false);
-
-  // TODO: Remove placeholder data when backend is ready
-  const placeholderActivities = [
-    { id: '301', name: 'Pickleball' },
-    { id: '302', name: 'Volleyball' },
-    { id: '303', name: 'Basketball' },
-    { id: '304', name: 'Ultimate Frisbee' },
-    { id: '305', name: 'Kickball' },
-  ];
-
-  const placeholderSkillLevels = [
-    { id: '501', name: 'Beginner', displayOrder: 1 },
-    { id: '502', name: 'Intermediate', displayOrder: 2 },
-    { id: '503', name: 'Expert', displayOrder: 3 },
-  ];
-
-  const activitiesToUse = activities.length > 0 ? activities : placeholderActivities;
-  const skillLevelsToUse = skillLevels.length > 0 ? skillLevels : placeholderSkillLevels;
-
-  useEffect(() => {
-    if (localStorage.getItem('firstLogin') === 'true') {
-      setShowFirstLoginMsg(true);
-    }
-  }, []);
+  const [showMoreInfoAlert, setShowMoreInfoAlert] = useState(false);
+  const [editPassword, setEditPassword] = useState(false);
 
   const form = useForm({
     initialValues: {
       displayName: '',
-      firstName: '',
-      lastName: '',
-      preferredAddress: '',
-      email: '',
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      preferredAddress: user?.address || '',
+      email: user?.emailPrimary || '',
       password: '',
       photo: null,
-      sports: {},
+      sports: user?.activities || {},
     },
 
     validate: {
@@ -71,13 +53,62 @@ export default function Profile({ activities = [], skillLevels = [] }) {
         return 'Please enter a valid email';
       },
       password: (value) => {
-        if (value.length < 6) {
-          return 'Password must be at least 6 characters';
-        }
+        if (!editPassword) return null;
+        if (!value) return 'Password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
         return null;
       },
     },
   });
+
+  const isProfileComplete = () => {
+    if (!user) return false;
+
+    const requiredFields = [
+      'displayName',
+      'firstName',
+      'lastName',
+      'address',
+      'emailPrimary',
+      'photo',
+    ];
+
+    const basicFieldsFilled = requiredFields.every((field) => !!user[field]);
+
+    const hasActivitySelected = (user.activities || []).some(
+      (act) => !!act.skillLevelId,
+    );
+
+    return basicFieldsFilled && hasActivitySelected;
+  };
+
+  useEffect(() => {
+    setShowMoreInfoAlert(!isProfileComplete());
+  }, [user, selectedSports]);
+
+  useEffect(() => {
+    if (user) {
+      form.setValues({
+        displayName: user.displayName || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        preferredAddress: user.address || '',
+        email: user.emailPrimary || '',
+        sports: user.activities || {},
+        lat: user?.lat || null,
+        lng: user?.lng || null,
+      });
+
+      const initialSports = {};
+      (user.activities || []).forEach((act) => {
+        const skillLevel = skillLevels.find((level) => level._id === act.skillLevelId);
+        if (skillLevel) {
+          initialSports[act.activityId] = skillLevel.name;
+        }
+      });
+      setSelectedSports(initialSports);
+    }
+  }, [user, skillLevels]);
 
   const toggleSport = (sport) => {
     setSelectedSports((prev) => {
@@ -95,21 +126,73 @@ export default function Profile({ activities = [], skillLevels = [] }) {
     setSelectedSports((prev) => ({ ...prev, [sport]: value }));
   };
 
-  const handleSubmit = (values) => {
-    if (localStorage.getItem('firstLogin') === 'true') {
-      localStorage.removeItem('firstLogin');
-      setShowFirstLoginMsg(false);
-    }
+  const { uploadEventImage } = useImageUpload();
 
-    console.log('Form submitted:', { ...values, sports: selectedSports });
+  const handleSubmit = async (values) => {
+    const imageUrl = values.photo
+      ? await uploadEventImage(values.photo, { maxSizeMB: 25 })
+      : user?.photo;
+
+    const activitiesArray = Object.entries(selectedSports)
+      .map(([activityId, skillLevelName]) => {
+        const skillLevel = skillLevels.find((lvl) => lvl.name === skillLevelName);
+        if (!skillLevel) return null;
+        return {
+          activityId,
+          skillLevelId: skillLevel._id,
+        };
+      })
+      .filter(Boolean);
+
+    const payload = {
+      displayName: values.displayName,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      emailPrimary: values.email,
+      address: values.preferredAddress,
+      photo: imageUrl,
+      activities: activitiesArray,
+      ...(editPassword && values.password ? { password: values.password } : {}),
+    };
+
+    console.log(payload);
+
+    try {
+      const updated = await updateUser(user._id, payload);
+      console.log('User updated successfully:', updated);
+
+      const mergedUser = {
+        ...updated,
+        lat:
+          values.preferredAddress === user?.preferredAddress
+            ? user?.lat
+            : values.lat,
+        lng:
+          values.preferredAddress === user?.preferredAddress
+            ? user?.lng
+            : values.lng,
+      };
+
+      setUser(mergedUser);
+      localStorage.setItem('user', JSON.stringify(mergedUser));
+
+      setEditPassword(false);
+      form.setFieldValue('password', '');
+    } catch (err) {
+      console.error('Failed to update user:', err);
+    }
   };
+
+  const theme = createTheme({
+    cursorType: 'pointer',
+  });
 
   return (
     <Container size={500}>
       <Space h='lg' />
-      {showFirstLoginMsg && (
+      {showMoreInfoAlert && (
         <Alert variant='light' color='teal' title='Info Needed' icon={<IconInfoCircle size={20} />}>
-          <Text size='xs'>Please fill out the required fields in your profile.</Text>
+          <Text size='xs'>Please fill out the additional fields in your profile.</Text>
         </Alert>
       )}
 
@@ -122,8 +205,14 @@ export default function Profile({ activities = [], skillLevels = [] }) {
         <Stack>
           {/* Photo Picker */}
           <PhotoPicker
+            size={120}
             value={form.values.photo}
             onChange={(file) => form.setFieldValue('photo', file)}
+            onError={(msg) => form.setFieldError('photo', msg)}
+            maxSizeMB={5}
+            style={{ flex: '0 0 160px' }}
+            mode='profile'
+            initialUrl={user?.photo || null}
           />
 
           {/* Display Name */}
@@ -150,7 +239,19 @@ export default function Profile({ activities = [], skillLevels = [] }) {
           />
 
           {/* Preferred Address */}
-          <AddressPicker />
+          <AddressPicker
+            value={form.values.preferredAddress}
+            onChange={(val) => form.setFieldValue('preferredAddress', val)}
+            onResolved={({ preferredAddress, lat, lng }) => {
+              if (preferredAddress && preferredAddress !== form.values.preferredAddress) {
+                form.setFieldValue('preferredAddress', preferredAddress);
+              }
+              if (lat && lng) {
+                form.setFieldValue('lat', lat);
+                form.setFieldValue('lng', lng);
+              }
+            }}
+          />
         </Stack>
 
         <Space h='md' />
@@ -160,30 +261,33 @@ export default function Profile({ activities = [], skillLevels = [] }) {
         {/* Activity Info */}
         <Title order={2} mb='sm' size='h4'>Activity Info</Title>
         <Stack>
-          {activitiesToUse.map((activity) => (
-            <Box key={activity.id}>
-              <Checkbox
-                label={activity.name}
-                checked={!!selectedSports[activity.id]}
-                onChange={() => toggleSport(activity.id)}
-                size='xs'
-              />
-              {selectedSports[activity.id] && (
-                <Box mt='lg' mb='lg'>
-                  <Slider
+          {activities.map((activity) => (
+            <Box key={activity._id}>
+              <Group align='center' grow>
+                <MantineProvider theme={theme}>
+                  <Checkbox
                     color='teal'
-                    size='md'
-                    min={1}
-                    max={3}
-                    step={1}
-                    value={selectedSports[activity.key]}
-                    onChange={(val) => handleSkillChange(activity.id, val)}
-                    marks={skillLevelsToUse.map((level) => ({
-                      value: parseInt(level.displayOrder, 10), label: level.name,
-                    }))}
+                    label={activity.name}
+                    checked={!!selectedSports[activity._id]}
+                    onChange={() => toggleSport(activity._id)}
+                    size='xs'
                   />
-                </Box>
-              )}
+                </MantineProvider>
+                {selectedSports[activity._id] && (
+                  <Box>
+                    <Select
+                      size='xs'
+                      placeholder='Select skill level'
+                      value={selectedSports[activity._id] || ''}
+                      onChange={(val) => handleSkillChange(activity._id, val)}
+                      data={skillLevels.map((level) => ({
+                        value: level.name,
+                        label: level.name,
+                      }))}
+                    />
+                  </Box>
+                )}
+              </Group>
             </Box>
           ))}
         </Stack>
@@ -202,12 +306,30 @@ export default function Profile({ activities = [], skillLevels = [] }) {
             placeholder='Enter email'
             {...form.getInputProps('email')}
           />
+          <Space h='xs' />
 
-          {/* Password */}
+          <Checkbox
+            label='Change Password'
+            disabled={editPassword}
+            checked={editPassword}
+            onChange={(e) => {
+              const checked = e.currentTarget.checked;
+              if (!checked && form.values.password) {
+                return;
+              }
+              setEditPassword(checked);
+              if (!checked) {
+                // Reset password value if unchecking
+                form.setFieldValue('password', '');
+              }
+            }}
+          />
+
+          {/* Password input */}
           <PasswordInput
-            withAsterisk
-            label='Password'
-            placeholder='Enter password'
+            withAsterisk={editPassword} // only required if checkbox is checked
+            label='New Password'
+            disabled={!editPassword}
             {...form.getInputProps('password')}
           />
         </Stack>
@@ -216,7 +338,7 @@ export default function Profile({ activities = [], skillLevels = [] }) {
         <Divider my='sm' />
         <Space h='md' />
 
-        <Button fullWidth type='submit'>Save Profile</Button>
+        <Button color='teal' fullWidth type='submit'>Save Profile</Button>
       </form>
 
       <Space h='xl' />

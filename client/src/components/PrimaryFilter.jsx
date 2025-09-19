@@ -11,23 +11,29 @@ import {
 import { IconChevronDown } from '@tabler/icons-react';
 
 function PrimaryFilter({
-  label, values, onChange, type = 'checkbox',
+  label, values, onChange, value, type = 'checkbox',
 }) {
   const [menuOpened, setMenuOpened] = useState(false);
 
-  const initialSelected = type === 'checkbox' ? [] : Math.max(...values);
-  const [committed, setCommitted] = useState(initialSelected);
-  const [selected, setSelected] = useState(initialSelected);
+  const initialSelected = React.useMemo(() => (type === 'checkbox' ? [] : Math.max(...values)), [type, values]);
+  const [committed, setCommitted] = useState(value ?? initialSelected);
+  const [selected, setSelected] = useState(value ?? initialSelected);
+
+  // Sync internal state with value prop
+  useEffect(() => {
+    setCommitted(value ?? initialSelected);
+    setSelected(value ?? initialSelected);
+  }, [value, initialSelected]);
 
   useEffect(() => {
     onChange(committed);
-  }, [committed]);
+  }, [committed, onChange]);
 
-  const toggleValue = (value) => {
+  const toggleValue = (val) => {
     if (type !== 'checkbox') return;
-    const newSelected = selected.includes(value)
-      ? selected.filter((v) => v !== value)
-      : [...selected, value];
+    const newSelected = selected.includes(val)
+      ? selected.filter((v) => v !== val)
+      : [...selected, val];
     setSelected(newSelected);
   };
 

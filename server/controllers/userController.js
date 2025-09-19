@@ -26,10 +26,12 @@ exports.signUp = async (req, res) => {
     delete userObj.password;
     delete userObj.__v;
 
+
     mail.sendMailWithHtmlFileAndParams({
       recipients: [{ email: userObj.emailPrimary }],
       subject: `Welcome to ${process.env.EMAIL_SITE_LABEL}!`,
       text: `Hello ${userObj.firstName},\n\nThank you for signing up for ${process.env.EMAIL_SITE_LABEL}! We're excited to have you on board.\n\nBest regards,\n${process.env.EMAIL_SITE_LABEL} Team`,
+
       htmlFile: 'createAccount.html',
       htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
     });
@@ -60,11 +62,13 @@ exports.login = async (req, res) => {
 };
 
 exports.patchUsers = async (req, res) => {
+  console.log('Update request for user:', req.query);
   try {
     if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 10);
     }
     const updatedUser = await user.findByIdAndUpdate(req.query.id, req.body, { new: true }); // Return the updated document
+    console.log(updatedUser);
     if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
     }

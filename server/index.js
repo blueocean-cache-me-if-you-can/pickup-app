@@ -1,5 +1,3 @@
-
-require('dotenv').config();
 const express = require('express');
 const logger = require('./middleware/logger');
 const sbdb = require('./db');
@@ -12,7 +10,9 @@ const intensityLevelRoutes = require("./routes/intensityLevelRoutes");
 const path = require('path');
 const uploadRoutes = require("./routes/uploadRoutes");
 const { Storage } = require('@google-cloud/storage');
+
 // const eventController = require('./controllers/eventController');
+
 const sendMail = require('./controllers/sendMail');
 
 
@@ -24,14 +24,6 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/dist')));
 app.use(logger);
-
-
-// Connecting to google cloud storage to upload images, creating a storage instance
-const storage = new Storage({
-  projectId: process.env.GCS_PROJECT_ID,
-  keyFilename: path.join(__dirname, process.env.PATH_TO_GCS_KEY),
-});
-const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
 
 // Server Routes
 app.use('/api/upload', uploadRoutes);
@@ -56,10 +48,12 @@ function sendReminders(interval) {
   let startDate = lastReminderSent
   lastReminderSent += interval;
 
+
   sendMail.sendEventReminders(startDate, lastReminderSent);
 
   //const oneYearLater = Date.UTC(new Date().getUTCFullYear() + 1, new Date().getUTCMonth(), new Date().getUTCDate());
   //sendMail.sendEventReminders(lastReminderSent, oneYearLater);
+
 }
 sendReminders(process.env.EMAIL_REMINDER_INTERVAL_INITIAL_MINS * 60 * 1000);
 setInterval(sendReminders, process.env.EMAIL_REMINDER_INTERVAL_SUBSEQUENT_MINS * 60 * 1000);

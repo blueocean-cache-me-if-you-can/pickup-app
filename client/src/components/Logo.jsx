@@ -11,7 +11,7 @@ function LogoBase({ showText }) {
       <AspectRatio ratio={1} w={50}>
         <Image src={logo} alt='Logo' />
       </AspectRatio>
-      {showText && <Text>Pickup App</Text>}
+      {showText && <Text>PicknRoll</Text>}
     </Group>
   );
 }

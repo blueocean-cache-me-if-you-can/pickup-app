@@ -1,23 +1,35 @@
+// client/src/components/PhotoPicker.jsx
 import React, {
   useEffect, useMemo, useRef, useState,
 } from 'react';
 import {
   ActionIcon, Avatar, Box, FileButton, Stack, Text, rem,
 } from '@mantine/core';
-import { Plus, User } from '@phosphor-icons/react';
+import { IconPlus, IconUser, IconPhoto } from '@tabler/icons-react';
 
-export function PhotoPicker({
+function PhotoPicker({
   size = 160,
   label = 'Upload a photo for your profile',
   accept = 'image/*',
   onChange,
+  mode = 'profile',
+  onError, 
+  maxSizeMB = 5,
+  initialUrl = null,
 }) {
   const [file, setFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(initialUrl);
 
   const resetRef = useRef(null);
 
   const handleFileChange = (f) => {
+    const maxBytes = maxSizeMB * 1024 * 1024;
+    if (f && f.size > maxBytes) {
+      onError?.(`Image must be ≤ ${maxSizeMB}MB`);
+      resetRef.current?.(); // clears the input
+      return;
+    }
+
     setFile(f);
     onChange?.(f ?? null);
     resetRef.current?.();
@@ -69,7 +81,8 @@ export function PhotoPicker({
               color='gray'
               variant={previewUrl ? 'filled' : 'light'}
             >
-              {!previewUrl && <User size={Math.max(48, Math.floor(size * 0.35))} />}
+              {(!previewUrl && mode === 'profile') && <IconUser size={Math.max(48, Math.floor(size * 0.35))} />}
+              {(!previewUrl && mode === 'event') && <IconPhoto size={Math.max(48, Math.floor(size * 0.35))} />}
             </Avatar>
 
             <ActionIcon
@@ -85,7 +98,7 @@ export function PhotoPicker({
                 boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
               }}
             >
-              <Plus size={Math.floor(badgeSize * 0.6)} />
+              <IconPlus size={Math.floor(badgeSize * 0.6)} />
             </ActionIcon>
           </Box>
         )}

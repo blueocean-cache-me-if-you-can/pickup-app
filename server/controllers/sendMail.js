@@ -22,6 +22,7 @@ function getHtmlFromFile(filename) {
     });
   });
 }
+
 transporter.verify(function(error, success) {
   if (error) {
     console.error('Error with mail transporter:', error);
@@ -113,6 +114,7 @@ async function sendMailWithHtmlFileAndParams({ recipients, subject, text, htmlFi
       ...(html && { html })
     };
     transporter.sendMail(mailOptions, (error, info) => {
+
       if (error) {
         if (
           error.response &&
@@ -124,6 +126,7 @@ async function sendMailWithHtmlFileAndParams({ recipients, subject, text, htmlFi
         }
         return reject(error);
       }
+
       resolve(info);
     });
   });
