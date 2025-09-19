@@ -8,9 +8,11 @@ import EditEvent from './EditEvent';
 function EventCard({
   event, currentUserId = 1, activities = [], intensities = [], skillLevels = [],
 }) {
+  console.log('event owner', event.owner.user_id);
+  console.log('currentUserId', currentUserId);
   // HARDCODING DEFAULT current user_id = 1
-  const [joined, setJoined] = useState(event.players.some((player) => player.user_id === currentUserId));
-  const [created, setCreated] = useState(event.owner.user_id === currentUserId);
+  const [joined, setJoined] = useState(event.players.some((player) => player.userId === currentUserId));
+  const [created, setCreated] = useState(event.owner.userId === currentUserId);
 
   const toggleJoin = () => {
     setJoined(!joined);
