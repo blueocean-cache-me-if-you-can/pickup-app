@@ -8,6 +8,8 @@ import { upcomingMyEvents, pastMyEvents } from '../data';
 
 function MyEvents({
   currentUserId = 1,
+  upcomingEvents = upcomingMyEvents,
+  pastEvents = pastMyEvents,
   selectedUpcomingSort,
   setSelectedUpcomingSort,
   selectedPastSort,
@@ -17,8 +19,8 @@ function MyEvents({
   skillLevels = [],
 }) {
   // TODO: set these states with API calls
-  const [upcomingEvents, setUpcomingEvents] = useState([...upcomingMyEvents]);
-  const [pastEvents, setPastEvents] = useState([...pastMyEvents]);
+  // const [upcomingEvents, setUpcomingEvents] = useState([...upcomingMyEvents]);
+  // const [pastEvents, setPastEvents] = useState([...pastMyEvents]);
 
   return (
     <Stack>

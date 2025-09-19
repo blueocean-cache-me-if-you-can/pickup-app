@@ -1,6 +1,4 @@
-import React, {
-  useEffect, useMemo, useState,
-} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Anchor,
   Autocomplete,
@@ -21,17 +19,12 @@ function AddressPicker({
   onChange,
   label = 'Preferred address',
   placeholder = 'Preferred address',
-  required = false,
   onResolved,
   error,
 }) {
   const [address, setAddress] = useState(value ?? '');
 
   const debouncedAddress = useDebounce(address, 300);
-  const optionsFilter = useMemo(() => ({ options, search }) => {
-    if (!search?.trim()) return [];
-    return options;
-  }, []);
 
   const { isReady, autocompleteService } = useGooglePlaces();
   const { options: suggestions, isLoading: isQueryLoading } = usePlaceAutocomplete(
@@ -62,7 +55,7 @@ function AddressPicker({
     }
   };
 
-  const handleOptionSubmit = async (val) => {
+  const handleConfirmAddress = async (val) => {
     setAddress(val);
     onChange?.(val);
     try {
@@ -73,32 +66,41 @@ function AddressPicker({
     }
   };
 
+  const optionsFilter = useMemo(
+    () => ({ options, search }) => {
+      if (!search?.trim()) return [];
+      return options;
+    },
+    [],
+  );
+
   return (
     <Stack gap='xs'>
       <Autocomplete
         data={suggestions}
         value={address}
-        onChange={(v) => {
-          setAddress(v);
-          onChange?.(v);
+        onChange={(v) => setAddress(v)}
+        onOptionSubmit={handleConfirmAddress}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleConfirmAddress(address);
+          }
         }}
-        onOptionSubmit={handleOptionSubmit}
         placeholder={placeholder}
         rightSection={isLoading ? <Loader size='xs' /> : null}
         leftSection={<IconSearch size={16} />}
         limit={10}
         filter={optionsFilter}
         label={label}
-        required={required}
         disabled={!isReady && !address}
         error={error}
       />
+
       <Group align='center' justify='center' gap='xs'>
         <IconLocation size={16} />
         <Anchor c='black' underline='always' onClick={handleUseMyLocation}>
-          <Text size='xs'>
-            Use my current location
-          </Text>
+          <Text size='xs'>Use my current location</Text>
         </Anchor>
       </Group>
     </Stack>

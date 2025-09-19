@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import {
-  Stack, Button, Group, Text, ScrollArea,
+  Stack, Button, Group, Text, ScrollArea, Box,
 } from '@mantine/core';
 import EventDetails from './EventDetails';
-// import Event from './Event';
+import Event from './Event';
 
 function EventsList({
   currentUserId, events, activities, intensities, skillLevels, height = '70vh',
@@ -19,18 +19,22 @@ function EventsList({
   const handleNext = () => setPage((p) => Math.min(p + 1, totalPages));
 
   return (
-    <ScrollArea h={height}>
-      <Stack>
-        {paginatedEvents.map((event) => (
-          <EventDetails
-            key={event.id}
-            event={event}
-            activities={activities}
-            intensities={intensities}
-            skillLevels={skillLevels}
-          />
-        ))}
-      </Stack>
+    <Box>
+      <ScrollArea h={height}>
+        <Stack>
+          {paginatedEvents.map((event) => (
+            <EventDetails
+              key={event._id}
+              event={event}
+              activities={activities}
+              intensities={intensities}
+              skillLevels={skillLevels}
+              currentUserId={currentUserId}
+            />
+          ))}
+        </Stack>
+
+      </ScrollArea>
       {totalPages > 1 && (
         <Group justify='center' mt='md'>
           <Button onClick={handlePrev} disabled={page === 1} variant='outline'>
@@ -42,7 +46,7 @@ function EventsList({
           </Button>
         </Group>
       )}
-    </ScrollArea>
+    </Box>
   );
 }
 

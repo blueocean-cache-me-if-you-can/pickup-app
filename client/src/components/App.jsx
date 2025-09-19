@@ -24,9 +24,9 @@ function App() {
   const [activities, setActivities] = useState([]);
   const [skillLevels, setSkillLevels] = useState([]);
   const [intensities, setIntensities] = useState([]);
-
   const { resolveAddress } = useGeocodeAddress();
 
+  // Handle user navigation and localStorage
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
@@ -39,7 +39,10 @@ function App() {
         navigate('/login', { replace: true });
       }
     }
+  }, [user, location.pathname, navigate]);
 
+  // Fetch reference data only once on mount
+  useEffect(() => {
     Promise.all([getActivities(), getSkillLevels(), getIntensityLevels()])
       .then(([activitiesRes, skillLevelsRes, intensitiesRes]) => {
         setActivities(activitiesRes);
@@ -49,7 +52,7 @@ function App() {
       .catch((err) => {
         console.error('Error fetching reference data:', err);
       });
-  }, [user, location.pathname, navigate]);
+  }, []);
 
   useEffect(() => {
     const runGeocode = async () => {

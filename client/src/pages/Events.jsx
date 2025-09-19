@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Container, SegmentedControl, Flex, Space, Select, Title, Box, Group, Text,
 } from '@mantine/core';
@@ -7,7 +7,7 @@ import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
 import EventsList from '../components/EventsList';
-import { events } from '../data';
+import { getEvents } from '../api';
 
 function Events({
   user, activities = [], intensities = [], skillLevels = [],
@@ -18,17 +18,42 @@ function Events({
   const [selectedSkillLevels, setSelectedSkillLevels] = useState([]);
   const [selectedIntensity, setSelectedIntensity] = useState([]);
   const [selectedDistance, setSelectedDistance] = useState(20);
-  const [selectedSort, setSelectedSort] = useState('distance'); // for events-near-me
+  const [selectedSort, setSelectedSort] = useState('distance');
   const [selectedUpcomingSort, setSelectedUpcomingSort] = useState('dateUpcoming');
   const [selectedPastSort, setSelectedPastSort] = useState('datePast');
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 
   const form = useForm({
     initialValues: {
       address: user?.address || '',
-      lat: user?.lat || null,
-      lng: user?.lng || null,
     },
   });
+
+  const [confirmedCoords, setConfirmedCoords] = useState({ lat: null, lng: null });
+
+  useEffect(() => {
+    if (user?.lat && user?.lng) {
+      setConfirmedCoords({ lat: user.lat, lng: user.lng });
+    }
+  }, [user]);
+
+  const sortDirections = useMemo(() => ({
+    distance: false,
+    dateUpcoming: false,
+    datePast: true,
+  }), []);
+
+  const orderByDesc = sortDirections[selectedSort] ?? false;
+
+  // State for API params
+  const [eventsNearMeParams, setEventsNearMeParams] = useState({});
+  const [upcomingParams, setUpcomingParams] = useState({});
+  const [pastParams, setPastParams] = useState({});
+
+  const [events, setEvents] = useState([]);
+  const [upcomingMyEvents, setUpcomingMyEvents] = useState([]);
+  const [pastMyEvents, setPastMyEvents] = useState([]);
+
   // Clear filters when view changes
   useEffect(() => {
     setSelectedActivities([]);
@@ -39,79 +64,63 @@ function Events({
     setSelectedUpcomingSort('dateUpcoming');
     setSelectedPastSort('datePast');
   }, [view]);
-  const sortDirections = React.useMemo(() => ({
-    distance: false,
-    dateUpcoming: false,
-    datePast: true,
-  }), []);
-  const orderByDesc = sortDirections[selectedSort] ?? false;
-  // Debugging state to view filter params being sent to backend
-  const [debugParams, setDebugParams] = useState({});
-  // TODO: Call API in a useEffect:
-  // - GET /api/events with params above for "Events Near Me"
-  // - GET /api/events with params above for "My Upcoming Events"
-  // - GET /api/events with params above for "My Past Events" DO NOT APPLY FILTERS
 
+  // Build filter helper
+  const buildFilter = () => {
+    const filter = {};
+    const activityArr = activities
+      .filter(a => selectedActivities.includes(a.name))
+      .map(a => a._id);
+    if (activityArr.length) filter.activity = activityArr;
+
+    const skillLevelArr = skillLevels
+      .filter(s => selectedSkillLevels.includes(s.name))
+      .map(s => s._id);
+    if (skillLevelArr.length) filter.skillLevel = skillLevelArr;
+
+    const intensityArr = intensities
+      .filter(i => selectedIntensity.includes(i.name))
+      .map(i => i._id);
+    if (intensityArr.length) filter.intensity = intensityArr;
+
+    filter.distance = selectedDistance;
+    return filter;
+  };
+
+  // Update params when dependencies change
   useEffect(() => {
-    // Events Near Me params
-    let eventsNearMeParams = {};
-    let upcomingParams = {};
-    let pastParams = {};
     if (view === 'events-near-me') {
-      eventsNearMeParams = {
-        user_id: null,
+      if (!confirmedCoords.lat || !confirmedCoords.lng) return;
+
+      const params = {
         finished: false,
         sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
         orderByDesc,
-        filter: [
-          { activities: selectedActivities },
-          { skillLevels: selectedSkillLevels },
-          { intensity: selectedIntensity },
-          { distance: selectedDistance },
-        ],
-        address: form.values.address,
-        lat: form.values.lat,
-        lng: form.values.lng,
+        filter: buildFilter(),
+        coordinates: [confirmedCoords.lng, confirmedCoords.lat],
       };
-      upcomingParams = {};
-      pastParams = {};
-    }
-    if (view === 'my-events') {
-    // My Upcoming Events params
-      upcomingParams = {
-        user_id: user._id,
+      setEventsNearMeParams(params);
+    } else if (view === 'my-events') {
+      const upcoming = {
+        user_id: user?._id,
         finished: false,
         sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
         orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
-        filter: [
-          { activities: selectedActivities },
-          { skillLevels: selectedSkillLevels },
-          { intensity: selectedIntensity },
-          { distance: selectedDistance },
-        ],
+        filter: buildFilter(),
       };
+      setUpcomingParams(upcoming);
 
-      // My Past Events params
-      pastParams = {
-        user_id: user._id,
+      const past = {
+        user_id: user?._id,
         finished: true,
         sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
         orderByDesc: sortDirections[selectedPastSort] ?? true,
-        filter: [
-          { activities: [] },
-          { skillLevels: [] },
-          { intensity: [] },
-          { distance: 20 },
-        ],
       };
-      eventsNearMeParams = {};
+      setPastParams(past);
     }
-    setDebugParams({
-      'Events Near Me': eventsNearMeParams,
-      'My Upcoming Events': upcomingParams,
-      'My Past Events': pastParams,
-    });
   }, [
+    view,
+    confirmedCoords,
     selectedActivities,
     selectedSkillLevels,
     selectedIntensity,
@@ -120,17 +129,45 @@ function Events({
     selectedUpcomingSort,
     selectedPastSort,
     user,
-    view,
-    orderByDesc,
-    sortDirections,
-    form.values.address, form.values.lat, form.values.lng,
+    sortDirections
   ]);
+
+  // Fetch events
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        setIsLoadingEvents(true);
+
+        if (view === 'events-near-me') {
+          const res = await getEvents(eventsNearMeParams);
+          setEvents(res);
+        } else if (view === 'my-events') {
+          const resUpcoming = await getEvents(upcomingParams);
+          setUpcomingMyEvents(resUpcoming);
+
+          const resPast = await getEvents(pastParams);
+          setPastMyEvents(resPast);
+        }
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        if (view === 'events-near-me') setEvents([]);
+        if (view === 'my-events') {
+          setUpcomingMyEvents([]);
+          setPastMyEvents([]);
+        }
+      } finally {
+        setIsLoadingEvents(false);
+      }
+    }
+
+    fetchEvents();
+  }, [view, eventsNearMeParams, upcomingParams, pastParams]);
 
   return (
     <Container size='lg'>
       <Space h='md' />
 
-      {/* View toggle & filter */}
+      {/* View toggle */}
       <Flex justify='center' mt='md' mb='xl'>
         <SegmentedControl
           fullWidth
@@ -148,25 +185,22 @@ function Events({
         <Title size='h4'>Filter by: </Title>
         <PrimaryFilter
           label='Activities'
-          values={['Pickleball', 'Volleyball', 'Basketball', 'Ultimate Frisbee', 'Kickball']}
+          values={activities.map(a => a.name)}
           value={selectedActivities}
           onChange={setSelectedActivities}
         />
-
         <PrimaryFilter
           label='Skill Levels'
-          values={['Beginner', 'Intermediate', 'Advanced']}
+          values={skillLevels.map(s => s.name)}
           value={selectedSkillLevels}
           onChange={setSelectedSkillLevels}
         />
-
         <PrimaryFilter
           label='Intensities'
-          values={['Casual', 'Spirited', 'Competitive']}
+          values={intensities.map(i => i.name)}
           value={selectedIntensity}
           onChange={setSelectedIntensity}
         />
-
         <PrimaryFilter
           label='Distance'
           type='slider'
@@ -181,13 +215,12 @@ function Events({
           <Group justify='space-between' mb='xl' gap='lg'>
             <AddressPicker
               value={form.values.address}
-              onChange={(val) => form.setFieldValue('address', val)}
+              onChange={val => form.setFieldValue('address', val)}
               onResolved={({ address, lat, lng }) => {
+                setConfirmedCoords({ lat, lng });
                 if (address && address !== form.values.address) {
                   form.setFieldValue('address', address);
                 }
-                form.setFieldValue('lat', lat);
-                form.setFieldValue('lng', lng);
               }}
             />
             <Select
@@ -200,13 +233,17 @@ function Events({
               onChange={setSelectedSort}
             />
           </Group>
-          {events.length === 0 ? <Text>No events found.</Text> : (
+          {isLoadingEvents ? (
+            <Flex justify='center'><Text>Loading events...</Text></Flex>
+          ) : Array.isArray(events) && events.length === 0 ? (
+            <Flex justify='center'><Text>Sorry! No events found.</Text></Flex>
+          ) : (
             <EventsList
               events={events}
               activities={activities}
               intensities={intensities}
               skillLevels={skillLevels}
-              currentUserId={user._id}
+              currentUserId={user?._id || null}
             />
           )}
         </Box>
@@ -214,7 +251,7 @@ function Events({
 
       {view === 'my-events' && (
         <MyEvents
-          currentUserId={user._id}
+          currentUserId={user?._id || null}
           selectedUpcomingSort={selectedUpcomingSort}
           setSelectedUpcomingSort={setSelectedUpcomingSort}
           selectedPastSort={selectedPastSort}
@@ -222,14 +259,10 @@ function Events({
           activities={activities}
           intensities={intensities}
           skillLevels={skillLevels}
+          upcomingEvents={upcomingMyEvents}
+          pastEvents={pastMyEvents}
         />
       )}
-
-      {/* debug my filter params here:  */}
-
-      <pre style={{ background: '#f5f5f5', padding: '1rem', fontSize: '12px' }}>
-        {JSON.stringify(debugParams, null, 2)}
-      </pre>
       <Space h='xl' />
     </Container>
   );
