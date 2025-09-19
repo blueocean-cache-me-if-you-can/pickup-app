@@ -24,7 +24,7 @@ function Event({
             activities={activities}
             intensities={intensities}
             skillLevels={skillLevels}
-            currentUserId={currentUserId}
+            // currentUserId={currentUserId}
           />
         </Grid.Col>
         <Grid.Col span={9}>
