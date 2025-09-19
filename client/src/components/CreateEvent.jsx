@@ -36,35 +36,46 @@ function CreateEvent({
   const { formatEventDateTime } = useDateTimeFormatter();
 
   const handleSubmit = async (values) => {
-    const imageUrl = values.imageFile
-      ? await uploadEventImage(values.imageFile, { maxSizeMB: 25 })
-      : '';
-
-    const dateTimeString = formatEventDateTime(values.date, values.time);
-
-    const location = [values.lng, values.lat];
-
-    const payload = {
-      title: values.title,
-      user_id: user._id,
-      activityId: values.sport,
-      skillId: values.skillLevel,
-      intensityId: values.intensity,
-      brief_description: values.summary,
-      description: values.description,
-      additional_info: values.instructions,
-      time: dateTimeString,
-      photo: imageUrl,
-      address: values.address,
-      minPlayers: values.minPlayers,
-      maxPlayers: values.maxPlayers,
-      coordinates: location,
-    };
-    console.log('payload', payload);
-
-    await createEvent(payload);
-    setIsOpen(false);
-    form.reset();
+    let imageUrl = '';
+    try {
+      imageUrl = values.imageFile
+        ? await uploadEventImage(values.imageFile, { maxSizeMB: 25 })
+        : '';
+    } catch (error) {
+      console.error('error', error);
+      return;
+    } finally {
+      const dateTimeString = formatEventDateTime(values.date, values.time);
+  
+      const location = [values.lng, values.lat];
+  
+      const payload = {
+        title: values.title,
+        user_id: user._id,
+        activityId: values.sport,
+        skillId: values.skillLevel,
+        intensityId: values.intensity,
+        brief_description: values.summary,
+        description: values.description,
+        additional_info: values.instructions,
+        time: dateTimeString,
+        photo: imageUrl,
+        address: values.address,
+        minPlayers: values.minPlayers,
+        maxPlayers: values.maxPlayers,
+        coordinates: location,
+      };
+  
+      try {
+        const event = await createEvent(payload);
+        console.log('success event created', event);
+      } catch (error) {
+        console.error('error', error);
+      } finally {
+        setIsOpen(false);
+        form.reset();
+      }
+    }
   };
 
   return (

@@ -8,5 +8,6 @@ router.patch('/:id', eventController.updateEvent);
 router.delete('/:id', eventController.deleteEvent);
 router.put('/:id/player', eventController.updateEventPlayer);
 router.post('/', eventController.createEvent);
+router.patch('/:id', eventController.updateEvent);
 
 module.exports = router;

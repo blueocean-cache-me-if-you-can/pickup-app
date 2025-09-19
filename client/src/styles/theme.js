@@ -20,6 +20,7 @@ export const theme = createTheme({
             h6: { fontSize: '0.5rem' }
         }
     },
+    primaryColor: 'teal',
     colors: {
         neutral: ['#E8EADF', '#E8EADF', '#E8EADF', '#E8EADF', '#E8EADF', '#E8EADF', '#E8EADF', '#E8EADF', '#E8EADF', '#E8EADF'],
         accent: ['#C81E24', '#C81E24', '#C81E24', '#C81E24', '#C81E24', '#C81E24', '#C81E24', '#C81E24', '#C81E24', '#C81E24'],
