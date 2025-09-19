@@ -37,6 +37,7 @@ function Signup({ setUser }) {
         if (value !== values.password) return 'Passwords must match';
         return null;
       },
+      address: (value) => (!value ? 'Preferred address is required' : null),
       atLeastEighteen: (value) => (value ? null : 'You must confirm you are at least 18'),
     },
   });
@@ -107,6 +108,7 @@ function Signup({ setUser }) {
                   form.setFieldValue('address', address);
                 }
               }}
+              error={form.errors.address}
             />
             <TextInput
               withAsterisk

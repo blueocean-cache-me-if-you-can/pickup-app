@@ -45,7 +45,7 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
     validate: {
       firstName: (value) => (!value ? 'First name required' : null),
       lastName: (value) => (!value ? 'Last name required' : null),
-      preferredAddress: (value) => (!value ? 'Preferred addr' : null),
+      preferredAddress: (value) => (!value ? 'Preferred address required' : null),
       email: (value) => {
         if (/^\S+@\S+$/.test(value)) {
           return null;
@@ -240,6 +240,7 @@ export default function Profile({ user, setUser, activities, skillLevels }) {
 
           {/* Preferred Address */}
           <AddressPicker
+            error={form.errors.preferredAddress}
             value={form.values.preferredAddress}
             onChange={(val) => form.setFieldValue('preferredAddress', val)}
             onResolved={({ preferredAddress, lat, lng }) => {

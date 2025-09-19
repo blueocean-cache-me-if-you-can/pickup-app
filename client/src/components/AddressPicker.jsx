@@ -1,6 +1,4 @@
-import React, {
-  useEffect, useMemo, useState,
-} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Anchor,
   Autocomplete,
@@ -21,9 +19,8 @@ function AddressPicker({
   onChange,
   label = 'Preferred address',
   placeholder = 'Preferred address',
-  required = false,
   onResolved,
-  error,
+  error, // controlled error from parent form
 }) {
   const [address, setAddress] = useState(value ?? '');
 
@@ -44,6 +41,7 @@ function AddressPicker({
   const { resolveAddress, isResolving: isGeocoding } = useGeocodeAddress();
   const isLoading = isQueryLoading || isResolvingLocation || isGeocoding;
 
+  // keep in sync with parent
   useEffect(() => {
     setAddress(value ?? '');
   }, [value]);
@@ -89,16 +87,13 @@ function AddressPicker({
         limit={10}
         filter={optionsFilter}
         label={label}
-        required={required}
         disabled={!isReady && !address}
         error={error}
       />
       <Group align='center' justify='center' gap='xs'>
         <IconLocation size={16} />
         <Anchor c='black' underline='always' onClick={handleUseMyLocation}>
-          <Text size='xs'>
-            Use my current location
-          </Text>
+          <Text size='xs'>Use my current location</Text>
         </Anchor>
       </Group>
     </Stack>
