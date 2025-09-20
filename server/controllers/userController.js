@@ -19,6 +19,7 @@ exports.signUp = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     req.body.displayName = req.body.firstName + (req.body.lastName ? (' ' + req.body.lastName) : '');
+    req.body.photo = req.body.photo || `${process.env.DEFAULT_PROFILE_PHOTO}`;
 
     const newUser = new user({ ...req.body, password: hashedPassword });
     const savedUser = await newUser.save();
