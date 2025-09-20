@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Box, Stack, Select, Title, Flex, Text,
 } from '@mantine/core';
-import Event from './Event';
 import EventsList from './EventsList';
 import { upcomingMyEvents, pastMyEvents } from '../data';
 

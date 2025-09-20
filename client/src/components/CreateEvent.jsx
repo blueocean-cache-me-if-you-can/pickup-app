@@ -45,16 +45,15 @@ function CreateEvent({
       console.error('error', error);
       return;
     } finally {
-
       const dateTimeString = formatEventDateTime(
         values.date,
         values.time,
         values.lng,
-        values.lat
+        values.lat,
       );
-  
+
       const location = [values.lng, values.lat];
-  
+
       const payload = {
         title: values.title,
         user_id: user._id,

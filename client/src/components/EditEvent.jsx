@@ -34,10 +34,10 @@ function EditEvent({
   const form = useCreateEventForm();
   const { uploadEventImage } = useImageUpload();
   const { formatEventDateTime, toLocalDateTimeParts } = useDateTimeFormatter();
+  const [lng, lat] = event.coordinates;
+  const { date, time } = toLocalDateTimeParts(event.time, lng, lat);
 
   useEffect(() => {
-    const [lng, lat] = event.coordinates;
-    const { date, time } = toLocalDateTimeParts(event.time, lng, lat);
     form.setValues({
       title: event.title,
       sport: event.activityId,
@@ -55,19 +55,18 @@ function EditEvent({
       lat,
       lng,
     });
-  }, [event]);
-  
+  }, [event, lng, lat, date, time]);
+
   const handleDelete = async (eventId) => {
     try {
-      const event = await deleteEvent(eventId);
-      console.log('success event deleted', event);
+      const deletedEvent = await deleteEvent(eventId);
+      console.log('success event deleted', deletedEvent);
     } catch (error) {
       console.error('error', error);
     } finally {
       close();
       form.reset();
     }
-
   };
 
   const handleSubmit = async (values) => {
@@ -110,14 +109,14 @@ function EditEvent({
 
   return (
     <>
-      <Button 
+      <Button
         m='xs'
-        variant='filled' 
+        variant='filled'
         fullWidth
         data-no-expand
         onClick={(e) => {
-            e.stopPropagation();
-            open();
+          e.stopPropagation();
+          open();
         }}
       >
         Edit
@@ -163,13 +162,13 @@ function EditEvent({
               <Button variant='default' onClick={() => handleDelete(event._id)}>
                 Delete
               </Button>
-                <Button  
-                    type='submit' 
-                    data-no-expand 
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    Save
-                </Button>
+              <Button
+                type='submit'
+                data-no-expand
+                onClick={(e) => e.stopPropagation()}
+              >
+                Save
+              </Button>
             </Group>
           </Stack>
         </form>

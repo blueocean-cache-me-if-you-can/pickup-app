@@ -13,7 +13,7 @@ function PhotoPicker({
   accept = 'image/*',
   onChange,
   mode = 'profile',
-  onError, 
+  onError,
   maxSizeMB = 5,
   initialUrl = null,
 }) {
