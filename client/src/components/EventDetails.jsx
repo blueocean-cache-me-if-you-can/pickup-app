@@ -16,8 +16,10 @@ import IconInfo from './IconInfo';
 import AttendeesRatio from './AttendeesRatio';
 import AttendingPlayers from './AttendingPlayers';
 
-function EventDetails({ event, activities, intensities, skillLevels, isPast = false, currentUserId }) {
-  console.log('event', event);
+function EventDetails({
+  event, activities, intensities, skillLevels, isPast = false, currentUserId,
+}) {
+  // console.log('event', event);
   const [isOpen, setIsOpen] = useState(false);
   const grayscale = isPast || new Date(event.time) < new Date();
   const [lng, lat] = event.coordinates;
@@ -32,7 +34,7 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
     if (!el.contains(t)) return;
     if (t.closest('[data-no-expand]')) return;
     setIsOpen(true);
-  }
+  };
 
   return (
     <>
@@ -41,12 +43,12 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
         style={{ cursor: 'pointer' }}
       >
         <Event
-            event={event}
-            activities={activities}
-            intensities={intensities}
-            skillLevels={skillLevels}
-            isPast={isPast}
-            currentUserId={currentUserId}
+          event={event}
+          activities={activities}
+          intensities={intensities}
+          skillLevels={skillLevels}
+          isPast={isPast}
+          currentUserId={currentUserId}
         />
       </Box>
 
@@ -79,6 +81,7 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
               {event.description && <Text size='xs'>{event.description}</Text>}
               <Group align='stretch' h='100%'>
                 <Stack flex={1}>
+
                   <Anchor 
                     size='xs' 
                     fw={600} 

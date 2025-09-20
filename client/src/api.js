@@ -25,6 +25,12 @@ export const createEvent = async (eventData) => {
   return response.data;
 };
 
+// PUT /:id/player
+export const updateEventPlayers = async (eventId, playerId) => {
+  const response = await api.put(`/events/${eventId}/player`, {}, { params: { user_id: playerId } });
+  return response.data;
+};
+
 /* =========================
    USERS API
    ========================= */
