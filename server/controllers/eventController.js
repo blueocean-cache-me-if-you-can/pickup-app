@@ -179,7 +179,7 @@ exports.updateEventPlayer = async (req, res) => {
       return res.status(200).json(updatedEvent);
     }
 
-    event.players.push({ userId: req.query.user_id, displayName: user.displayName || 'Anonymous' });
+    event.players.push({ userId: req.query.user_id, displayName: user.displayName || user.firstName + ' ' + user.lastName });
     const updatedEvent = await event.save();
 
     mail.sendMailWithHtmlFileAndParams({
