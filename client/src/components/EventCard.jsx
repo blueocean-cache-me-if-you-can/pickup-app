@@ -4,6 +4,7 @@ import {
 } from '@mantine/core';
 import { IconCrown } from '@tabler/icons-react';
 import EditEvent from './EditEvent';
+import { updateEventPlayers } from '../api';
 
 function EventCard({
   event, currentUserId = 1, activities = [], intensities = [], skillLevels = [],
@@ -17,12 +18,13 @@ function EventCard({
   const toggleJoin = () => {
     setJoined(!joined);
     // TODO: Call API to join/leave event
-    console.log(joined ? 'Leave event clicked' : 'Join event clicked');
+    // console.log(joined ? 'Leave event clicked' : 'Join event clicked');
+    updateEventPlayers(event._id, currentUserId);
   };
-  const editEvent = () => {
-    // TODO: Call API to edit event
-    console.log('Edit event clicked');
-  };
+  // const editEvent = () => {
+  //   // TODO: Call API to edit event
+  //   console.log('Edit event clicked');
+  // };
   const activity = activities.find((act) => act._id === event.activityId) || {};
   return (
     <Box>
