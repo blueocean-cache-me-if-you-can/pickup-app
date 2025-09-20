@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  AspectRatio, Box, Button, Image, Center,
+  AspectRatio, Box, Button, Image, Center, Flex, Text,
 } from '@mantine/core';
 import { IconCrown } from '@tabler/icons-react';
 import EditEvent from './EditEvent';
@@ -93,6 +93,15 @@ function EventCard({
         </Center>
         )}
       </Box>
+      <Flex justify='center' align='center' mt='sm'>
+        {typeof event.distance === 'number' && !isNaN(event.distance) && (
+          <Text fw={800} fz='xs' ta='center'>
+            {Math.round(event.distance * 100) / 100}
+            {' '}
+            miles
+          </Text>
+        )}
+      </Flex>
     </Box>
   );
 }
