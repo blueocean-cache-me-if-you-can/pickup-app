@@ -252,30 +252,29 @@ exports.createEvent = async (req, res) => {
 
 exports.deleteEvent = async (req, res) => {
   try {
-    console.log('req.query', req.query);
-    console.log('req.path', req.path);
     if (!req.query.id) {
       req.query.id = req.path.split('/').pop()
     }
-    console.log('req.query.event_id', req.query.id);
-    const deletedEvent = await Event.findByIdAndDelete(req.query.id);
-    console.log('deletedEvent', deletedEvent);
+    const deletedEvent = await Event.findById(req.query.id);
     if (deletedEvent === undefined) {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    await getEventPlayersWithEmails(req.query.event_id).then(eventWithEmails => {
-      eventWithEmails.players.forEach(userObj => {
-        mail.sendMailWithHtmlFileAndParams({
-          recipients: [{ email: userObj.emailPrimary }],
-          subject: 'An Event You\'ve joined has been Canceled on PicknRoll!',
-          text: `Hello ${userObj.firstName},\n\nThe event with the title: ${deletedEvent.title} has been canceled.\n\nBest regards,\nBlue Ocean Pickup Team`,
-          htmlFile: 'cancelEvent.html',
-          htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
+    await getEventPlayersWithEmails(req.query.id).then(eventWithEmails => {
+      if (eventWithEmails) {
+        eventWithEmails.players.forEach(userObj => {
+          mail.sendMailWithHtmlFileAndParams({
+            recipients: [{ email: userObj.emailPrimary }],
+            subject: 'An Event You\'ve joined has been Canceled on PicknRoll!',
+            text: `Hello ${userObj.firstName},\n\nThe event with the title: ${deletedEvent.title} has been canceled.\n\nBest regards,\nBlue Ocean Pickup Team`,
+            htmlFile: 'cancelEvent.html',
+            htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
+          });
         });
-      });
+      }
     });
 
+    await Event.findByIdAndDelete(req.query.id);
     res.status(200).json({ message: 'Event deleted successfully' });
   } catch (err) {
     res.status(400).json({ error: 'Failed to delete event', details: err.message });
