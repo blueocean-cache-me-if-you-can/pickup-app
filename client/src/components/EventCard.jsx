@@ -34,7 +34,7 @@ function EventCard({
         <AspectRatio ratio={1}>
           <Image
             src={event.photo}
-            fallbackSrc='https://placehold.co/600x400?text=Placeholder'
+            fallbackSrc={activity.placeholderImage || 'https://placehold.co/600x400?text=Placeholder'}
             alt={event.title}
             radius='lg'
             w='100%'

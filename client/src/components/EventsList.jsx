@@ -6,10 +6,10 @@ import EventDetails from './EventDetails';
 import Event from './Event';
 
 function EventsList({
-  currentUserId, events, activities, intensities, skillLevels, height = '70vh',
+  currentUserId, events, activities, intensities, skillLevels,
 }) {
   const [page, setPage] = useState(1);
-  const eventsPerPage = 5;
+  const eventsPerPage = 2;
   const totalPages = Math.ceil(events.length / eventsPerPage);
   const startIdx = (page - 1) * eventsPerPage;
   const endIdx = startIdx + eventsPerPage;
@@ -20,21 +20,18 @@ function EventsList({
 
   return (
     <Box>
-      <ScrollArea h={height}>
-        <Stack>
-          {paginatedEvents.map((event) => (
-            <EventDetails
-              key={event._id}
-              event={event}
-              activities={activities}
-              intensities={intensities}
-              skillLevels={skillLevels}
-              currentUserId={currentUserId}
-            />
-          ))}
-        </Stack>
-
-      </ScrollArea>
+      <Stack>
+        {paginatedEvents.map((event) => (
+          <EventDetails
+            key={event._id}
+            event={event}
+            activities={activities}
+            intensities={intensities}
+            skillLevels={skillLevels}
+            currentUserId={currentUserId}
+          />
+        ))}
+      </Stack>
       {totalPages > 1 && (
         <Group justify='center' mt='md'>
           <Button onClick={handlePrev} disabled={page === 1} variant='outline'>
