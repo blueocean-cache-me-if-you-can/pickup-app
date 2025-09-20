@@ -76,6 +76,7 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
               <Text size='sm' fw={700}>{event.title}</Text>
               <Text size='xs' fw={600}>{event.brief_description}</Text>
               <Text size='xs'>{event.description}</Text>
+              {event.additional_info && <Text size='xs'>{event.additional_info}</Text>}
               <Group>
                 <Stack flex={1}>
                   <Anchor size='xs' fw={600} underline='always' c='black'>{event.address}</Anchor>

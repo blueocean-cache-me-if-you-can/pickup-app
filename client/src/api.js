@@ -25,6 +25,12 @@ export const createEvent = async (eventData) => {
   return response.data;
 };
 
+// PATCH /api/events
+export const updateEvent = async (eventData, eventId) => {
+  const response = await api.patch(`/events/${eventId}`, eventData);
+  return response.data;
+};
+
 /* =========================
    USERS API
    ========================= */

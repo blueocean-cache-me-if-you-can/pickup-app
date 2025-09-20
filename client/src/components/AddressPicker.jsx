@@ -21,6 +21,7 @@ function AddressPicker({
   placeholder = 'Preferred address',
   onResolved,
   error,
+  disabled = false,
 }) {
   const [address, setAddress] = useState(value ?? '');
 
@@ -93,13 +94,18 @@ function AddressPicker({
         limit={10}
         filter={optionsFilter}
         label={label}
-        disabled={!isReady && !address}
+        disabled={disabled || (!isReady && !address)}
         error={error}
       />
 
       <Group align='center' justify='center' gap='xs'>
         <IconLocation size={16} />
-        <Anchor c='black' underline='always' onClick={handleUseMyLocation}>
+        <Anchor
+          c={disabled ? 'gray' : 'black'}
+          underline='always'
+          onClick={disabled ? undefined : handleUseMyLocation}
+          style={disabled ? { pointerEvents: 'none', opacity: 0.6 } : undefined}
+        >
           <Text size='xs'>Use my current location</Text>
         </Anchor>
       </Group>
