@@ -261,7 +261,6 @@ exports.deleteEvent = async (req, res) => {
     }
 
     await getEventPlayersWithEmails(req.query.id).then(eventWithEmails => {
-      console.log('Event with players:', JSON.stringify(eventWithEmails, null, 2));
       if (eventWithEmails) {
         eventWithEmails.players.forEach(userObj => {
           mail.sendMailWithHtmlFileAndParams({
