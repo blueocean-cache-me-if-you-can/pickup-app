@@ -10,12 +10,14 @@ async function getEventPlayersWithEmails(eventId) {
 
   if (!event) return null;
 
+  //console.log('Event with players:', JSON.stringify(event, null, 2));
+
   return {
     ...event,
-    players: event.players.map(user => ({
-      _id: user._id,
-      emailPrimary: user.emailPrimary,
-      emailSecondary: user.emailSecondary
+    players: event.players.map(player => ({
+      _id: player._id,
+      emailPrimary: player.userId.emailPrimary,
+      emailSecondary: player.userId.emailSecondary
     }))
   };
 }
@@ -44,6 +46,7 @@ async function getEventsPlayersWithEmailsBetween(startTime, endTime) {
 
   return eventList;
 }
+
 // async function getEventsBetween(startTime, endTime) {
 //   return await Event.find({
 //     time: {
