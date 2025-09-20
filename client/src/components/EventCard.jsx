@@ -69,8 +69,13 @@ function EventCard({
                 variant='filled'
                 fullWidth
                 onClick={toggleJoin}
+                disabled={event.players.length >= event.maxPlayers && !event.players.some((player) => player.userId === currentUserId)}
               >
-                {event.players.some((player) => player.userId === currentUserId) ? 'Leave' : 'Join'}
+                {(() => {
+                  if (event.players.some((player) => player.userId === currentUserId)) return 'Leave';
+                  if (event.players.length >= event.maxPlayers) return 'Full';
+                  return 'Join';
+                })()}
               </Button>
             )}
         </Center>
