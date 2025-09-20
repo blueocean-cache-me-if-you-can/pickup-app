@@ -43,13 +43,6 @@ function Events({
     datePast: true,
   }), []);
 
-  const orderByDesc = sortDirections[selectedSort] ?? false;
-
-  // State for API params
-  const [eventsNearMeParams, setEventsNearMeParams] = useState({});
-  const [upcomingParams, setUpcomingParams] = useState({});
-  const [pastParams, setPastParams] = useState({});
-
   const [events, setEvents] = useState([]);
   const [upcomingMyEvents, setUpcomingMyEvents] = useState([]);
   const [pastMyEvents, setPastMyEvents] = useState([]);
@@ -87,37 +80,64 @@ function Events({
     return filter;
   };
 
-  // Update params when dependencies change
+  // Single effect: build params + fetch
   useEffect(() => {
-    if (view === 'events-near-me') {
-      if (!confirmedCoords.lat || !confirmedCoords.lng) return;
+    const controller = new AbortController();
 
-      const params = {
-        finished: false,
-        sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
-        orderByDesc,
-        filter: buildFilter(),
-        coordinates: [confirmedCoords.lng, confirmedCoords.lat],
-      };
-      setEventsNearMeParams(params);
-    } else if (view === 'my-events') {
-      const upcoming = {
-        user_id: user?._id,
-        finished: false,
-        sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
-        orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
-        filter: buildFilter(),
-      };
-      setUpcomingParams(upcoming);
+    async function fetchEvents() {
+      try {
+        setIsLoadingEvents(true);
 
-      const past = {
-        user_id: user?._id,
-        finished: true,
-        sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
-        orderByDesc: sortDirections[selectedPastSort] ?? true,
-      };
-      setPastParams(past);
+        if (view === 'events-near-me') {
+          if (!confirmedCoords.lat || !confirmedCoords.lng) return;
+
+          const params = {
+            finished: false,
+            sort: (selectedSort === 'dateUpcoming' || selectedSort === 'datePast') ? 'date' : selectedSort,
+            orderByDesc: sortDirections[selectedSort] ?? false,
+            filter: buildFilter(),
+            coordinates: [confirmedCoords.lng, confirmedCoords.lat],
+          };
+
+          const res = await getEvents(params, { signal: controller.signal });
+          setEvents(res);
+        }
+
+        if (view === 'my-events' && user?._id) {
+          const upcomingParams = {
+            user_id: user._id,
+            finished: false,
+            sort: selectedUpcomingSort === 'dateUpcoming' ? 'date' : selectedUpcomingSort,
+            orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
+            filter: buildFilter(),
+          };
+
+          const pastParams = {
+            user_id: user._id,
+            finished: true,
+            sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
+            orderByDesc: sortDirections[selectedPastSort] ?? true,
+          };
+
+          const [resUpcoming, resPast] = await Promise.all([
+            getEvents(upcomingParams, { signal: controller.signal }),
+            getEvents(pastParams, { signal: controller.signal }),
+          ]);
+          setUpcomingMyEvents(resUpcoming);
+          setPastMyEvents(resPast);
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching events:', err);
+        }
+      } finally {
+        setIsLoadingEvents(false);
+      }
     }
+
+    fetchEvents();
+
+    return () => controller.abort();
   }, [
     view,
     confirmedCoords,
@@ -129,39 +149,8 @@ function Events({
     selectedUpcomingSort,
     selectedPastSort,
     user,
-    sortDirections
+    sortDirections,
   ]);
-
-  // Fetch events
-  useEffect(() => {
-    async function fetchEvents() {
-      try {
-        setIsLoadingEvents(true);
-
-        if (view === 'events-near-me') {
-          const res = await getEvents(eventsNearMeParams);
-          setEvents(res);
-        } else if (view === 'my-events') {
-          const resUpcoming = await getEvents(upcomingParams);
-          setUpcomingMyEvents(resUpcoming);
-
-          const resPast = await getEvents(pastParams);
-          setPastMyEvents(resPast);
-        }
-      } catch (err) {
-        console.error('Error fetching events:', err);
-        if (view === 'events-near-me') setEvents([]);
-        if (view === 'my-events') {
-          setUpcomingMyEvents([]);
-          setPastMyEvents([]);
-        }
-      } finally {
-        setIsLoadingEvents(false);
-      }
-    }
-
-    fetchEvents();
-  }, [view, eventsNearMeParams, upcomingParams, pastParams]);
 
   return (
     <Container size='lg'>
