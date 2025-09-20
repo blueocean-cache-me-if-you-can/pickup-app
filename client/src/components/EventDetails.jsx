@@ -16,12 +16,12 @@ import AttendeesRatio from './AttendeesRatio';
 import AttendingPlayers from './AttendingPlayers';
 
 function EventDetails({
-  event, activities, intensities, skillLevels, isPast = false, currentUserId,
+  event, activities, intensities, skillLevels, isPast = false, currentUserId, setCurrentEvent,
 }) {
-  // console.log('event', event);
+  // Use event prop directly, and setCurrentEvent from parent
   const [isOpen, setIsOpen] = useState(false);
   const grayscale = isPast || new Date(event.time) < new Date();
-  const [lng, lat] = event.coordinates;
+  const [lng, lat] = event.coordinates || [0, 0];
   const mapUrl = `https://maps.google.com/maps?q=${lat},${lng}&hl=en&z=14&output=embed`;
   const getGoogleMapsLink = (address) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
@@ -43,6 +43,7 @@ function EventDetails({
       >
         <Event
           event={event}
+          setCurrentEvent={setCurrentEvent}
           activities={activities}
           intensities={intensities}
           skillLevels={skillLevels}
@@ -64,25 +65,26 @@ function EventDetails({
         <Stack align='flex-start' w='100%' mah='100%'>
           <Group align='flex-start' gap='xl' wrap='nowrap' w='100%' h='100%'>
             <Stack w='250px'>
-              <EventCard 
-                event={event} 
-                activities={activities} 
-                intensities={intensities} 
-                skillLevels={skillLevels} 
-                currentUserId={currentUserId} 
-                />
-              <IconInfo 
-                iconType='time' 
-                infoText={new Date(event.time).toLocaleString()} 
-                size={rem(11)} 
-                grayscale={grayscale} 
+              <EventCard
+                event={event}
+                setCurrentEvent={setCurrentEvent}
+                activities={activities}
+                intensities={intensities}
+                skillLevels={skillLevels}
+                currentUserId={currentUserId}
+              />
+              <IconInfo
+                iconType='time'
+                infoText={new Date(event.time).toLocaleString()}
+                size={rem(11)}
+                grayscale={grayscale}
               />
               {/* <IconInfo iconType='location' infoText={event.address} size={rem(11)} grayscale={grayscale} /> */}
-              <IconInfo 
-                iconType='owner' 
-                infoText={event.owner.displayName} 
-                size={rem(11)} 
-                grayscale={grayscale} 
+              <IconInfo
+                iconType='owner'
+                infoText={event.owner.displayName}
+                size={rem(11)}
+                grayscale={grayscale}
               />
             </Stack>
             <Stack flex={1} h='100%'>

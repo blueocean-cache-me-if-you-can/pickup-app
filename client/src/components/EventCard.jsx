@@ -7,7 +7,7 @@ import EditEvent from './EditEvent';
 import { updateEventPlayers } from '../api';
 
 function EventCard({
-  event, currentUserId = 1, activities = [], intensities = [], skillLevels = [],
+  event, setCurrentEvent, currentUserId = 1, activities = [], intensities = [], skillLevels = [],
 }) {
   // console.log('event owner', event.owner.user_id);
   // console.log('currentUserId', currentUserId);
@@ -17,16 +17,11 @@ function EventCard({
   );
   const created = event.owner.userId === currentUserId;
 
-  const toggleJoin = () => {
-    setJoined(!joined);
-    // TODO: Call API to join/leave event
-    // console.log(joined ? 'Leave event clicked' : 'Join event clicked');
-    updateEventPlayers(event._id, currentUserId);
+  const toggleJoin = async () => {
+  const updatedEvent = await updateEventPlayers(event._id, currentUserId);
+  // console.log('Updated event from backend:', updatedEvent);
+  setCurrentEvent(updatedEvent);
   };
-  // const editEvent = () => {
-  //   // TODO: Call API to edit event
-  //   console.log('Edit event clicked');
-  // };
   const activity = activities.find((act) => act._id === event.activityId) || {};
   return (
     <Box>
@@ -75,7 +70,7 @@ function EventCard({
                 fullWidth
                 onClick={toggleJoin}
               >
-                {joined ? 'Leave' : 'Join'}
+                {event.players.some((player) => player.userId === currentUserId) ? 'Leave' : 'Join'}
               </Button>
             )}
         </Center>
