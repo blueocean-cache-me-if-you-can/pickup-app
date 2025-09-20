@@ -39,6 +39,7 @@ function MyEvents({
         </Flex>
         {upcomingEvents.length === 0 ? <Text>No upcoming events.</Text> : (
           <EventsList
+            currentUserId={currentUserId}
             events={upcomingEvents}
             activities={activities}
             intensities={intensities}
@@ -62,6 +63,7 @@ function MyEvents({
         </Flex>
         {pastEvents.length === 0 ? <Text>No past events.</Text> : (
           <EventsList
+            currentUserId={currentUserId}
             events={pastEvents}
             activities={activities}
             intensities={intensities}
