@@ -49,7 +49,7 @@ function EditEvent({
       summary: event.brief_description,
       description: event.description,
       instructions: event.additional_info,
-      imageFile: event.imageUrl,
+      imageFile: event.photo,
       date,
       time,
       lat,
@@ -143,6 +143,7 @@ function EditEvent({
                   label='Add an event photo'
                   onChange={(f) => form.setFieldValue('imageFile', f)}
                   onError={(msg) => form.setFieldError('imageFile', msg)}
+                  initialUrl={event.photo}
                   maxSizeMB={5}
                   style={{ flex: '0 0 160px' }}
                   mode='event'
