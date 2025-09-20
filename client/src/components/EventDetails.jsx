@@ -17,8 +17,10 @@ import AttendeesRatio from './AttendeesRatio';
 import useGeocodeAddress from '../hooks/useGeocodeAddress';
 import AttendingPlayers from './AttendingPlayers';
 
-function EventDetails({ event, activities, intensities, skillLevels, isPast = false, currentUserId }) {
-  console.log('event', event);
+function EventDetails({
+  event, activities, intensities, skillLevels, isPast = false, currentUserId,
+}) {
+  // console.log('event', event);
   const [isOpen, setIsOpen] = useState(false);
   const grayscale = isPast || new Date(event.time) < new Date();
   const { lng, lat } = useGeocodeAddress(event.address);
@@ -31,7 +33,7 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
     if (!el.contains(t)) return;
     if (t.closest('[data-no-expand]')) return;
     setIsOpen(true);
-  }
+  };
 
   return (
     <>
@@ -40,12 +42,12 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
         style={{ cursor: 'pointer' }}
       >
         <Event
-            event={event}
-            activities={activities}
-            intensities={intensities}
-            skillLevels={skillLevels}
-            isPast={isPast}
-            currentUserId={currentUserId}
+          event={event}
+          activities={activities}
+          intensities={intensities}
+          skillLevels={skillLevels}
+          isPast={isPast}
+          currentUserId={currentUserId}
         />
       </Box>
 
@@ -62,10 +64,16 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
         <Stack align='flex-start' w='100%' mah='100%'>
           <Group align='flex-start' gap='xl' wrap='nowrap' w='100%'>
             <Stack w='250px'>
-                <EventCard event={event} activities={activities} intensities={intensities} skillLevels={skillLevels} currentUserId={currentUserId}/>
-                <IconInfo iconType='time' infoText={new Date(event.time).toLocaleString()} size={rem(11)} grayscale={grayscale} />
-                <IconInfo iconType='location' infoText={event.address} size={rem(11)} grayscale={grayscale} />
-                <IconInfo iconType='owner' infoText={event.owner.displayName} size={rem(11)} grayscale={grayscale} />
+              <EventCard
+                event={event}
+                activities={activities}
+                intensities={intensities}
+                skillLevels={skillLevels}
+                currentUserId={currentUserId}
+              />
+              <IconInfo iconType='time' infoText={new Date(event.time).toLocaleString()} size={rem(11)} grayscale={grayscale} />
+              <IconInfo iconType='location' infoText={event.address} size={rem(11)} grayscale={grayscale} />
+              <IconInfo iconType='owner' infoText={event.owner.displayName} size={rem(11)} grayscale={grayscale} />
             </Stack>
             <Stack flex={1}>
               <AttendeesRatio
@@ -79,7 +87,7 @@ function EventDetails({ event, activities, intensities, skillLevels, isPast = fa
               <Group>
                 <Stack flex={1}>
                   <Anchor size='xs' fw={600} underline='always' c='black'>{event.address}</Anchor>
-                  <AspectRatio ratio={16/9} w='100%'>
+                  <AspectRatio ratio={16 / 9} w='100%'>
                     <iframe
                       src={`https://maps.google.com/maps?q=${lat},${lng}&hl=en&z=14&output=embed`}
                       width='100%'
