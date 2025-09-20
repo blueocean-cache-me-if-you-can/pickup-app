@@ -67,15 +67,16 @@ function EditEvent({
     } finally {
       close();
       form.reset();
+      onRefresh?.();
     }
   };
 
   const handleSubmit = async (values) => {
-    let imageUrl = '';
+    let imageUrl = event.photo;
     try {
-      imageUrl = values.imageFile
+      imageUrl = values.imageFile !== event.photo
         ? await uploadEventImage(values.imageFile, { maxSizeMB: 25 })
-        : '';
+        : event.photo;
     } catch (error) {
       console.error('error', error);
       return;
@@ -83,23 +84,24 @@ function EditEvent({
 
     const dateTimeString = formatEventDateTime(values.date, values.time, values.lng, values.lat);
 
-    const payload = {
-      title: values.title,
-      skillId: values.skillLevel,
-      intensityId: values.intensity,
-      brief_description: values.summary,
-      description: values.description,
-      additional_info: values.instructions,
-      time: dateTimeString,
-      photo: imageUrl,
-      minPlayers: values.minPlayers,
-      maxPlayers: values.maxPlayers,
-    };
+    const payload = {};
+    if (values.title !== event.title) payload.title = values.title;
+    if (values.skillLevel !== event.skillId) payload.skillId = values.skillLevel;
+    if (values.intensity !== event.intensityId) payload.intensityId = values.intensity;
+    if (values.summary !== event.brief_description) payload.brief_description = values.summary;
+    if (values.description !== event.description) payload.description = values.description;
+    if (values.instructions !== event.additional_info) payload.additional_info = values.instructions;
+    if (dateTimeString !== event.time) payload.time = dateTimeString;
+    if (values.imageFile !== event.photo) payload.photo = imageUrl;
+    if (values.minPlayers !== event.minPlayers) payload.minPlayers = values.minPlayers;
+    if (values.maxPlayers !== event.maxPlayers) payload.maxPlayers = values.maxPlayers;
     console.log('payload', payload);
 
     try {
-      const updatedEvent = await updateEvent(payload, event._id);
-      console.log('success event updated', updatedEvent);
+      if (Object.keys(payload).length > 0) {
+        const updatedEvent = await updateEvent(payload, event._id);
+        console.log('success event updated', updatedEvent);
+      }
     } catch (error) {
       console.error('error', error);
     } finally {
