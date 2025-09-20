@@ -252,7 +252,7 @@ exports.createEvent = async (req, res) => {
 
 exports.deleteEvent = async (req, res) => {
   try {
-    const deletedEvent = await Event.findByIdAndDelete(req.query.event_id);
+    const deletedEvent = await Event.findById(req.query.event_id);
     if (!deletedEvent) {
       return res.status(404).json({ error: 'Event not found' });
     }
@@ -269,6 +269,7 @@ exports.deleteEvent = async (req, res) => {
       });
     });
 
+    await Event.findByIdAndDelete(req.query.event_id);
     res.status(200).json({ message: 'Event deleted successfully' });
   } catch (err) {
     res.status(400).json({ error: 'Failed to delete event', details: err.message });
