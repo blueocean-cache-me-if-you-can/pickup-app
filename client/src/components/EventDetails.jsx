@@ -16,7 +16,7 @@ import AttendeesRatio from './AttendeesRatio';
 import AttendingPlayers from './AttendingPlayers';
 
 function EventDetails({
-  event, activities, intensities, skillLevels, isPast = false, currentUserId, setCurrentEvent,
+  event, activities, intensities, skillLevels, isPast = false, currentUserId, onRefresh, setCurrentEvent
 }) {
   // Use event prop directly, and setCurrentEvent from parent
   const [isOpen, setIsOpen] = useState(false);
@@ -49,6 +49,7 @@ function EventDetails({
           skillLevels={skillLevels}
           isPast={isPast}
           currentUserId={currentUserId}
+          onRefresh={onRefresh}
         />
       </Box>
 
@@ -72,6 +73,7 @@ function EventDetails({
                 intensities={intensities}
                 skillLevels={skillLevels}
                 currentUserId={currentUserId}
+                onRefresh={onRefresh}
               />
               <IconInfo
                 iconType='time'

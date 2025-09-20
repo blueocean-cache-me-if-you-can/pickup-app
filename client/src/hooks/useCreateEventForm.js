@@ -22,9 +22,10 @@ const useCreateEventForm = () => {
     },
     validate: {
       sport: (v) => (v ? null : 'Select a sport'),
+      intensity: (v) => (v ? null : 'Select an intensity'),
       minPlayers: (v) => (v >= 2 && v <= 100 ? null : 'Choose between 2 and 100'),
       maxPlayers: (v, values) => {
-        if (!(v >= 2 && v <= 100)) return 'Choose between 2 and 100';
+        if (!(v >= 2 && v <= 30)) return 'Choose between 2 and 30';
         if (values?.minPlayers && v < values.minPlayers) return 'Max must be ≥ min';
         return null;
       },
