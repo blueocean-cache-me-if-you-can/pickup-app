@@ -22,6 +22,7 @@ function EditEvent({
   activities,
   skillLevels,
   intensities,
+  onRefresh,
 }) {
   const [isOpen, { open, close }] = useDisclosure(false);
 
@@ -104,6 +105,7 @@ function EditEvent({
     } finally {
       close();
       form.reset();
+      onRefresh?.();
     }
   };
 

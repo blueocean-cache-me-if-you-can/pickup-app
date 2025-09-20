@@ -16,6 +16,7 @@ function MyEvents({
   activities = [],
   intensities = [],
   skillLevels = [],
+  onRefresh,
 }) {
   // TODO: set these states with API calls
   // const [upcomingEvents, setUpcomingEvents] = useState([...upcomingMyEvents]);
@@ -44,6 +45,7 @@ function MyEvents({
             intensities={intensities}
             skillLevels={skillLevels}
             height='35vh'
+            onRefresh={onRefresh}
           />
         )}
       </Box>
@@ -68,6 +70,7 @@ function MyEvents({
             intensities={intensities}
             skillLevels={skillLevels}
             height='35vh'
+            onRefresh={onRefresh}
           />
         )}
       </Box>

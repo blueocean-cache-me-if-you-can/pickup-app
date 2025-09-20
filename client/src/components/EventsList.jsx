@@ -6,7 +6,7 @@ import EventDetails from './EventDetails';
 import Event from './Event';
 
 function EventsList({
-  currentUserId, events, activities, intensities, skillLevels, height = '70vh',
+  currentUserId, events, activities, intensities, skillLevels, height = '70vh', onRefresh,
 }) {
   const [page, setPage] = useState(1);
   const eventsPerPage = 5;
@@ -30,6 +30,7 @@ function EventsList({
               intensities={intensities}
               skillLevels={skillLevels}
               currentUserId={currentUserId}
+              onRefresh={onRefresh}
             />
           ))}
         </Stack>

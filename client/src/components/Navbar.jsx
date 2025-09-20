@@ -9,7 +9,7 @@ import CreateEvent from './CreateEvent';
 import ProfileHeadline from './ProfileHeadline';
 
 function Navbar({
-  user, setUser, activities, skillLevels, intensities,
+  user, setUser, activities, skillLevels, intensities, refreshEvents,
 }) {
   const navigate = useNavigate();
   return (
@@ -21,6 +21,7 @@ function Navbar({
           activities={activities}
           skillLevels={skillLevels}
           intensities={intensities}
+          onRefresh={refreshEvents}
         />
         <Divider orientation='vertical' />
         <Menu shadow='md' width={200}>

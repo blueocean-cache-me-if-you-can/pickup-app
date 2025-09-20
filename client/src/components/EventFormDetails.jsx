@@ -33,13 +33,15 @@ function EventFormDetails({
         </Text>
         <RangeSlider
           min={2}
-          max={100}
+          max={30}
           step={1}
           marks={[
             { value: 2, label: '2' },
-            { value: 100, label: '100' },
+            { value: 30, label: '30' },
           ]}
           value={[form.values.minPlayers, form.values.maxPlayers]}
+          pushOnOverlap={false}
+          minRange={0}
           onChange={([min, max]) => {
             form.setFieldValue('minPlayers', min);
             form.setFieldValue('maxPlayers', max);

@@ -16,7 +16,7 @@ import AttendeesRatio from './AttendeesRatio';
 import AttendingPlayers from './AttendingPlayers';
 
 function EventDetails({
-  event, activities, intensities, skillLevels, isPast = false, currentUserId,
+  event, activities, intensities, skillLevels, isPast = false, currentUserId, onRefresh,
 }) {
   // console.log('event', event);
   const [isOpen, setIsOpen] = useState(false);
@@ -48,6 +48,7 @@ function EventDetails({
           skillLevels={skillLevels}
           isPast={isPast}
           currentUserId={currentUserId}
+          onRefresh={onRefresh}
         />
       </Box>
 
@@ -70,6 +71,7 @@ function EventDetails({
                 intensities={intensities} 
                 skillLevels={skillLevels} 
                 currentUserId={currentUserId} 
+                onRefresh={onRefresh}
                 />
               <IconInfo 
                 iconType='time' 

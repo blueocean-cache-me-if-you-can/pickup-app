@@ -7,10 +7,11 @@ import AddressPicker from '../components/AddressPicker';
 import PrimaryFilter from '../components/PrimaryFilter';
 import MyEvents from '../components/MyEvents';
 import EventsList from '../components/EventsList';
-import { getEvents } from '../api';
 
 function Events({
   user, activities = [], intensities = [], skillLevels = [],
+  events = [], upcomingEvents = [], pastEvents = [],
+  isLoadingEvents = false, onQueryChange, refreshEvents,
 }) {
   const [view, setView] = useState('events-near-me');
 
@@ -21,7 +22,7 @@ function Events({
   const [selectedSort, setSelectedSort] = useState('distance');
   const [selectedUpcomingSort, setSelectedUpcomingSort] = useState('dateUpcoming');
   const [selectedPastSort, setSelectedPastSort] = useState('datePast');
-  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  // isLoadingEvents provided by App
 
   const form = useForm({
     initialValues: {
@@ -45,14 +46,7 @@ function Events({
 
   const orderByDesc = sortDirections[selectedSort] ?? false;
 
-  // State for API params
-  const [eventsNearMeParams, setEventsNearMeParams] = useState({});
-  const [upcomingParams, setUpcomingParams] = useState({});
-  const [pastParams, setPastParams] = useState({});
-
-  const [events, setEvents] = useState([]);
-  const [upcomingMyEvents, setUpcomingMyEvents] = useState([]);
-  const [pastMyEvents, setPastMyEvents] = useState([]);
+  // Params are built here and sent up to App via onQueryChange
 
   // Clear filters when view changes
   useEffect(() => {
@@ -87,7 +81,7 @@ function Events({
     return filter;
   };
 
-  // Update params when dependencies change
+  // Update params when dependencies change: emit upward to App
   useEffect(() => {
     if (view === 'events-near-me') {
       if (!confirmedCoords.lat || !confirmedCoords.lng) return;
@@ -99,7 +93,7 @@ function Events({
         filter: buildFilter(),
         coordinates: [confirmedCoords.lng, confirmedCoords.lat],
       };
-      setEventsNearMeParams(params);
+      onQueryChange?.({ eventsNearMe: params, upcoming: null, past: null });
     } else if (view === 'my-events') {
       const upcoming = {
         user_id: user?._id,
@@ -108,7 +102,6 @@ function Events({
         orderByDesc: sortDirections[selectedUpcomingSort] ?? false,
         filter: buildFilter(),
       };
-      setUpcomingParams(upcoming);
 
       const past = {
         user_id: user?._id,
@@ -116,7 +109,8 @@ function Events({
         sort: selectedPastSort === 'datePast' ? 'date' : selectedPastSort,
         orderByDesc: sortDirections[selectedPastSort] ?? true,
       };
-      setPastParams(past);
+
+      onQueryChange?.({ eventsNearMe: null, upcoming, past });
     }
   }, [
     view,
@@ -129,39 +123,10 @@ function Events({
     selectedUpcomingSort,
     selectedPastSort,
     user,
-    sortDirections
+    sortDirections,
+    orderByDesc,
+    onQueryChange,
   ]);
-
-  // Fetch events
-  useEffect(() => {
-    async function fetchEvents() {
-      try {
-        setIsLoadingEvents(true);
-
-        if (view === 'events-near-me') {
-          const res = await getEvents(eventsNearMeParams);
-          setEvents(res);
-        } else if (view === 'my-events') {
-          const resUpcoming = await getEvents(upcomingParams);
-          setUpcomingMyEvents(resUpcoming);
-
-          const resPast = await getEvents(pastParams);
-          setPastMyEvents(resPast);
-        }
-      } catch (err) {
-        console.error('Error fetching events:', err);
-        if (view === 'events-near-me') setEvents([]);
-        if (view === 'my-events') {
-          setUpcomingMyEvents([]);
-          setPastMyEvents([]);
-        }
-      } finally {
-        setIsLoadingEvents(false);
-      }
-    }
-
-    fetchEvents();
-  }, [view, eventsNearMeParams, upcomingParams, pastParams]);
 
   return (
     <Container size='lg'>
@@ -244,6 +209,7 @@ function Events({
               activities={activities}
               intensities={intensities}
               skillLevels={skillLevels}
+              onRefresh={refreshEvents}
             />
           )}
         </Box>
@@ -259,8 +225,9 @@ function Events({
           activities={activities}
           intensities={intensities}
           skillLevels={skillLevels}
-          upcomingEvents={upcomingMyEvents}
-          pastEvents={pastMyEvents}
+          upcomingEvents={upcomingEvents}
+          pastEvents={pastEvents}
+          onRefresh={refreshEvents}
         />
       )}
       <Space h='xl' />
