@@ -15,7 +15,7 @@ import useEventSelectOptions from '../hooks/useEventSelectOptions';
 import useCreateEventForm from '../hooks/useCreateEventForm';
 import useImageUpload from '../hooks/useImageUpload';
 import useDateTimeFormatter from '../hooks/useDateTimeFormatter';
-import { updateEvent } from '../api';
+import { updateEvent, deleteEvent } from '../api';
 
 function EditEvent({
   event,
@@ -57,6 +57,19 @@ function EditEvent({
     });
   }, [event]);
   
+  const handleDelete = async (eventId) => {
+    try {
+      const event = await deleteEvent(eventId);
+      console.log('success event deleted', event);
+    } catch (error) {
+      console.error('error', error);
+    } finally {
+      close();
+      form.reset();
+    }
+
+  };
+
   const handleSubmit = async (values) => {
     let imageUrl = '';
     try {
@@ -147,16 +160,9 @@ function EditEvent({
             </ScrollArea>
 
             <Group w='100%' justify='flex-end'>
-                <Button 
-                    variant='default' 
-                    data-no-expand 
-                    onClick={(e) => { 
-                        e.stopPropagation(); 
-                        close(); 
-                    }}
-                >
-                    Cancel
-                </Button>
+              <Button variant='default' onClick={() => handleDelete(event._id)}>
+                Delete
+              </Button>
                 <Button  
                     type='submit' 
                     data-no-expand 
