@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Modal,
-  Button,
   Group,
   Stack,
   Text,
@@ -24,7 +23,7 @@ function EventDetails({
   const grayscale = isPast || new Date(event.time) < new Date();
   const [lng, lat] = event.coordinates;
   const mapUrl = `https://maps.google.com/maps?q=${lat},${lng}&hl=en&z=14&output=embed`;
-  const getGoogleMapsLink = address => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  const getGoogleMapsLink = (address) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
   const modalOnClick = (e) => {
     // bug fix: prevents the event modal from triggering when edit modal opens and closes
@@ -65,10 +64,26 @@ function EventDetails({
         <Stack align='flex-start' w='100%' mah='100%'>
           <Group align='flex-start' gap='xl' wrap='nowrap' w='100%' h='100%'>
             <Stack w='250px'>
-                <EventCard event={event} activities={activities} intensities={intensities} skillLevels={skillLevels} currentUserId={currentUserId}/>
-                <IconInfo iconType='time' infoText={new Date(event.time).toLocaleString()} size={rem(11)} grayscale={grayscale} />
-                {/* <IconInfo iconType='location' infoText={event.address} size={rem(11)} grayscale={grayscale} /> */}
-                <IconInfo iconType='owner' infoText={event.owner.displayName} size={rem(11)} grayscale={grayscale} />
+              <EventCard 
+                event={event} 
+                activities={activities} 
+                intensities={intensities} 
+                skillLevels={skillLevels} 
+                currentUserId={currentUserId} 
+                />
+              <IconInfo 
+                iconType='time' 
+                infoText={new Date(event.time).toLocaleString()} 
+                size={rem(11)} 
+                grayscale={grayscale} 
+              />
+              {/* <IconInfo iconType='location' infoText={event.address} size={rem(11)} grayscale={grayscale} /> */}
+              <IconInfo 
+                iconType='owner' 
+                infoText={event.owner.displayName} 
+                size={rem(11)} 
+                grayscale={grayscale} 
+              />
             </Stack>
             <Stack flex={1} h='100%'>
               <AttendeesRatio
@@ -79,27 +94,28 @@ function EventDetails({
               <Text size='sm' fw={700}>{event.title}</Text>
               {event.brief_description && <Text size='xs' fw={600}>{event.brief_description}</Text>}
               {event.description && <Text size='xs'>{event.description}</Text>}
+              {event.additional_info && <Text size='xs'>{event.additional_info}</Text>}
               <Group align='stretch' h='100%'>
                 <Stack flex={1}>
 
-                  <Anchor 
-                    size='xs' 
-                    fw={600} 
-                    underline='always' 
+                  <Anchor
+                    size='xs'
+                    fw={600}
+                    underline='always'
                     c='black'
                     href={getGoogleMapsLink(event.address)}
                     target='_blank'
                     rel='noopener noreferrer'
                   >
-                      {event.address}
+                    {event.address}
                   </Anchor>
-                  <AspectRatio ratio={16/9} w='100%'>
+                  <AspectRatio ratio={16 / 9} w='100%'>
                     <iframe
                       src={mapUrl}
                       width='100%'
                       height='100%'
                       title='Event location map'
-                      style={{ border: 0}}
+                      style={{ border: 0 }}
                       loading='lazy'
                       referrerPolicy='no-referrer-when-downgrade'
                       allowFullScreen

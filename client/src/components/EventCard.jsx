@@ -12,8 +12,10 @@ function EventCard({
   // console.log('event owner', event.owner.user_id);
   // console.log('currentUserId', currentUserId);
   // HARDCODING DEFAULT current user_id = 1
-  const [joined, setJoined] = useState(event.players.some((player) => player.userId === currentUserId));
-  const [created, setCreated] = useState(event.owner.userId === currentUserId);
+  const [joined, setJoined] = useState(
+    event.players.some((player) => player.userId === currentUserId)
+  );
+  const created = event.owner.userId === currentUserId;
 
   const toggleJoin = () => {
     setJoined(!joined);
@@ -63,7 +65,6 @@ function EventCard({
                 activities={activities}
                 intensities={intensities}
                 skillLevels={skillLevels}
-                onEdit={editEvent}
               />
             )
             : (

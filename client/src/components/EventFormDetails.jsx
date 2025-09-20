@@ -5,7 +5,7 @@ import {
 import { DatePickerInput, TimeInput } from '@mantine/dates';
 
 function EventFormDetails({
-  form, sportOptions, skillOptions, intensityOptions,
+  form, sportOptions, skillOptions, intensityOptions, mode = 'create',
 }) {
   return (
     <Stack>
@@ -18,6 +18,7 @@ function EventFormDetails({
         value={form.values.sport}
         onChange={(v) => form.setFieldValue('sport', v)}
         error={form.errors.sport}
+        disabled={mode === 'edit'}
       />
 
       <Stack gap={6}>
