@@ -2,7 +2,7 @@ import React from 'react';
 import { Stack, TextInput, Textarea } from '@mantine/core';
 import AddressPicker from './AddressPicker';
 
-function EventFormInfo({ form }) {
+function EventFormInfo({ form, mode = 'create' }) {
   return (
     <Stack flex={1} miw={0}>
       <TextInput
@@ -46,6 +46,7 @@ function EventFormInfo({ form }) {
           form.setFieldValue('lng', lng);
         }}
         error={form.errors.address || form.errors.lat || form.errors.lng}
+        disabled={mode === 'edit'}
       />
     </Stack>
   );

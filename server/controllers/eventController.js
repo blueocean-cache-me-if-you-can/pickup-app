@@ -252,8 +252,15 @@ exports.createEvent = async (req, res) => {
 
 exports.deleteEvent = async (req, res) => {
   try {
-    const deletedEvent = await Event.findByIdAndDelete(req.query.event_id);
-    if (!deletedEvent) {
+    console.log('req.query', req.query);
+    console.log('req.path', req.path);
+    if (!req.query.id) {
+      req.query.id = req.path.split('/').pop()
+    }
+    console.log('req.query.event_id', req.query.id);
+    const deletedEvent = await Event.findByIdAndDelete(req.query.id);
+    console.log('deletedEvent', deletedEvent);
+    if (deletedEvent === undefined) {
       return res.status(404).json({ error: 'Event not found' });
     }
 

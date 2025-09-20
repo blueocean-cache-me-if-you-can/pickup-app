@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Box, Stack, Select, Title, Flex, Text,
 } from '@mantine/core';
-import Event from './Event';
 import EventsList from './EventsList';
 import { upcomingMyEvents, pastMyEvents } from '../data';
 
@@ -39,6 +38,7 @@ function MyEvents({
         </Flex>
         {upcomingEvents.length === 0 ? <Text>No upcoming events.</Text> : (
           <EventsList
+            currentUserId={currentUserId}
             events={upcomingEvents}
             activities={activities}
             intensities={intensities}
@@ -62,6 +62,7 @@ function MyEvents({
         </Flex>
         {pastEvents.length === 0 ? <Text>No past events.</Text> : (
           <EventsList
+            currentUserId={currentUserId}
             events={pastEvents}
             activities={activities}
             intensities={intensities}

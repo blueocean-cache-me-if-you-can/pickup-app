@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Modal,
   Button,
@@ -15,6 +15,7 @@ import useEventSelectOptions from '../hooks/useEventSelectOptions';
 import useCreateEventForm from '../hooks/useCreateEventForm';
 import useImageUpload from '../hooks/useImageUpload';
 import useDateTimeFormatter from '../hooks/useDateTimeFormatter';
+import { updateEvent, deleteEvent } from '../api';
 
 function EditEvent({
   event,
@@ -32,54 +33,90 @@ function EditEvent({
 
   const form = useCreateEventForm();
   const { uploadEventImage } = useImageUpload();
-  const { formatEventDateTime } = useDateTimeFormatter();
+  const { formatEventDateTime, toLocalDateTimeParts } = useDateTimeFormatter();
+  const [lng, lat] = event.coordinates;
+  const { date, time } = toLocalDateTimeParts(event.time, lng, lat);
+
+  useEffect(() => {
+    form.setValues({
+      title: event.title,
+      sport: event.activityId,
+      skillLevel: event.skillId,
+      intensity: event.intensityId,
+      minPlayers: event.minPlayers,
+      maxPlayers: event.maxPlayers,
+      address: event.address,
+      summary: event.brief_description,
+      description: event.description,
+      instructions: event.additional_info,
+      imageFile: event.photo,
+      date,
+      time,
+      lat,
+      lng,
+    });
+  }, [event, lng, lat, date, time]);
+
+  const handleDelete = async (eventId) => {
+    try {
+      const deletedEvent = await deleteEvent(eventId);
+      console.log('success event deleted', deletedEvent);
+    } catch (error) {
+      console.error('error', error);
+    } finally {
+      close();
+      form.reset();
+    }
+  };
 
   const handleSubmit = async (values) => {
-    const imageUrl = values.imageFile
-      ? await uploadEventImage(values.imageFile, { maxSizeMB: 25 })
-      : '';
+    let imageUrl = '';
+    try {
+      imageUrl = values.imageFile
+        ? await uploadEventImage(values.imageFile, { maxSizeMB: 25 })
+        : '';
+    } catch (error) {
+      console.error('error', error);
+      return;
+    }
 
-    const dateTimeString = formatEventDateTime(values.date, values.time);
-
-    // const location = [values.longitude, values.latitude];
+    const dateTimeString = formatEventDateTime(values.date, values.time, values.lng, values.lat);
 
     const payload = {
       title: values.title,
-      user_id: event.owner.user_id,
-      activityId: values.sport,
       skillId: values.skillLevel,
       intensityId: values.intensity,
       brief_description: values.summary,
       description: values.description,
       additional_info: values.instructions,
       time: dateTimeString,
-      imageUrl,
-      location: values.address,
+      photo: imageUrl,
       minPlayers: values.minPlayers,
       maxPlayers: values.maxPlayers,
-      latitude: values.lat,
-      longitude: values.lng,
     };
     console.log('payload', payload);
 
-    // e.preventDefault();
-    // const payload = form.values;
-    // console.log('CreateEvent payload:', payload);
-    // onCreate?.(payload);
-    close();
-    form.reset();
+    try {
+      const updatedEvent = await updateEvent(payload, event._id);
+      console.log('success event updated', updatedEvent);
+    } catch (error) {
+      console.error('error', error);
+    } finally {
+      close();
+      form.reset();
+    }
   };
 
   return (
     <>
-      <Button 
+      <Button
         m='xs'
-        variant='filled' 
+        variant='filled'
         fullWidth
         data-no-expand
         onClick={(e) => {
-            e.stopPropagation();
-            open();
+          e.stopPropagation();
+          open();
         }}
       >
         Edit
@@ -106,6 +143,7 @@ function EditEvent({
                   label='Add an event photo'
                   onChange={(f) => form.setFieldValue('imageFile', f)}
                   onError={(msg) => form.setFieldError('imageFile', msg)}
+                  initialUrl={event.photo}
                   maxSizeMB={5}
                   style={{ flex: '0 0 160px' }}
                   mode='event'
@@ -115,30 +153,23 @@ function EditEvent({
                   sportOptions={sportOptions}
                   skillOptions={skillOptions}
                   intensityOptions={intensityOptions}
+                  mode='edit'
                 />
-                <EventFormInfo form={form} />
+                <EventFormInfo form={form} mode='edit' />
               </Group>
             </ScrollArea>
 
             <Group w='100%' justify='flex-end'>
-                <Button 
-                    variant='default' 
-                    data-no-expand 
-                    onClick={(e) => { 
-                        e.stopPropagation(); 
-                        close(); 
-                    }}
-                >
-                    Cancel
-                </Button>
-                <Button 
-                    color='dark' 
-                    type='submit' 
-                    data-no-expand 
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    Create Event
-                </Button>
+              <Button variant='default' onClick={() => handleDelete(event._id)}>
+                Delete
+              </Button>
+              <Button
+                type='submit'
+                data-no-expand
+                onClick={(e) => e.stopPropagation()}
+              >
+                Save
+              </Button>
             </Group>
           </Stack>
         </form>

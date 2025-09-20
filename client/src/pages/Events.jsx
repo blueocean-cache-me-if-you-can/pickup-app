@@ -239,29 +239,33 @@ function Events({
             <Flex justify='center'><Text>Sorry! No events found.</Text></Flex>
           ) : (
             <EventsList
+              currentUserId={user._id || null}
               events={events}
               activities={activities}
               intensities={intensities}
               skillLevels={skillLevels}
-              currentUserId={user?._id || null}
             />
           )}
         </Box>
       )}
 
       {view === 'my-events' && (
-        <MyEvents
-          currentUserId={user?._id || null}
-          selectedUpcomingSort={selectedUpcomingSort}
-          setSelectedUpcomingSort={setSelectedUpcomingSort}
-          selectedPastSort={selectedPastSort}
-          setSelectedPastSort={setSelectedPastSort}
-          activities={activities}
-          intensities={intensities}
-          skillLevels={skillLevels}
-          upcomingEvents={upcomingMyEvents}
-          pastEvents={pastMyEvents}
-        />
+        isLoadingEvents ? (
+          <Flex justify='center'><Text>Loading events...</Text></Flex>
+        ) : (
+          <MyEvents
+            currentUserId={user?._id || null}
+            selectedUpcomingSort={selectedUpcomingSort}
+            setSelectedUpcomingSort={setSelectedUpcomingSort}
+            selectedPastSort={selectedPastSort}
+            setSelectedPastSort={setSelectedPastSort}
+            activities={activities}
+            intensities={intensities}
+            skillLevels={skillLevels}
+            upcomingEvents={upcomingMyEvents}
+            pastEvents={pastMyEvents}
+          />
+        )
       )}
       <Space h='xl' />
     </Container>

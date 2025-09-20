@@ -25,6 +25,24 @@ export const createEvent = async (eventData) => {
   return response.data;
 };
 
+// PATCH /api/events
+export const updateEvent = async (eventData, eventId) => {
+  const response = await api.patch(`/events/${eventId}`, eventData);
+  return response.data;
+};
+
+// DELETE /api/events
+export const deleteEvent = async (eventId) => {
+  const response = await api.delete(`/events/${eventId}`);
+  return response.data;
+};
+
+// PUT /:id/player
+export const updateEventPlayers = async (eventId, playerId) => {
+  const response = await api.put(`/events/${eventId}/player`, {}, { params: { user_id: playerId } });
+  return response.data;
+};
+
 /* =========================
    USERS API
    ========================= */
