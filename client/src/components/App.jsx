@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Routes, Route, Navigate, useNavigate, useLocation,
 } from 'react-router-dom';
@@ -12,6 +12,7 @@ import {
   getActivities,
   getSkillLevels,
   getIntensityLevels,
+  getEvents,
 } from '../api';
 import useGeocodeAddress from '../hooks/useGeocodeAddress';
 
@@ -25,6 +26,52 @@ function App() {
   const [skillLevels, setSkillLevels] = useState([]);
   const [intensities, setIntensities] = useState([]);
   const { resolveAddress } = useGeocodeAddress();
+
+  const [events, setEvents] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [pastEvents, setPastEvents] = useState([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+
+  const [eventsNearMeParams, setEventsNearMeParams] = useState(null);
+  const [upcomingParams, setUpcomingParams] = useState(null);
+  const [pastParams, setPastParams] = useState(null);
+
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refreshEvents = useCallback(() => setRefreshKey(k => k + 1), []);
+
+  const handleQueryChange = useCallback(({ eventsNearMe, upcoming, past }) => {
+    setEventsNearMeParams(eventsNearMe || null);
+    setUpcomingParams(upcoming || null);
+    setPastParams(past || null);
+  }, []);
+  
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        setIsLoadingEvents(true);
+        if  (eventsNearMeParams) {
+          const res = await getEvents(eventsNearMeParams);
+          setEvents(Array.isArray(res) ? res : []);
+        }
+        if (upcomingParams) {
+          const resUpcoming = await getEvents(upcomingParams);
+          setUpcomingEvents(Array.isArray(resUpcoming) ? resUpcoming : []);
+        }
+        if (pastParams) {
+          const resPast = await getEvents(pastParams);
+          setPastEvents(Array.isArray(resPast) ? resPast : []);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        if (eventsNearMeParams) setEvents([]);
+        if (upcomingParams) setUpcomingEvents([]);
+        if (pastParams) setPastEvents([]);
+      } finally {
+        setIsLoadingEvents(false);
+      }
+    }
+    fetchEvents();
+  }, [eventsNearMeParams, upcomingParams, pastParams, refreshKey]);
 
   // Handle user navigation and localStorage
   useEffect(() => {
@@ -89,6 +136,7 @@ function App() {
             activities={activities}
             skillLevels={skillLevels}
             intensities={intensities}
+            refreshEvents={refreshEvents}
           />
         </AppShell.Header>
       )}
@@ -99,7 +147,20 @@ function App() {
           <Route path='/login' element={<Login setUser={setUser} />} />
           <Route path='/signup' element={<Signup setUser={setUser} />} />
           <Route path='/profile' element={<Profile user={user} setUser={setUser} activities={activities} skillLevels={skillLevels} />} />
-          <Route path='/events' element={<Events user={user} activities={activities} skillLevels={skillLevels} intensities={intensities} />} />
+          <Route path='/events' element={
+            <Events 
+              user={user} 
+              activities={activities} 
+              skillLevels={skillLevels} 
+              intensities={intensities} 
+              events={events}
+              upcomingEvents={upcomingEvents}
+              pastEvents={pastEvents} 
+              isLoadingEvents={isLoadingEvents}
+              onQueryChange={handleQueryChange}
+              refreshEvents={refreshEvents}
+            />} 
+          />
           <Route path='*' element={<Navigate to={user ? '/events' : '/login'} />} />
         </Routes>
       </AppShell.Main>

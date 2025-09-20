@@ -22,6 +22,7 @@ function CreateEvent({
   activities,
   skillLevels,
   intensities,
+  onRefresh,
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -79,6 +80,7 @@ function CreateEvent({
       } finally {
         setIsOpen(false);
         form.reset();
+        onRefresh?.();
       }
     }
   };

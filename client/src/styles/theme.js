@@ -1,7 +1,7 @@
 import { createTheme } from '@mantine/core';
 
 export const theme = createTheme({
-    fontFamily: 'Avenir',
+    fontFamily: 'Avenir, Helvetica',
     fontSizes: {
         xl: '3rem',
         lg: '2rem',
@@ -10,7 +10,7 @@ export const theme = createTheme({
         xs: '1rem',
     },
     headings: {
-        fontFamily: 'Avenir',
+        fontFamily: 'Avenir, Helvetica',
         sizes: {
             h1: { fontSize: '4rem',    fontWeight: '700', lineHeight: '0.9'},
             h2: { fontSize: '2.1rem' },

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import {
-  Stack, Button, Group, Text, ScrollArea, Box,
+  Stack, Button, Group, Text, Box,
 } from '@mantine/core';
 import EventDetails from './EventDetails';
-import Event from './Event';
 
 function EventsList({
-  currentUserId, events, activities, intensities, skillLevels,
+  currentUserId, events, activities, intensities, skillLevels, onRefresh,
 }) {
   const [eventList, setEventList] = useState(events);
   const [page, setPage] = useState(1);
@@ -38,6 +37,7 @@ function EventsList({
             skillLevels={skillLevels}
             currentUserId={currentUserId}
             setCurrentEvent={handleSetCurrentEvent}
+            onRefresh={onRefresh}
           />
         ))}
       </Stack>
