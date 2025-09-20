@@ -27,15 +27,6 @@ function MyEvents({
       <Box>
         <Flex justify='space-between' mb='xl' gap='lg'>
           <Title order={2} tt='uppercase'>My Events</Title>
-          <Select
-            label='Sort by'
-            data={[
-              { value: 'distance', label: 'Distance' },
-              { value: 'dateUpcoming', label: 'Date' },
-            ]}
-            value={selectedUpcomingSort}
-            onChange={setSelectedUpcomingSort}
-          />
         </Flex>
         {upcomingEvents.length === 0 ? <Text>No upcoming events.</Text> : (
           <EventsList
@@ -52,15 +43,6 @@ function MyEvents({
       <Box>
         <Flex justify='space-between' mb='xl' gap='lg'>
           <Title order={2} tt='uppercase'>Past Events</Title>
-          <Select
-            label='Sort by'
-            data={[
-              { value: 'distance', label: 'Distance' },
-              { value: 'datePast', label: 'Date' },
-            ]}
-            value={selectedPastSort}
-            onChange={setSelectedPastSort}
-          />
         </Flex>
         {pastEvents.length === 0 ? <Text>No past events.</Text> : (
           <EventsList
