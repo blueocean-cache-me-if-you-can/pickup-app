@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Box, Stack, Select, Title, Flex, Text,
+  Box, Stack, Title, Flex, Text,
 } from '@mantine/core';
 import EventsList from './EventsList';
 import { upcomingMyEvents, pastMyEvents } from '../data';
@@ -9,19 +9,11 @@ function MyEvents({
   currentUserId = 1,
   upcomingEvents = upcomingMyEvents,
   pastEvents = pastMyEvents,
-  selectedUpcomingSort,
-  setSelectedUpcomingSort,
-  selectedPastSort,
-  setSelectedPastSort,
   activities = [],
   intensities = [],
   skillLevels = [],
   onRefresh,
 }) {
-  // TODO: set these states with API calls
-  // const [upcomingEvents, setUpcomingEvents] = useState([...upcomingMyEvents]);
-  // const [pastEvents, setPastEvents] = useState([...pastMyEvents]);
-
   return (
     <Stack>
       <Box>

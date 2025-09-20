@@ -7,17 +7,20 @@ import IconInfo from './IconInfo';
 import AttendeesRatio from './AttendeesRatio';
 
 function Event({
-  currentUserId, event, activities, intensities, skillLevels, isPast = false, onRefresh, setCurrentEvent
+  currentUserId,
+  event,
+  activities,
+  intensities,
+  skillLevels,
+  isPast = false,
+  onRefresh,
+  setCurrentEvent,
 }) {
-  const expandEvent = () => {
-    // TODO: trigger event details modal
-    console.log(`Event ${event.title} expanded`);
-  };
   const grayscale = isPast || new Date(event.time) < new Date();
   const street = event.address.split(',')[0];
   return (
     <div style={{ filter: grayscale ? 'grayscale(100%)' : 'none' }}>
-      <Grid m='md' onClick={expandEvent} align='center'>
+      <Grid m='md' align='center'>
         <Grid.Col span={3}>
           <EventCard
             event={event}
@@ -27,6 +30,7 @@ function Event({
             skillLevels={skillLevels}
             currentUserId={currentUserId}
             onRefresh={onRefresh}
+            isPast={grayscale}
           />
         </Grid.Col>
         <Grid.Col span={9}>

@@ -7,11 +7,15 @@ import EditEvent from './EditEvent';
 import { updateEventPlayers } from '../api';
 
 function EventCard({
-  event, currentUserId = 1, activities = [], intensities = [], skillLevels = [], onRefresh, setCurrentEvent
+  event,
+  currentUserId = 1,
+  activities = [],
+  intensities = [],
+  skillLevels = [],
+  onRefresh,
+  setCurrentEvent,
+  isPast = false,
 }) {
-  // console.log('event owner', event.owner.user_id);
-  // console.log('currentUserId', currentUserId);
-  // HARDCODING DEFAULT current user_id = 1
   const [joined, setJoined] = useState(
     event.players.some((player) => player.userId === currentUserId)
   );
@@ -53,6 +57,7 @@ function EventCard({
             <IconCrown />
           </Box>
         )}
+        {!isPast && (
         <Center pos='absolute' bottom={0} right={0} w='100%'>
           {created
             ? (
@@ -71,7 +76,12 @@ function EventCard({
                 variant='filled'
                 fullWidth
                 onClick={toggleJoin}
-                disabled={event.players.length >= event.maxPlayers && !event.players.some((player) => player.userId === currentUserId)}
+                disabled={
+                  event.players.length >= event.maxPlayers &&
+                  !event.players.some(
+                    (player) => player.userId === currentUserId
+                  )
+                }
               >
                 {(() => {
                   if (event.players.some((player) => player.userId === currentUserId)) return 'Leave';
@@ -81,6 +91,7 @@ function EventCard({
               </Button>
             )}
         </Center>
+        )}
       </Box>
     </Box>
   );
