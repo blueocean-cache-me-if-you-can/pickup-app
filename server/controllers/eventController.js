@@ -110,6 +110,7 @@ exports.getEvents = async (req, res) => {
       event.coordinates = event.location.coordinates;
       delete event.location;
     }
+
     res.status(200).json(events);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch events', details: err.message });
@@ -118,10 +119,27 @@ exports.getEvents = async (req, res) => {
 
 exports.getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    let event = await Event.findById(req.params.id);
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
+
+    event = event.toObject(); // convert to plain object
+    event.coordinates = event.location.coordinates;
+    delete event.location;
+
+    await Promise.all(event.players.map(async (player) => {
+      let user = await User.findById(player.userId);
+      console.log('User fetched for player:', user);
+      if (user.photo) {
+        player.photo = user.photo;
+        console.log('User photo found:', user.photo);
+      } else {
+        player.photo = null;
+      }
+      return player;
+    }));
+
     res.status(200).json(event);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch event', details: err.message });
