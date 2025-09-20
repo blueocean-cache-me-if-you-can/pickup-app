@@ -180,6 +180,12 @@ exports.updateEventPlayer = async (req, res) => {
       return res.status(200).json(updatedEvent);
     }
 
+    // Check if event is full
+    if (event.players.length >= event.maxPlayers) {
+      return res.status(400).json({ error: 'Event is full' });
+    }
+
+    // Add user to players list
     event.players.push({ userId: req.query.user_id, displayName: user.displayName || user.firstName + ' ' + user.lastName });
     const updatedEvent = await event.save();
 
@@ -257,7 +263,7 @@ exports.deleteEvent = async (req, res) => {
           recipients: [{ email: userObj.emailPrimary }],
           subject: 'An Event You\'ve joined has been Canceled on PicknRoll!',
           text: `Hello ${userObj.firstName},\n\nThe event with the title: ${deletedEvent.title} has been canceled.\n\nBest regards,\nBlue Ocean Pickup Team`,
-          htmlFile: 'eventCanceled.html',
+          htmlFile: 'cancelEvent.html',
           htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
         });
       });
