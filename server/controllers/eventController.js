@@ -130,10 +130,8 @@ exports.getEventById = async (req, res) => {
 
     await Promise.all(event.players.map(async (player) => {
       let user = await User.findById(player.userId);
-      console.log('User fetched for player:', user);
       if (user.photo) {
         player.photo = user.photo;
-        console.log('User photo found:', user.photo);
       } else {
         player.photo = null;
       }
