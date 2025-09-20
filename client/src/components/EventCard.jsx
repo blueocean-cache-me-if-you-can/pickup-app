@@ -4,22 +4,23 @@ import {
 } from '@mantine/core';
 import { IconCrown } from '@tabler/icons-react';
 import EditEvent from './EditEvent';
+import { updateEventPlayers } from '../api';
 
 function EventCard({
-  event, currentUserId = 1, activities = [], intensities = [], skillLevels = [],
+  event, setCurrentEvent, currentUserId = 1, activities = [], intensities = [], skillLevels = [],
 }) {
+  // console.log('event owner', event.owner.user_id);
+  // console.log('currentUserId', currentUserId);
   // HARDCODING DEFAULT current user_id = 1
-  const [joined, setJoined] = useState(event.players.some((player) => player.user_id === currentUserId));
-  const [created, setCreated] = useState(event.owner.user_id === currentUserId);
+  const [joined, setJoined] = useState(
+    event.players.some((player) => player.userId === currentUserId)
+  );
+  const created = event.owner.userId === currentUserId;
 
-  const toggleJoin = () => {
-    setJoined(!joined);
-    // TODO: Call API to join/leave event
-    console.log(joined ? 'Leave event clicked' : 'Join event clicked');
-  };
-  const editEvent = () => {
-    // TODO: Call API to edit event
-    console.log('Edit event clicked');
+  const toggleJoin = async () => {
+  const updatedEvent = await updateEventPlayers(event._id, currentUserId);
+  // console.log('Updated event from backend:', updatedEvent);
+  setCurrentEvent(updatedEvent);
   };
   const activity = activities.find((act) => act._id === event.activityId) || {};
   return (
@@ -28,7 +29,7 @@ function EventCard({
         <AspectRatio ratio={1}>
           <Image
             src={event.photo}
-            fallbackSrc='https://placehold.co/600x400?text=Placeholder'
+            fallbackSrc={activity.placeholderImage || 'https://placehold.co/600x400?text=Placeholder'}
             alt={event.title}
             radius='lg'
             w='100%'
@@ -52,25 +53,26 @@ function EventCard({
           </Box>
         )}
         <Center pos='absolute' bottom={0} right={0} w='100%'>
-          {created ?
-            <EditEvent
-              event={event}
-              activities={activities}
-              intensities={intensities}
-              skillLevels={skillLevels}
-              onEdit={editEvent}
-            />
-            :
-            <Button
-              m='xs'
-              data-no-expand
-              variant='filled'
-              fullWidth
-              onClick={toggleJoin}
-            >
-              {joined ? 'Leave' : 'Join'}
-            </Button>
-          }
+          {created
+            ? (
+              <EditEvent
+                event={event}
+                activities={activities}
+                intensities={intensities}
+                skillLevels={skillLevels}
+              />
+            )
+            : (
+              <Button
+                m='xs'
+                data-no-expand
+                variant='filled'
+                fullWidth
+                onClick={toggleJoin}
+              >
+                {event.players.some((player) => player.userId === currentUserId) ? 'Leave' : 'Join'}
+              </Button>
+            )}
         </Center>
       </Box>
     </Box>

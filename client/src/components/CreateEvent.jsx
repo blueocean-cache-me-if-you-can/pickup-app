@@ -45,10 +45,15 @@ function CreateEvent({
       console.error('error', error);
       return;
     } finally {
-      const dateTimeString = formatEventDateTime(values.date, values.time);
-  
+      const dateTimeString = formatEventDateTime(
+        values.date,
+        values.time,
+        values.lng,
+        values.lat,
+      );
+
       const location = [values.lng, values.lat];
-  
+
       const payload = {
         title: values.title,
         user_id: user._id,
@@ -65,7 +70,7 @@ function CreateEvent({
         maxPlayers: values.maxPlayers,
         coordinates: location,
       };
-  
+      console.log('payload', payload);
       try {
         const event = await createEvent(payload);
         console.log('success event created', event);
@@ -122,7 +127,7 @@ function CreateEvent({
 
             <Group w='100%' justify='flex-end'>
               <Button variant='default' onClick={() => setIsOpen(false)}>Cancel</Button>
-              <Button color='dark' type='submit'>Create Event</Button>
+              <Button type='submit'>Create Event</Button>
             </Group>
           </Stack>
         </form>
