@@ -45,7 +45,7 @@ function sendReminders(interval) {
   lastReminderSent += interval;
 
 
-  sendMail.sendEventReminders(startDate, lastReminderSent);
+  //sendMail.sendEventReminders(startDate, lastReminderSent);
 
   //const oneYearLater = Date.UTC(new Date().getUTCFullYear() + 1, new Date().getUTCMonth(), new Date().getUTCDate());
   //sendMail.sendEventReminders(lastReminderSent, oneYearLater);
