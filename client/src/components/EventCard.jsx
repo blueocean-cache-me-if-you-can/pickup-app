@@ -1,31 +1,27 @@
 import React, { useState } from 'react';
 import {
-  AspectRatio, Box, Button, Image, Center,
+  AspectRatio, Box, Button, Image, Center, Flex, Text,
 } from '@mantine/core';
 import { IconCrown } from '@tabler/icons-react';
 import EditEvent from './EditEvent';
 import { updateEventPlayers } from '../api';
 
 function EventCard({
-  event,
-  currentUserId = 1,
-  activities = [],
-  intensities = [],
-  skillLevels = [],
-  onRefresh,
-  setCurrentEvent,
-  isPast = false,
+  event, setCurrentEvent, currentUserId = 1, activities = [], intensities = [], skillLevels = [],
 }) {
+  const roundedDistance = Math.round(event.distance * 100) / 100;
+  // console.log('event owner', event.owner.user_id);
+  // console.log('currentUserId', currentUserId);
+  // HARDCODING DEFAULT current user_id = 1
   const [joined, setJoined] = useState(
     event.players.some((player) => player.userId === currentUserId)
   );
   const created = event.owner.userId === currentUserId;
 
   const toggleJoin = async () => {
-    setJoined(!joined);
-    const updatedEvent = await updateEventPlayers(event._id, currentUserId);
-    setCurrentEvent(updatedEvent);
-    onRefresh?.();
+  const updatedEvent = await updateEventPlayers(event._id, currentUserId);
+  // console.log('Updated event from backend:', updatedEvent);
+  setCurrentEvent(updatedEvent);
   };
   const activity = activities.find((act) => act._id === event.activityId) || {};
   return (
@@ -57,7 +53,6 @@ function EventCard({
             <IconCrown />
           </Box>
         )}
-        {!isPast && (
         <Center pos='absolute' bottom={0} right={0} w='100%'>
           {created
             ? (
@@ -66,7 +61,6 @@ function EventCard({
                 activities={activities}
                 intensities={intensities}
                 skillLevels={skillLevels}
-                onRefresh={onRefresh}
               />
             )
             : (
@@ -76,23 +70,21 @@ function EventCard({
                 variant='filled'
                 fullWidth
                 onClick={toggleJoin}
-                disabled={
-                  event.players.length >= event.maxPlayers &&
-                  !event.players.some(
-                    (player) => player.userId === currentUserId
-                  )
-                }
               >
-                {(() => {
-                  if (event.players.some((player) => player.userId === currentUserId)) return 'Leave';
-                  if (event.players.length >= event.maxPlayers) return 'Full';
-                  return 'Join';
-                })()}
+                {event.players.some((player) => player.userId === currentUserId) ? 'Leave' : 'Join'}
               </Button>
             )}
         </Center>
-        )}
       </Box>
+      <Flex justify='center' align='center' mt='sm'>
+        {typeof event.distance === 'number' && !isNaN(event.distance) && (
+          <Text fw={800} fz='xs' ta='center'>
+            {Math.round(event.distance * 100) / 100}
+            &nbsp;
+            miles
+          </Text>
+        )}
+      </Flex>
     </Box>
   );
 }
