@@ -7,7 +7,7 @@ import EditEvent from './EditEvent';
 import { updateEventPlayers } from '../api';
 
 function EventCard({
-  event, currentUserId = 1, activities = [], intensities = [], skillLevels = [], onRefresh,
+  event, currentUserId = 1, activities = [], intensities = [], skillLevels = [], onRefresh, setCurrentEvent
 }) {
   // console.log('event owner', event.owner.user_id);
   // console.log('currentUserId', currentUserId);
@@ -19,13 +19,10 @@ function EventCard({
 
   const toggleJoin = async () => {
     setJoined(!joined);
-    await updateEventPlayers(event._id, currentUserId);
+    const updatedEvent = await updateEventPlayers(event._id, currentUserId);
+    setCurrentEvent(updatedEvent);
     onRefresh?.();
   };
-  // const editEvent = () => {
-  //   // TODO: Call API to edit event
-  //   console.log('Edit event clicked');
-  // };
   const activity = activities.find((act) => act._id === event.activityId) || {};
   return (
     <Box>
@@ -33,7 +30,7 @@ function EventCard({
         <AspectRatio ratio={1}>
           <Image
             src={event.photo}
-            fallbackSrc='https://placehold.co/600x400?text=Placeholder'
+            fallbackSrc={activity.placeholderImage || 'https://placehold.co/600x400?text=Placeholder'}
             alt={event.title}
             radius='lg'
             w='100%'
@@ -74,8 +71,13 @@ function EventCard({
                 variant='filled'
                 fullWidth
                 onClick={toggleJoin}
+                disabled={event.players.length >= event.maxPlayers && !event.players.some((player) => player.userId === currentUserId)}
               >
-                {joined ? 'Leave' : 'Join'}
+                {(() => {
+                  if (event.players.some((player) => player.userId === currentUserId)) return 'Leave';
+                  if (event.players.length >= event.maxPlayers) return 'Full';
+                  return 'Join';
+                })()}
               </Button>
             )}
         </Center>

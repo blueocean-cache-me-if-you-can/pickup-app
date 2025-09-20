@@ -10,11 +10,7 @@ const intensityLevelRoutes = require("./routes/intensityLevelRoutes");
 const path = require('path');
 const uploadRoutes = require("./routes/uploadRoutes");
 const { Storage } = require('@google-cloud/storage');
-
-// const eventController = require('./controllers/eventController');
-
 const sendMail = require('./controllers/sendMail');
-
 
 require('dotenv').config();
 

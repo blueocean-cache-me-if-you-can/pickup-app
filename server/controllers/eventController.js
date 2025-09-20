@@ -12,20 +12,16 @@ exports.getEvents = async (req, res) => {
   try {
     let skip, limit;
     let { user_id, finished, page, count, coordinates, filter, sort, orderByDesc } = req.body;
-    console.log(user_id, finished, page, count, coordinates, filter, sort, orderByDesc);
-
     const radius = filter?.distance * 1609.34 || 5000; // 5 km in meters
     const intensity = filter?.intensity || null;
     const skillLevel = filter?.skillLevel || null;
     const activity = filter?.activity || null;
-    console.log(radius, intensity, skillLevel, activity);
 
     // Filtering
 
     const pipeline = [
       {
         $match: {
-          // location: {$geoWithin: { $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100] }},
           ...(coordinates ? { location: { $geoWithin: { $centerSphere: [[coordinates[0], coordinates[1]], radius / 6378100] } } } : {}),
           ...(intensity ? { intensityId: { $in: Array.isArray(intensity) ? intensity.map(id => new ObjectId(id)) : [new ObjectId(intensity)] } } : {}),
           ...(skillLevel ? { skillId: { $in: Array.isArray(skillLevel) ? skillLevel.map(id => new ObjectId(id)) : [new ObjectId(skillLevel)] } } : {}),
@@ -100,8 +96,6 @@ exports.getEvents = async (req, res) => {
     }
 
     // Fetch events based on query
-    console.log('Aggregation Pipeline:', JSON.stringify(pipeline, null, 2));
-
     let events = await Event.aggregate(pipeline).skip(skip).limit(limit).exec();
     for (let event of events) {
       if (event.intensity && Object.keys(event.intensity).length > 0) {
@@ -176,10 +170,23 @@ exports.updateEventPlayer = async (req, res) => {
       // if they are remove them from player list
       event.players = event.players.filter(player => player.userId.toString() !== req.query.user_id);
       const updatedEvent = await event.save();
+      mail.sendMailWithHtmlFileAndParams({
+        recipients: [{ email: user.emailPrimary }],
+        subject: 'You left an Event on PicknRoll!',
+        text: `Hello ${user.firstName},\n\nYou have left the event: ${event.title}.\n\nBest regards,\nBlue Ocean Pickup Team`,
+        htmlFile: 'leaveEvent.html',
+        htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
+      });
       return res.status(200).json(updatedEvent);
     }
 
-    event.players.push({ userId: req.query.user_id, displayName: user.displayName || 'Anonymous' });
+    // Check if event is full
+    if (event.players.length >= event.maxPlayers) {
+      return res.status(400).json({ error: 'Event is full' });
+    }
+
+    // Add user to players list
+    event.players.push({ userId: req.query.user_id, displayName: user.displayName || user.firstName + ' ' + user.lastName });
     const updatedEvent = await event.save();
 
     mail.sendMailWithHtmlFileAndParams({
@@ -245,30 +252,29 @@ exports.createEvent = async (req, res) => {
 
 exports.deleteEvent = async (req, res) => {
   try {
-    console.log('req.query', req.query);
-    console.log('req.path', req.path);
     if (!req.query.id) {
       req.query.id = req.path.split('/').pop()
     }
-    console.log('req.query.event_id', req.query.id);
-    const deletedEvent = await Event.findByIdAndDelete(req.query.id);
-    console.log('deletedEvent', deletedEvent);
+    const deletedEvent = await Event.findById(req.query.id);
     if (deletedEvent === undefined) {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    await getEventPlayersWithEmails(req.query.event_id).then(eventWithEmails => {
-      eventWithEmails.players.forEach(userObj => {
-        mail.sendMailWithHtmlFileAndParams({
-          recipients: [{ email: userObj.emailPrimary }],
-          subject: 'An Event You\'ve joined has been Canceled on PicknRoll!',
-          text: `Hello ${userObj.firstName},\n\nThe event with the title: ${deletedEvent.title} has been canceled.\n\nBest regards,\nBlue Ocean Pickup Team`,
-          htmlFile: 'eventCanceled.html',
-          htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
+    await getEventPlayersWithEmails(req.query.id).then(eventWithEmails => {
+      if (eventWithEmails) {
+        eventWithEmails.players.forEach(userObj => {
+          mail.sendMailWithHtmlFileAndParams({
+            recipients: [{ email: userObj.emailPrimary }],
+            subject: 'An Event You\'ve joined has been Canceled on PicknRoll!',
+            text: `Hello ${userObj.firstName},\n\nThe event with the title: ${deletedEvent.title} has been canceled.\n\nBest regards,\nBlue Ocean Pickup Team`,
+            htmlFile: 'cancelEvent.html',
+            htmlParams: { "PICKNROLL_URL": `${process.env.HOST}/login` }
+          });
         });
-      });
+      }
     });
 
+    await Event.findByIdAndDelete(req.query.id);
     res.status(200).json({ message: 'Event deleted successfully' });
   } catch (err) {
     res.status(400).json({ error: 'Failed to delete event', details: err.message });

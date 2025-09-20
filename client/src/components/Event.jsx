@@ -7,7 +7,7 @@ import IconInfo from './IconInfo';
 import AttendeesRatio from './AttendeesRatio';
 
 function Event({
-  currentUserId, event, activities, intensities, skillLevels, isPast = false, onRefresh,
+  currentUserId, event, activities, intensities, skillLevels, isPast = false, onRefresh, setCurrentEvent
 }) {
   const expandEvent = () => {
     // TODO: trigger event details modal
@@ -21,6 +21,7 @@ function Event({
         <Grid.Col span={3}>
           <EventCard
             event={event}
+            setCurrentEvent={setCurrentEvent}
             activities={activities}
             intensities={intensities}
             skillLevels={skillLevels}
