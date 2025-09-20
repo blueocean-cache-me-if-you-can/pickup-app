@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Group,
@@ -14,9 +14,10 @@ import Event from './Event';
 import IconInfo from './IconInfo';
 import AttendeesRatio from './AttendeesRatio';
 import AttendingPlayers from './AttendingPlayers';
+import { getEventById } from '../api';
 
 function EventDetails({
-  event,
+  eventId,
   activities,
   intensities,
   skillLevels,
@@ -25,12 +26,24 @@ function EventDetails({
   onRefresh,
   setCurrentEvent,
 }) {
-  // Use event prop directly, and setCurrentEvent from parent
+  const [event, setEvent] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-  const grayscale = isPast || new Date(event.time) < new Date();
-  const [lng, lat] = event.coordinates || [0, 0];
-  const mapUrl = `https://maps.google.com/maps?q=${lat},${lng}&hl=en&z=14&output=embed`;
+  const [lng, setLng] = useState(0);
+  const [lat, setLat] = useState(0);
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      const e = await getEventById(eventId);
+      setEvent(e);
+      setLng(e.coordinates[0]);
+      setLat(e.coordinates[1]);
+    };
+    fetchEvent();
+  }, [eventId]);
+
   const getGoogleMapsLink = (address) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  const getGrayscale = (time) => isPast || new Date(time) < new Date();
+  const getMapUrl = (lng, lat) => `https://maps.google.com/maps?q=${lat},${lng}&hl=en&z=14&output=embed`;
 
   const modalOnClick = (e) => {
     // bug fix: prevents the event modal from triggering when edit modal opens and closes
@@ -41,6 +54,9 @@ function EventDetails({
     if (t.closest('[data-no-expand]')) return;
     setIsOpen(true);
   };
+
+  if (!event) return null;
+
 
   return (
     <>
@@ -81,13 +97,13 @@ function EventDetails({
                 skillLevels={skillLevels}
                 currentUserId={currentUserId}
                 onRefresh={onRefresh}
-                isPast={grayscale}
+                isPast={getGrayscale(event.time)}
               />
               <IconInfo
                 iconType='time'
                 infoText={new Date(event.time).toLocaleString()}
                 size={rem(11)}
-                grayscale={grayscale}
+                grayscale={getGrayscale(event.time)}
               />
               {/*
                 <IconInfo
@@ -101,14 +117,14 @@ function EventDetails({
                 iconType='owner'
                 infoText={event.owner.displayName}
                 size={rem(11)}
-                grayscale={grayscale}
+                grayscale={getGrayscale(event.time)}
               />
             </Stack>
             <Stack flex={1} h='100%'>
               <AttendeesRatio
                 players={event.players}
                 maxPlayers={event.maxPlayers}
-                grayscale={grayscale}
+                grayscale={getGrayscale(event.time)}
               />
               <Text size='sm' fw={700}>{event.title}</Text>
               {event.brief_description && <Text size='xs' fw={600}>{event.brief_description}</Text>}
@@ -130,7 +146,7 @@ function EventDetails({
                   </Anchor>
                   <AspectRatio ratio={16 / 9} w='100%'>
                     <iframe
-                      src={mapUrl}
+                      src={getMapUrl(lng, lat)}
                       width='100%'
                       height='100%'
                       title='Event location map'
