@@ -15,7 +15,7 @@ const api = axios.create({
 // POST /api/search
 export const getEvents = async (params) => {
   const response = await api.post('/events/get', params);
-  console.log('getEvents response:', response);
+  // console.log('getEvents response:', response);
   return response.data;
 };
 
@@ -42,6 +42,13 @@ export const updateEventPlayers = async (eventId, playerId) => {
   const response = await api.put(`/events/${eventId}/player`, {}, { params: { user_id: playerId } });
   return response.data;
 };
+
+// GET /api/events/:id
+export const getEventById = async (eventId) => {
+  const response = await api.get(`/events/${eventId}`);
+  return response.data;
+};
+
 
 /* =========================
    USERS API

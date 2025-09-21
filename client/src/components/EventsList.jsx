@@ -31,7 +31,7 @@ function EventsList({
         {paginatedEvents.map((event) => (
           <EventDetails
             key={event._id}
-            event={event}
+            eventId={event._id}
             activities={activities}
             intensities={intensities}
             skillLevels={skillLevels}
