@@ -28,6 +28,7 @@ function EventCard({
     onRefresh?.();
   };
   const activity = activities.find((act) => act._id === event.activityId) || {};
+
   return (
     <Box>
       <Box pos='relative' w='100%' h='100%'>

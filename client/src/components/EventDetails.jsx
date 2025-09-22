@@ -25,6 +25,7 @@ function EventDetails({
   currentUserId,
   onRefresh,
   setCurrentEvent,
+  eventDistance,
 }) {
   const [event, setEvent] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -34,12 +35,18 @@ function EventDetails({
   useEffect(() => {
     const fetchEvent = async () => {
       const e = await getEventById(eventId);
-      setEvent(e);
+
+      const eventWithDistance = {
+        ...e,
+        distance: eventDistance,
+      };
+
+      setEvent(eventWithDistance);
       setLng(e.coordinates[0]);
       setLat(e.coordinates[1]);
     };
     fetchEvent();
-  }, [eventId]);
+  }, [eventId, eventDistance]);
 
   const getGoogleMapsLink = (address) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
   const getGrayscale = (time) => isPast || new Date(time) < new Date();
@@ -56,7 +63,6 @@ function EventDetails({
   };
 
   if (!event) return null;
-
 
   return (
     <>
