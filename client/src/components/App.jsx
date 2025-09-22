@@ -49,7 +49,7 @@ function App() {
     async function fetchEvents() {
       try {
         setIsLoadingEvents(true);
-        if (eventsNearMeParams) {
+        if  (eventsNearMeParams) {
           const res = await getEvents(eventsNearMeParams);
           setEvents(Array.isArray(res) ? res : []);
         }
