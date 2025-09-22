@@ -32,6 +32,7 @@ function EventsList({
           <EventDetails
             key={event._id}
             eventId={event._id}
+            eventDistance={event.distance}
             activities={activities}
             intensities={intensities}
             skillLevels={skillLevels}

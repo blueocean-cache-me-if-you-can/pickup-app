@@ -44,12 +44,12 @@ function App() {
     setUpcomingParams(upcoming || null);
     setPastParams(past || null);
   }, []);
-  
+
   useEffect(() => {
     async function fetchEvents() {
       try {
         setIsLoadingEvents(true);
-        if  (eventsNearMeParams) {
+        if (eventsNearMeParams) {
           const res = await getEvents(eventsNearMeParams);
           setEvents(Array.isArray(res) ? res : []);
         }
@@ -148,18 +148,18 @@ function App() {
           <Route path='/signup' element={<Signup setUser={setUser} />} />
           <Route path='/profile' element={<Profile user={user} setUser={setUser} activities={activities} skillLevels={skillLevels} />} />
           <Route path='/events' element={
-            <Events 
-              user={user} 
-              activities={activities} 
-              skillLevels={skillLevels} 
-              intensities={intensities} 
+            <Events
+              user={user}
+              activities={activities}
+              skillLevels={skillLevels}
+              intensities={intensities}
               events={events}
               upcomingEvents={upcomingEvents}
-              pastEvents={pastEvents} 
+              pastEvents={pastEvents}
               isLoadingEvents={isLoadingEvents}
               onQueryChange={handleQueryChange}
               refreshEvents={refreshEvents}
-            />} 
+            />}
           />
           <Route path='*' element={<Navigate to={user ? '/events' : '/login'} />} />
         </Routes>
